@@ -1,11 +1,12 @@
 export async function fetchURL(
   url: string,
-  options?: {
+  options: {
     customHeaders?: Record<string, string>;
     returnText?: boolean;
     userAgent?: string;
-  },
-): Promise<string | any> {
+    method?: string;
+  } = { method: 'GET' },
+): Promise<string | unknown> {
   const maxRetries = 5;
   const timeoutMs = 15000;
 
@@ -16,17 +17,30 @@ export async function fetchURL(
     try {
       const headers: Record<string, string> = {
         'User-Agent':
-          options?.userAgent ||
+          options.userAgent ||
           'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36',
-        ...options?.customHeaders,
+        ...options.customHeaders,
       };
 
-      const response = await fetch(url, { headers, signal: controller.signal });
+      const response = await fetch(url, {
+        method: options.method,
+        headers,
+        signal: controller.signal,
+      });
 
       clearTimeout(timeoutId);
 
       if (!response.ok) {
-        throw new Error(`Failed to fetch ${url}: ${response.status}`);
+        let errorMessage = `Failed to fetch ${url}: ${response.status}`;
+        try {
+          const errorBody = await response.json();
+          if (errorBody.error) {
+            errorMessage = errorBody.error;
+          }
+        } catch {
+          // Ignore JSON parse errors, use generic message
+        }
+        throw new Error(errorMessage);
       }
 
       if (options?.returnText === false) {
@@ -39,11 +53,11 @@ export async function fetchURL(
 
       const isAbortError =
         err instanceof Error &&
-        (err.name === 'AbortError' || (err as any).cause?.name === 'AbortError');
+        (err.name === 'AbortError' || (err.cause as Error | undefined)?.name === 'AbortError');
 
       if (attempt === maxRetries - 1) {
         if (isAbortError) {
-          throw new Error(`Request to ${url} timed out after ${timeoutMs}ms`);
+          throw new Error(`Request to ${url} timed out after ${timeoutMs}ms`, { cause: err });
         }
         throw err;
       }

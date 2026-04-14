@@ -1,6 +1,6 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { fetchWidgetData } from '$lib/server/widget.store';
+import { fetchWidgetInfo } from '$lib/server/widget.store';
 
 export const GET: RequestHandler = async ({ params }) => {
   const widgetId = params.id;
@@ -10,11 +10,11 @@ export const GET: RequestHandler = async ({ params }) => {
   }
 
   try {
-    const result = await fetchWidgetData(widgetId);
+    const result = await fetchWidgetInfo(widgetId);
     return json(result);
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Failed to fetch widget data';
-    console.log(err);
-    return json({ error: message }, { status: 404 });
+    console.error(err);
+    return json({ error: message }, { status: 502 });
   }
 };

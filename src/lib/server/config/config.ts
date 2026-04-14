@@ -7,7 +7,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 import type { ThemePreset } from '$lib/theme/types';
 import type { PageConfig } from './pages';
-import type { AnyWidget } from './widget';
+import type { AnyWidgetParams } from '$lib/types/widget.params';
 import { parsePresets, generateThemeCSS } from './theme';
 import { defaultTheme } from '$lib/theme/store.svelte';
 import { parsePages } from './pages';
@@ -158,9 +158,9 @@ export function getFirstPage(): PageConfig | null {
   return pages[0] ?? null;
 }
 
-export function getWidgets(): AnyWidget[] {
+export function getWidgets(): AnyWidgetParams[] {
   const pages = getCached().pages;
-  const widgets: AnyWidget[] = [];
+  const widgets: AnyWidgetParams[] = [];
   for (const page of pages) {
     for (const column of page.columns) {
       widgets.push(...column.widgets);

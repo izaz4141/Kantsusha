@@ -1,10 +1,10 @@
 <script lang="ts">
   import { slide } from 'svelte/transition';
   import type { CalendarEvent } from '$lib/types/widget.data';
-  import type { WidgetData } from '$lib/types/widget.data';
+  import type { BaseWidgetInfo } from '$lib/types/widget.data';
 
   interface Props {
-    result: WidgetData;
+    result: BaseWidgetInfo;
     class?: string;
   }
 

@@ -1,10 +1,11 @@
-import { parseWidgets, type AnyWidget } from './widget';
+import { parseWidgets } from './widget';
+import type { AnyWidgetParams } from '$lib/types/widget.params';
 
 export type CssUnit = `${number}px` | `${number}rem` | `${number}%`;
 
 export interface PageColumn {
   size: 'small' | 'full' | CssUnit;
-  widgets: AnyWidget[];
+  widgets: AnyWidgetParams[];
 }
 
 export interface PageConfig {

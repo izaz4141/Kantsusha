@@ -6,6 +6,7 @@
       "name": "kantsusha",
       "dependencies": {
         "lru-cache": "^11.3.5",
+        "zod": "^4.3.6",
       },
       "devDependencies": {
         "@better-auth/cli": "~1.4.21",

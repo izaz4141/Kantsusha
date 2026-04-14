@@ -37,18 +37,18 @@ src/
 │   └── demo/better-auth/     # Auth demo routes
 ├── lib/
 │   ├── components/
-│   │   ├── layout/          # Layout components 
+│   │   ├── layout/          # Layout components
 │   │   ├── ui/             # UI components (Mostly Container)
-│   │   ├── widgets/         # Widget components 
-│   │   └── shared/         # Shared components 
+│   │   ├── widgets/         # Widget components
+│   │   └── shared/         # Shared components
 │   ├── server/
-│   │   ├── api/           # Widget fetch logic 
+│   │   ├── api/           # Widget fetch logic
 │   │   ├── config/        # Config loaders (pages.ts, theme.ts, widget.ts)
 │   │   ├── db/            # Database (schema.ts, auth.schema.ts)
 │   │   └── auth.ts        # Better-Auth configuration
 │   ├── stores/             # Svelte stores
 │   ├── theme/             # Theme store and types
-│   ├── types/             # TypeScript types (widget.interfaces, widget.schema, widget.data, layout)
+│   ├── types/             # TypeScript types (widget.params, widget.data, layout)
 │   └── utils/             # Utility functions (time.ts, network.ts)
 ├── static/               # Static assets
 └── ref/                  # Reference files
@@ -98,7 +98,7 @@ Available layouts in `src/lib/components/layout/`:
 
 1. **Page Loading**: `config.yaml` → `src/lib/server/config/pages.ts` → `parsePages()` → page config objects
 2. **Widget Rendering**: `src/routes/[slug]/+page.server.ts` loads page config → passes to Svelte component
-3. **Widget Data Fetch**: WidgetRenderer.svelte → `/api/v1/widgets/[id]` → `fetchWidgetData()` → widget API files
+3. **Widget Data Fetch**: WidgetRenderer.svelte → `/api/v1/widgets/[id]` → `fetchWidgetInfo()` → widget API files
 4. **Theme**: `config.yaml` presets → `src/lib/server/config/theme.ts` → client-side theme store
 
 ## Adding a New Widget
@@ -120,4 +120,5 @@ bun --bun run dev      # Dev server
 bun --bun run build  # Production build
 bun --bun run check   # Typecheck
 bun --bun run lint   # Prettier + ESLint
+bun --bun run test   # Run tests (vitest)
 ```

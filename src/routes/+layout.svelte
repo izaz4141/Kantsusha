@@ -33,9 +33,9 @@
   {@html `<style>${data.theme.css}</style>`}
 </svelte:head>
 
-<div class="flex min-h-screen flex-col px-4 pt-4">
+<div class="flex min-h-screen flex-col items-center px-4 pt-4">
   <Header routes={data.routes} />
-  <main class="grow pb-16 md:pb-0">{@render children()}</main>
+  <main class="w-full grow pb-16 md:pb-0">{@render children()}</main>
   <MobileHeader routes={data.routes} />
 
   <Footer />

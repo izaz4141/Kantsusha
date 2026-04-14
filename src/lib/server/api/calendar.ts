@@ -1,6 +1,6 @@
 import { fetchURL } from '$lib/utils/network';
 import type { CalendarEvent } from '$lib/types/widget.data';
-import type { ICalFeed } from '$lib/types/widget.interfaces';
+import type { ICalFeed } from '$lib/types/widget.params';
 
 function parseICSDate(dateStr: string): Date {
   if (!dateStr) return new Date();

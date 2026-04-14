@@ -7,68 +7,69 @@
 - `bun --bun run check` - Typecheck
 - `bun --bun run lint` - Prettier + ESLint
 - `bun --bun run db:push` / `db:generate` - Database migrations
+- `bun --bun run test` - Run unit tests (vitest)
 
 ## Key Architecture
 
 - Pages defined in `config.yaml` under `pages`, loaded via dynamic route `[slug]`
 - Widget API: `/api/v1/widgets/[id]` (server: `src/routes/api/v1/widgets/[id]/+server.ts`)
 - Widget types: `calendar`, `rss`, `reddit`, `tabbed`
+- Widget validation uses Zod 4.x with discriminated unions in `src/lib/types/widget.params.ts`
 
 ## Styling
 
-- Use Tailwind CSS with theme tokens from `src/lib/server/config.yaml` 
+- Use Tailwind CSS with theme tokens from `src/lib/server/config.yaml`
 - Never use pure CSS classes - use Tailwind utilities + theme tokens
-- Theme tokens: `background`, `surface`, `text`, `primary`, `border`, (see src/routes/layout.css).
+- Theme tokens: `background`, `surface`, `text`, `primary`, `border` (see src/routes/layout.css)
 
 ## Database
 
 - SQLite via libSQL (`DATABASE_URL` in `.env`)
 - Schema: `src/lib/server/db/schema.ts`
 
+## Widget Validation (Zod Refactor)
+
+Validation now uses Zod schemas in `src/lib/types/widget.params.ts`:
+
+- `AnyWidgetParamsSchema` - Root discriminated union for all widget types
+- `CalendarParamsSchema`, `RssParamsSchema`, `RedditParamsSchema` - Individual widget schemas
+- `TabbedParamsSchema` - Container widget holding nested widgets
+
+Key Zod features used:
+
+- `z.discriminatedUnion('type', ...)` for type-safe switch on widget type
+- `.default()` for optional defaults
+- `.overwrite()` for computed defaults
+- `z.infer` to extract TypeScript types
+
+Validation logic in `src/lib/server/config/widget.ts`:
+
+- `validateWidget(raw)` - Parse and validate single widget, returns null on failure
+- `parseWidgets(rawWidgets)` - Parse array of widgets, filters invalid ones
+
 ## Adding a New Widget
 
-1. **Define interface** in `src/lib/types/widget.interfaces.ts`:
+1. **Define Zod schema** in `src/lib/types/widget.params.ts`:
 
    ```ts
-   export interface MyWidget {
-     type: 'mywidget';
-     title?: string;
-     param1: string;
-     param2?: number;
-     cache?: string;
-   }
+   export const MyWidgetParamsSchema = z.object({
+     type: z.literal('mywidget'),
+     title: z.string().optional(),
+     param1: z.string(),
+     param2: z.number().optional(),
+     cache: z.string().optional(),
+   });
+   export type MyWidgetParams = z.infer<typeof MyWidgetParamsSchema>;
    ```
 
-2. **Add to union types**: Update `AnyWidget` and `WidgetType`
+2. **Add to discriminated unions**: Update `BaseWidgetParamsSchema` or `ContainerWidgetParams`
 
-3. **Add data types** in `src/lib/types/widget.data.ts`:
+3. **Add data types** in `src/lib/types/widget.data.ts` if needed
 
-   ```ts
-   export interface MyWidgetData {
-     items: MyItem[];
-   }
-   ```
+4. **Implement API logic** in `src/lib/server/api/mywidget.ts`
 
-4. **Add schema validation** in `src/lib/types/widget.schema.ts`:
+5. **Register handler** in `src/routes/api/v1/widgets/[id]/+server.ts`
 
-   ```ts
-   mywidget: {
-     required: ['param1'],
-     allowed: ['title', 'param1', 'param2', 'param3'],
-   }
-   ```
+6. **Create UI component** in `src/lib/components/widgets/MyWidget.svelte`
 
-5. **Implement API logic** in `src/lib/server/api/mywidget.ts`:
-
-   ```ts
-   export async function fetchMyWidget(params: MyWidget): Promise<WidgetData> {
-     // fetch and transform data
-     return { data, params };
-   }
-   ```
-
-6. **Register handler** in `src/routes/api/v1/widgets/[id]/+server.ts`
-
-7. **Create UI component** in `src/lib/components/widgets/MyWidget.svelte`
-
-8. **Add to WidgetRenderer** in `src/lib/components/ui/WidgetRenderer.svelte`
+7. **Add to WidgetRenderer** in `src/lib/components/ui/WidgetRenderer.svelte`

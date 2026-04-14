@@ -1,5 +1,6 @@
 import { fetchURL } from '$lib/utils/network';
-import type { RedditData, RedditPost } from '$lib/types/widget.data';
+import type { RedditPost } from '$lib/types/widget.data';
+import { REDDIT_SORT_REGEX, REDDIT_TIME_REGEX } from '$lib/types/widget.params';
 
 interface RedditApiPost {
   title: string;
@@ -19,9 +20,6 @@ interface RedditApiPost {
   };
   is_video: boolean;
 }
-
-export type RedditSort = 'hot' | 'new' | 'top' | 'rising';
-export type RedditTime = 'day' | 'week' | 'month' | 'year' | 'all';
 
 function parseRedditPost(post: RedditApiPost): RedditPost {
   let thumbnail: string | undefined;
@@ -48,18 +46,23 @@ function parseRedditPost(post: RedditApiPost): RedditPost {
 
 export async function fetchRedditPosts(
   subreddit: string,
-  sort: RedditSort = 'hot',
+  sort: string = 'hot',
   limit: number = 10,
-  time: RedditTime = 'day',
-): Promise<RedditData> {
-  const safeLimit = Math.min(Math.max(limit, 1), 100);
-  let url = `https://www.reddit.com/r/${subreddit}/${sort}.json?limit=${safeLimit}`;
+  time: string = 'day',
+): Promise<RedditPost[]> {
+  const safeSort = REDDIT_SORT_REGEX.test(sort) ? sort : 'hot';
+  const safeTime = REDDIT_TIME_REGEX.test(time) ? time : 'day';
 
-  if (sort === 'top') {
-    url += `&t=${time}`;
+  const safeLimit = Math.min(Math.max(limit, 1), 100);
+  let url = `https://www.reddit.com/r/${subreddit}/${safeSort}.json?limit=${safeLimit}`;
+
+  if (safeSort === 'top') {
+    url += `&t=${safeTime}`;
   }
 
-  const response = await fetchURL(url, { returnText: false });
+  const response = (await fetchURL(url, { returnText: false })) as {
+    data?: { children: Array<{ kind: string; data: RedditApiPost }> };
+  };
 
   const posts: RedditPost[] = [];
   const children = response.data?.children || [];
@@ -75,12 +78,5 @@ export async function fetchRedditPosts(
     }
   }
 
-  const output: RedditData = {
-    subreddit: subreddit,
-    sort: sort,
-    time: time,
-    posts: posts.slice(0, limit),
-  };
-
-  return output;
+  return posts;
 }

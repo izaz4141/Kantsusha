@@ -57,6 +57,7 @@
     "vitest-browser-svelte": "^2.1.0"
   },
   "dependencies": {
-    "lru-cache": "^11.3.5"
+    "lru-cache": "^11.3.5",
+    "zod": "^4.3.6"
   }
 }

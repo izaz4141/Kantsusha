@@ -1,24 +1,25 @@
 <script lang="ts">
-  import type { RedditPost, WidgetData } from '$lib/types/widget.data';
+  import type { RedditPost, BaseWidgetInfo } from '$lib/types/widget.data';
+  import type { RedditParams } from '$lib/types/widget.params';
   import ListView from '../ui/ListView.svelte';
   import { dateToNow } from '$lib/utils/time';
 
   interface Props {
-    result: WidgetData;
+    result: BaseWidgetInfo;
     class?: string;
   }
 
   let { result, class: className = '' }: Props = $props();
 
-  let data = $derived(result.data as { subreddit: string; posts: RedditPost[] });
   let posts = $derived(
-    data.posts.map((p) => ({
+    (result.data as RedditPost[]).map((p) => ({
       ...p,
       pubDate: new Date(p.pubDate),
     })),
   );
-  let showThumbnail = $derived(result.params.showThumbnail ?? false);
-  let collapseAfter = $derived(result.params.collapseAfter ?? 5);
+  let params = $derived(result.params as RedditParams);
+  let showThumbnail = $derived(params.showThumbnail ?? false);
+  let collapseAfter = $derived(params.collapseAfter ?? 5);
 
   function formatScore(score: number): string {
     if (score >= 1000000) return `${(score / 1000000).toFixed(1)}m`;

@@ -11,29 +11,36 @@
   let { routes }: Props = $props();
 </script>
 
-<header
-  class="mb-4 hidden items-center justify-between border border-border px-6 py-3 md:flex {uiState.layoutType ===
-  'slim'
-    ? 'md:w-4/5'
-    : 'w-full'}"
->
-  <div class="flex items-center gap-6">
-    <a href={resolve(`/${routes[0].slug}`)} class="flex items-center">
-      <img src={favicon} alt="Logo" class="h-7 w-7" />
-    </a>
-    <nav class="flex gap-4">
-      {#each routes as route (route.slug)}
-        <a
-          href={resolve(`/${route.slug}`)}
-          class="h-full text-sm text-text no-underline
-          transition-opacity hover:opacity-70
-          {page.url.pathname.startsWith('/' + route.slug) ? 'border-b border-primary' : ''}"
-          >{route.name}</a
-        >
-      {/each}
-    </nav>
-  </div>
-  <div class="flex items-center">
-    <SettingsIcon />
-  </div>
-</header>
+{#if !uiState.isMobile}
+  <header
+    class="mb-4 flex h-12 items-center justify-between border border-border px-6
+  {uiState.layoutType === 'slim' ? 'md:w-4/5' : 'w-full'}"
+  >
+    <div class="flex h-full items-center gap-6">
+      <a href={resolve(`/${routes[0].slug}`)} class="flex items-center">
+        <img src={favicon} alt="Logo" class="h-7 w-7" />
+      </a>
+      <nav class="flex h-full gap-4">
+        {#each routes as route (route.slug)}
+          <div class="relative flex h-full items-center">
+            <a
+              href={resolve(`/${route.slug}`)}
+              class="peer flex text-sm text-text no-underline
+            transition-opacity hover:opacity-70">{route.name}</a
+            >
+            <div
+              class="absolute bottom-0 left-1/2 h-0.5 w-8/10 -translate-x-1/2 {page.url.pathname.startsWith(
+                '/' + route.slug,
+              )
+                ? 'bg-primary'
+                : 'peer-hover:bg-text-muted'}"
+            ></div>
+          </div>
+        {/each}
+      </nav>
+    </div>
+    <div class="flex items-center">
+      <SettingsIcon />
+    </div>
+  </header>
+{/if}

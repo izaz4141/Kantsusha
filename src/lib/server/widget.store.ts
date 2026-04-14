@@ -1,17 +1,27 @@
 import { LRUCache } from 'lru-cache';
-import type { AnyWidget } from './config/widget';
+
+import type {
+  AnyWidgetParams,
+  BaseWidgetParams,
+  CalendarParams,
+  RedditParams,
+  RssParams,
+  TabbedParams,
+  DockerContainersParams,
+} from '$lib/types/widget.params';
+import type { AnyWidgetData, AnyWidgetInfo } from '$lib/types/widget.data';
 import { timeToMs } from '$lib/utils/time';
 
 export interface Widget {
   id: string;
   type: string;
-  params: Record<string, any>;
-  data?: any;
+  params: AnyWidgetParams;
+  data?: AnyWidgetData;
   cachedAt?: number;
 }
 
 interface WidgetHandlers {
-  [type: string]: (params: Record<string, any>) => Promise<any>;
+  [type: string]: (params: AnyWidgetParams) => Promise<AnyWidgetData>;
 }
 
 const DEFAULT_CACHE_TTL = 2 * 60 * 60 * 1000;
@@ -24,7 +34,7 @@ const widgetHandlers: WidgetHandlers = {};
 
 export function registerWidget(
   type: string,
-  handler: (params: Record<string, any>) => Promise<any>,
+  handler: (params: AnyWidgetParams) => Promise<AnyWidgetData>,
 ) {
   widgetHandlers[type] = handler;
 }
@@ -37,78 +47,38 @@ export function setWidget(id: string, widget: Widget) {
   widgetCache.set(id, widget);
 }
 
-export function createWidget(id: string, type: string, params: Record<string, any>): Widget {
+export function createWidget(id: string, type: string, params: AnyWidgetParams): Widget {
   const widget: Widget = { id, type, params };
   setWidget(id, widget);
   return widget;
 }
 
-export function createTabbedWidget(id: string, widgets: AnyWidget[]): Widget {
+export function createTabbedWidget(id: string, widgets: BaseWidgetParams[]): Widget {
   const nestedIds: string[] = [];
   for (let i = 0; i < widgets.length; i++) {
     const widget = widgets[i];
-    const nestedParams = widgetParams(widget);
+    const nestedParams = widget;
     const nestedId = `${id}:tab:${i}`;
     const nested = createWidget(nestedId, widget.type, nestedParams);
     nestedIds.push(nested.id);
   }
-  const tabbed = createWidget(id, 'tabbed', { id, widgets });
-  tabbed.data = { ids: nestedIds };
+  const tabbed = createWidget(id, 'tabbed', { type: 'tabbed', id, widgets });
+  tabbed.data = { ids: nestedIds, widgets };
   return tabbed;
 }
 
-export function getOrCreateWidget(id: string, widget: AnyWidget): string {
+export function getOrCreateWidget(id: string, widget: AnyWidgetParams): string {
   const existing = getWidget(id);
   if (existing) return existing.id;
 
   const created =
     widget.type === 'tabbed'
       ? createTabbedWidget(id, widget.widgets)
-      : createWidget(id, widget.type, widgetParams(widget));
+      : createWidget(id, widget.type, widget);
   return created.id;
 }
 
-export function widgetParams(widget: AnyWidget): Record<string, any> {
-  switch (widget.type) {
-    case 'calendar':
-      return {
-        title: widget.title,
-        icals: widget.icals,
-        cache: widget.cache,
-        update: widget.update,
-      };
-    case 'rss':
-      return {
-        title: widget.title,
-        feeds: widget.feeds,
-        showThumbnail: widget.showThumbnail,
-        collapseAfter: widget.collapseAfter,
-        cache: widget.cache,
-        update: widget.update,
-      };
-    case 'reddit':
-      return {
-        title: widget.title,
-        subreddit: widget.subreddit,
-        sort: widget.sort,
-        time: widget.time,
-        limit: widget.limit,
-        showThumbnail: widget.showThumbnail,
-        collapseAfter: widget.collapseAfter,
-        cache: widget.cache,
-        update: widget.update,
-      };
-    default:
-      return {};
-  }
-}
-
-export interface WidgetData {
-  data: any;
-  params: Record<string, any>;
-}
-
-export async function fetchWidgetData(id: string): Promise<WidgetData> {
+export async function fetchWidgetInfo(id: string): Promise<AnyWidgetInfo> {
   const widget = widgetCache.get(id);
   if (!widget) {
     throw new Error('Widget not found');
@@ -149,21 +119,31 @@ export function clearWidgetCache() {
 }
 
 registerWidget('rss', async (params) => {
+  params = params as RssParams;
   const { fetchRSS } = await import('./api/rss');
   return fetchRSS(params.feeds, params.limit);
 });
 
 registerWidget('calendar', async (params) => {
+  params = params as CalendarParams;
   const { fetchCalendar } = await import('./api/calendar');
   return fetchCalendar(params.icals, params.limit);
 });
 
 registerWidget('reddit', async (params) => {
+  params = params as RedditParams;
   const { fetchRedditPosts } = await import('./api/reddit');
   return fetchRedditPosts(params.subreddit, params.sort, params.limit, params.time);
 });
 
 registerWidget('tabbed', async (params) => {
+  params = params as TabbedParams;
   const widget = widgetCache.get(params.id);
-  return widget?.data ?? {};
+  return widget?.data ?? [];
+});
+
+registerWidget('docker-containers', async (params) => {
+  params = params as DockerContainersParams;
+  const { fetchDockerContainers } = await import('./api/docker');
+  return fetchDockerContainers(params);
 });

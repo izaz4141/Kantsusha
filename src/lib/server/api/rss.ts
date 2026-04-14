@@ -1,5 +1,6 @@
 import { fetchURL } from '$lib/utils/network';
-import type { RssArticle, RSSFeed } from '$lib/types/widget.data';
+import type { RssArticle } from '$lib/types/widget.data';
+import type { RssFeed } from '$lib/types/widget.params';
 
 async function parseRSS(xml: string, sourceUrl: string): Promise<RssArticle[]> {
   const articles: RssArticle[] = [];
@@ -52,7 +53,7 @@ async function parseRSS(xml: string, sourceUrl: string): Promise<RssArticle[]> {
   return articles;
 }
 
-export async function fetchRSS(feeds: RSSFeed[], limit: number = 10): Promise<RssArticle[]> {
+export async function fetchRSS(feeds: RssFeed[], limit: number = 10): Promise<RssArticle[]> {
   const allArticles: RssArticle[] = [];
 
   await Promise.all(

@@ -4,7 +4,8 @@
   import CalendarWidget from '$lib/components/widgets/CalendarWidget.svelte';
   import RssWidget from '$lib/components/widgets/RssWidget.svelte';
   import RedditWidget from '$lib/components/widgets/RedditWidget.svelte';
-  import type { WidgetData } from '$lib/types/widget.data';
+  import DockerContainersWidget from '$lib/components/widgets/DockerContainersWidget.svelte';
+  import type { BaseWidgetInfo } from '$lib/types/widget.data';
   import { fetchURL } from '$lib/utils/network';
   import { timeToMs } from '$lib/utils/time';
 
@@ -17,25 +18,24 @@
 
   let { id, type, update = 2 * 60 * 60 * 1000, showTitle = true }: Props = $props();
 
-  let timer = $state(Date.now());
   let loading = $state(true);
   let error = $state<string | null>(null);
-  let widgetData = $state<WidgetData | null>(null);
+  let widgetInfo = $state<BaseWidgetInfo | null>(null);
   let widgetTitle = $state<string | null>(null);
   let intervalId: ReturnType<typeof setInterval> | null = null;
   let reloading = $state(false);
 
-  async function fetchWidgetData(isInitial = false) {
+  async function fetchWidgetInfo(isInitial = false) {
     if (isInitial) {
       loading = true;
-      error = null;
-      widgetData = null;
+      widgetInfo = null;
       widgetTitle = null;
     }
+    error = null;
     try {
       const result = await fetchURL(`/api/v1/widgets/${id}`, { returnText: false });
-      widgetData = result;
-      widgetTitle = result.params?.title ?? null;
+      widgetInfo = result as BaseWidgetInfo;
+      widgetTitle = widgetInfo.params.title ?? null;
     } catch (e) {
       if (isInitial) {
         error = e instanceof Error ? e.message : 'Failed to load data';
@@ -49,15 +49,15 @@
 
   async function reload() {
     reloading = true;
-    await fetchWidgetData(false);
+    await fetchWidgetInfo(false);
     reloading = false;
   }
 
   onMount(async () => {
-    await fetchWidgetData(true);
-    update = widgetData?.params?.update ? (timeToMs(widgetData.params.update) ?? update) : update;
+    await fetchWidgetInfo(true);
+    update = widgetInfo?.params.update ? (timeToMs(widgetInfo.params.update) ?? update) : update;
     if (update && update > 0) {
-      intervalId = setInterval(() => fetchWidgetData(false), update);
+      intervalId = setInterval(() => fetchWidgetInfo(false), update);
     }
   });
 
@@ -91,10 +91,12 @@
   >
     <span class="text-error">{error}</span>
   </div>
-{:else if type === 'calendar' && widgetData}
-  <CalendarWidget result={widgetData} />
-{:else if type === 'rss' && widgetData}
-  <RssWidget result={widgetData} />
-{:else if type === 'reddit' && widgetData}
-  <RedditWidget result={widgetData} />
+{:else if type === 'calendar' && widgetInfo}
+  <CalendarWidget result={widgetInfo} />
+{:else if type === 'rss' && widgetInfo}
+  <RssWidget result={widgetInfo} />
+{:else if type === 'reddit' && widgetInfo}
+  <RedditWidget result={widgetInfo} />
+{:else if type === 'docker-containers' && widgetInfo}
+  <DockerContainersWidget result={widgetInfo} />
 {/if}

@@ -1,6 +1,7 @@
 <script lang="ts">
   import { slide } from 'svelte/transition';
   import type { Snippet } from 'svelte';
+  import { uiState } from '$lib/stores/global.svelte';
 
   interface Props {
     showThumbnail?: boolean;
@@ -34,8 +35,8 @@
     <ul class="space-y-3" transition:slide={{ duration: 300 }}>
       {#each thumbnails.slice(0, visibleCount) as _, i (`feed_${i}`)}
         <li class="group flex h-14 items-center gap-2 rounded" transition:slide={{ duration: 300 }}>
-          {#if showThumbnail}
-            <div class="hidden h-full w-1/10 rounded md:flex">
+          {#if showThumbnail && !uiState.isMobile}
+            <div class=" flex h-full w-1/10 rounded">
               {#if thumbnails[i] !== ''}
                 <img
                   src={thumbnails[i]}

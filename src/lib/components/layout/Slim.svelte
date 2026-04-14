@@ -7,7 +7,7 @@
 
   onMount(() => {
     uiState.layoutType = 'slim';
-    uiState.numPanel = panels.length;
+    uiState.numPanel = 1;
   });
 </script>
 

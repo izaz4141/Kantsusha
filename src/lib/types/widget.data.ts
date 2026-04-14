@@ -1,14 +1,24 @@
+import type { AnyWidgetParams, BaseWidgetParams, ContainerParams } from './widget.params';
+
+export interface DockerContainerData {
+  name: string;
+  image: string;
+  status: 'running' | 'exited' | 'paused' | 'restarting' | 'created' | 'removing' | 'dead';
+  health: 'healthy' | 'unhealthy' | 'starting' | null;
+  state: string;
+  statusText: string;
+  cpuPercent: number;
+  memoryUsage: number;
+  memoryLimit: number;
+  memoryPercent: number;
+}
+
 export interface RssArticle {
   title: string;
   link: string;
   pubDate: Date;
   source: string;
   thumbnail?: string;
-}
-
-export interface RSSFeed {
-  url: string;
-  headers?: Record<string, string>;
 }
 
 export interface CalendarEvent {
@@ -33,14 +43,25 @@ export interface RedditPost {
   thumbnail?: string;
 }
 
-export interface RedditData {
-  subreddit: string;
-  sort: string;
-  time?: string;
-  posts: RedditPost[];
+export interface TabbedData {
+  ids: string[];
+  widgets: BaseWidgetParams[] | [];
 }
 
-export interface WidgetData {
-  data: any;
-  params: Record<string, any>;
+export type BaseWidgetData = RssArticle[] | CalendarEvent[] | RedditPost[] | DockerContainerData[];
+export interface BaseWidgetInfo {
+  data: BaseWidgetData;
+  params: BaseWidgetParams;
+}
+
+export type ContainerWidgetData = TabbedData;
+export interface ContainerWidgetInfo {
+  data: ContainerWidgetData;
+  params: ContainerParams;
+}
+
+export type AnyWidgetData = BaseWidgetData | ContainerWidgetData;
+export interface AnyWidgetInfo {
+  data: AnyWidgetData;
+  params: AnyWidgetParams;
 }

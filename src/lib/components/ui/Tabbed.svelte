@@ -1,8 +1,8 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import WidgetRenderer from './WidgetRenderer.svelte';
-  import type { AnyWidget } from '$lib/server/config/widget';
   import { fetchURL } from '$lib/utils/network';
+  import type { TabbedData, AnyWidgetInfo } from '$lib/types/widget.data';
 
   interface Props {
     id: string;
@@ -12,15 +12,20 @@
 
   let loading = $state(true);
   let error = $state<string | null>(null);
-  let tabData = $state<{ ids: string[]; widgets: AnyWidget[] } | null>(null);
+  let tabData = $state<TabbedData | null>(null);
   let active = $state(0);
+  let reloading = $state(false);
 
-  async function fetchTabbedData() {
-    loading = true;
+  async function fetchTabbedData(isInitial = false) {
+    if (isInitial) {
+      loading = true;
+    }
     error = null;
     try {
-      const result = await fetchURL(`/api/v1/widgets/${id}`, { returnText: false });
-      tabData = { ids: result.data.ids, widgets: result.params.widgets };
+      const result = (await fetchURL(`/api/v1/widgets/${id}`, {
+        returnText: false,
+      })) as AnyWidgetInfo;
+      tabData = result.data as TabbedData;
     } catch (e) {
       error = e instanceof Error ? e.message : 'Failed to load tabs';
     } finally {
@@ -28,8 +33,14 @@
     }
   }
 
+  async function reload() {
+    reloading = true;
+    await fetchTabbedData();
+    reloading = false;
+  }
+
   onMount(() => {
-    fetchTabbedData();
+    fetchTabbedData(true);
   });
 </script>
 
@@ -42,18 +53,28 @@
     <span class="text-error">{error}</span>
   </div>
 {:else if tabData}
-  <div class="flex flex-row">
-    {#each tabData.widgets as widget, i (`${widget.type}_${i}`)}
-      <button
-        type="button"
-        class="mx-2 flex text-sm font-medium uppercase {active === i
-          ? 'border-b border-dotted border-text-muted text-text'
-          : 'text-text-muted'} hover:text-text"
-        onclick={() => (active = i)}
-      >
-        {widget.title ?? 'N/A'}
-      </button>
-    {/each}
+  <div class="mx-2 flex flex-row items-center justify-between">
+    <div class="flex flex-row gap-2 overflow-x-auto">
+      {#each tabData.widgets as widget, i (`${widget.type}_${i}`)}
+        <button
+          type="button"
+          class="flex shrink-0 text-sm font-medium uppercase {active === i
+            ? 'border-b border-dotted border-text-muted text-text'
+            : 'text-text-muted'} hover:text-text"
+          onclick={() => (active = i)}
+        >
+          {widget.title ?? 'N/A'}
+        </button>
+      {/each}
+    </div>
+    <button
+      onclick={reload}
+      class="text-text-muted transition-colors hover:text-text"
+      disabled={reloading}
+      aria-label="Reload tabs"
+    >
+      <span class:animate-spin={reloading}>↻</span>
+    </button>
   </div>
   {#each tabData.ids as _, i (i)}
     <div class:hidden={active !== i}>

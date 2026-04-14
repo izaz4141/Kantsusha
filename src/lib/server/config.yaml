@@ -76,9 +76,18 @@ pages:
             icals:
               - url: 'https://calendar.google.com/calendar/ical/id.indonesian%23holiday%40group.v.calendar.google.com/public/basic.ics'
                 limit: 50
-          - type: reddit
-            subreddit: selfhosted
-            sort: top
-            time: month
-            limit: 10
-            showThumbnail: true
+          - type: docker-containers
+            title: Download
+            sockPath: tcp://socket-proxy:2375
+            column: 2
+            containers:
+              nadekodon:
+                name: Nadeko~don
+                description: Download Manager
+                url: https://ndk.${SUBHOST}/
+                icon: /assets/nadeko-don-64.png
+              slskd:
+                name: Slskd
+                description: Soulseek Client
+                url: https://sls.${SUBHOST}/
+                icon: sh:slskd

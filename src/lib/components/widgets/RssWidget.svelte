@@ -1,10 +1,11 @@
 <script lang="ts">
-  import type { RssArticle, WidgetData } from '$lib/types/widget.data';
+  import type { RssArticle, BaseWidgetInfo } from '$lib/types/widget.data';
+  import type { RssParams } from '$lib/types/widget.params';
   import ListView from '../ui/ListView.svelte';
   import { dateToNow } from '$lib/utils/time';
 
   interface Props {
-    result: WidgetData;
+    result: BaseWidgetInfo;
     class?: string;
   }
 
@@ -16,8 +17,9 @@
       pubDate: new Date(a.pubDate),
     })),
   );
-  let showThumbnail = $derived(result.params.showThumbnail ?? false);
-  let collapseAfter = $derived(result.params.collapseAfter ?? 5);
+  let params = $derived(result.params as RssParams);
+  let showThumbnail = $derived(params.showThumbnail ?? false);
+  let collapseAfter = $derived(params.collapseAfter ?? 5);
 </script>
 
 {#snippet renderDetails(index: number)}
@@ -43,7 +45,7 @@
 <ListView
   {showThumbnail}
   {collapseAfter}
-  thumbnails={articles.map((a) => a.thumbnail ?? '')}
+  thumbnails={articles.map((a: RssArticle) => a.thumbnail ?? '')}
   details={renderDetails}
   class={className}
 />
