@@ -19,7 +19,7 @@ COPY --from=build /app/build ./build
 RUN export CONF_USER=$(getent passwd 1000 | cut -d: -f1) && \
     export CONF_GROUP=$(getent group 1000 | cut -d: -f1) && \
     [ -n "$CONF_USER" ] && deluser "$CONF_USER" || true && \
-    [ -n "$CONF_GROUP" ] && delgroup "$CONF_GROUP" || true && \
+    [ -n "$CONF_GROUP" ] && delgroup "$CONF_GROUP" || true
 RUN groupadd -g 1000 nadeko && \
     useradd -u 1000 -G nadeko -s /bin/sh -D nadeko
 
