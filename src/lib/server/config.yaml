@@ -1,0 +1,93 @@
+presets:
+  light:
+    name: Light
+    light: true
+    colors: {}
+
+  sepia:
+    name: Sepia
+    light: true
+    colors:
+      background: '#f5f0e6'
+      surface: '#ebe4d4'
+      text: '#3d3426'
+      textMuted: '#6b5d4d'
+      primary: '#b8860b'
+      primaryHover: '#9a7209'
+      secondary: '#8b7355'
+      border: '#d4c9b5'
+
+  dark:
+    name: Dark
+    light: false
+    colors: {}
+
+  high-contrast:
+    name: High Contrast
+    light: false
+    colors:
+      background: '#000000'
+      surface: '#1a1a1a'
+      text: '#ffffff'
+      textMuted: '#e0e0e0'
+      primary: '#ffff00'
+      primaryHover: '#e6e600'
+      secondary: '#00ffff'
+      border: '#ffffff'
+
+pages:
+  - name: Start
+    layout: default
+    columns:
+      - size: 25%
+        widgets:
+          - type: calendar
+            icals:
+              - url: 'https://calendar.google.com/calendar/ical/id.indonesian%23holiday%40group.v.calendar.google.com/public/basic.ics'
+                limit: 50
+
+          - type: rss
+            title: SELFTHOST RSS
+            showThumbnail: true
+            feeds:
+              - url: 'https://selfh.st/rss'
+      - size: full
+        widgets:
+          - type: tabbed
+            widgets:
+              - type: reddit
+                cache: 2h
+                update: 30m
+                subreddit: selfhosted
+                sort: top
+                time: month
+                limit: 10
+              - type: reddit
+                subreddit: privacy
+                sort: top
+                time: month
+                limit: 10
+  - name: About
+    layout: slim
+    columns:
+      - size: full
+        widgets:
+          - type: calendar
+            icals:
+              - url: 'https://calendar.google.com/calendar/ical/id.indonesian%23holiday%40group.v.calendar.google.com/public/basic.ics'
+                limit: 50
+          - type: docker-containers
+            title: Download
+            sockPath: tcp://socket-proxy:2375
+            column: 2
+            containers:
+              nadekodon:
+                name: Nadeko~don
+                description: Download Manager
+                url: https://ndk.${SUBHOST}/
+                icon: /assets/nadeko-don-64.png
+              slskd:
+                name: Slskd
+                description: Soulseek Client
+                url: https://sls.${SUBHOST}/
+                icon: sh:slskd

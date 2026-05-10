@@ -1,0 +1,34 @@
+# Dependencies
+node_modules
+.bun
+
+# Build output
+build
+
+# Git
+.git
+.gitignore
+
+# Development
+.env
+.env.*
+!.env.example
+
+# Tests & docs
+*.spec.ts
+*.test.ts
+vitest.config.ts
+tests
+docs
+README.md
+AGENTS.md
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
