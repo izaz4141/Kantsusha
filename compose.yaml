@@ -1,0 +1,15 @@
+services:
+  kantsusha:
+    container_name: kantsusha
+    image: ghcr.io/izaz4141/kantsusha:latest
+    restart: unless-stopped
+    user: nadeko
+    volumes:
+      - ./db:/app/db:Z,U
+      - ./config:/app/config:Z,U
+    ports:
+      - 3000:3000
+    environment:
+      KANTSUSHAKANTSUSHA_DATABASE_URL: ./db/kantsusha.db
+      KANTSUSHA_ORIGINS: 'https://d1.example.com:443,https://d2.example.com:443'
+      KANTSUSHA_AUTH_SECRET: '32longsecret'
