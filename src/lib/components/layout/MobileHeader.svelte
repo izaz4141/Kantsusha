@@ -131,7 +131,7 @@
       bind:this={menuEl}
       class="absolute top-full right-0 left-0 border-t border-border bg-surface p-2"
     >
-      <div class="flex items-center justify-between">
+      <div class="flex items-center justify-between px-2">
         <nav class="flex flex-row gap-4">
           {#each routes as route (route.slug)}
             <a
