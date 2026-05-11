@@ -1,7 +1,7 @@
-import type { DockerContainerData } from '$lib/types/widget.data';
-import type { DockerContainersParams } from '$lib/types/widget.params';
+import type { ContainerData } from '$lib/types/widget.data';
+import type { ContainerParams, ServicesParams } from '$lib/types/widget.params';
 
-function getDockerHost(params: DockerContainersParams): string {
+export function getContainerHost(params: ContainerParams): string {
   if (params['sockPath']) {
     return params['sockPath'];
   }
@@ -12,7 +12,7 @@ function getDockerHost(params: DockerContainersParams): string {
   return '/var/run/docker.sock';
 }
 
-function buildDockerUrl(host: string, path: string): string {
+function buildContainerUrl(host: string, path: string): string {
   if (host.startsWith('unix://') || host.startsWith('/')) {
     const socketPath = host.replace('unix://', '');
     const encodedPath = encodeURIComponent(socketPath);
@@ -25,7 +25,7 @@ function buildDockerUrl(host: string, path: string): string {
   return `http+unix://${encodedPath}${path}`;
 }
 
-interface DockerStats {
+interface ContainerStats {
   cpu_stats: {
     cpu_usage: { total_usage: number };
     system_cpu_usage: number;
@@ -41,7 +41,7 @@ interface DockerStats {
   };
 }
 
-function calculateCpuPercent(stats: DockerStats): number {
+function calculateCpuPercent(stats: ContainerStats): number {
   const cpuDelta = stats.cpu_stats.cpu_usage.total_usage - stats.precpu_stats.cpu_usage.total_usage;
   const systemDelta = stats.cpu_stats.system_cpu_usage - stats.precpu_stats.system_cpu_usage;
   const cpuCount = stats.cpu_stats.online_cpus || 1;
@@ -52,7 +52,7 @@ function calculateCpuPercent(stats: DockerStats): number {
   return 0;
 }
 
-function calculateMemoryPercent(stats: DockerStats): number {
+function calculateMemoryPercent(stats: ContainerStats): number {
   const usage = stats.memory_stats.usage.usage - (stats.memory_stats.stats.cache || 0);
   const limit = stats.memory_stats.usage.limit;
   if (limit > 0) {
@@ -61,12 +61,12 @@ function calculateMemoryPercent(stats: DockerStats): number {
   return 0;
 }
 
-async function fetchContainerData(
+export async function fetchContainerData(
   host: string,
   containerName: string,
-): Promise<DockerContainerData> {
-  const inspectUrl = buildDockerUrl(host, `/v1.54/containers/${containerName}/json`);
-  const statsUrl = buildDockerUrl(host, `/v1.54/containers/${containerName}/stats?stream=false`);
+): Promise<ContainerData> {
+  const inspectUrl = buildContainerUrl(host, `/v1.54/containers/${containerName}/json`);
+  const statsUrl = buildContainerUrl(host, `/v1.54/containers/${containerName}/stats?stream=false`);
 
   const inspectResponse = await fetch(inspectUrl, {
     method: 'GET',
@@ -96,10 +96,9 @@ async function fetchContainerData(
   const container = await inspectResponse.json();
   const image = container.Config?.Image || 'unknown';
 
-  const status = (container.State?.Status?.toLowerCase() ||
-    'created') as DockerContainerData['status'];
+  const status = (container.State?.Status?.toLowerCase() || 'created') as ContainerData['status'];
   const health = (container.State?.Health?.status?.toLowerCase() ||
-    null) as DockerContainerData['health'];
+    null) as ContainerData['health'];
 
   let cpuPercent = 0;
   let memoryUsage = 0;
@@ -116,7 +115,7 @@ async function fetchContainerData(
       });
 
       if (statsResponse.ok) {
-        const stats: DockerStats = await statsResponse.json();
+        const stats: ContainerStats = await statsResponse.json();
         cpuPercent = calculateCpuPercent(stats);
         memoryUsage = stats.memory_stats.usage.usage - (stats.memory_stats.stats.cache || 0);
         memoryLimit = stats.memory_stats.usage.limit;
@@ -141,15 +140,13 @@ async function fetchContainerData(
   };
 }
 
-export async function fetchDockerContainers(
-  params: DockerContainersParams,
-): Promise<DockerContainerData[]> {
-  const host = getDockerHost(params);
-  const containerNames = Object.keys(params.containers);
+export async function fetchContainers(params: ServicesParams): Promise<ContainerData[]> {
+  const containerServices = params.services.filter((s) => s.type === 'container');
 
-  const results: DockerContainerData[] = [];
-  for (const containerName of containerNames) {
-    const data = await fetchContainerData(host, containerName);
+  const results: ContainerData[] = [];
+  for (const container of containerServices) {
+    const host = getContainerHost(container);
+    const data = await fetchContainerData(host, container.id);
     results.push(data);
   }
 

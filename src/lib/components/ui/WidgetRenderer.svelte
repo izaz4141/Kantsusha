@@ -4,7 +4,7 @@
   import CalendarWidget from '$lib/components/widgets/CalendarWidget.svelte';
   import RssWidget from '$lib/components/widgets/RssWidget.svelte';
   import RedditWidget from '$lib/components/widgets/RedditWidget.svelte';
-  import DockerContainersWidget from '$lib/components/widgets/DockerContainersWidget.svelte';
+  import ServicesWidget from '$lib/components/widgets/ServicesWidget.svelte';
   import type { BaseWidgetInfo } from '$lib/types/widget.data';
   import { fetchURL } from '$lib/utils/network';
   import { timeToMs } from '$lib/utils/time';
@@ -97,6 +97,6 @@
   <RssWidget result={widgetInfo} />
 {:else if type === 'reddit' && widgetInfo}
   <RedditWidget result={widgetInfo} />
-{:else if type === 'docker-containers' && widgetInfo}
-  <DockerContainersWidget result={widgetInfo} />
+{:else if type === 'services' && widgetInfo}
+  <ServicesWidget result={widgetInfo} />
 {/if}

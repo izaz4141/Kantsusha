@@ -7,9 +7,14 @@ import type {
   RedditParams,
   RssParams,
   TabbedParams,
-  DockerContainersParams,
+  ServicesParams,
 } from '$lib/types/widget.params';
-import type { AnyWidgetData, AnyWidgetInfo } from '$lib/types/widget.data';
+import type {
+  AnyWidgetData,
+  AnyWidgetInfo,
+  ContainerData,
+  EndpointData,
+} from '$lib/types/widget.data';
 import { timeToMs } from '$lib/utils/time';
 
 export interface Widget {
@@ -142,8 +147,23 @@ registerWidget('tabbed', async (params) => {
   return widget?.data ?? [];
 });
 
-registerWidget('docker-containers', async (params) => {
-  params = params as DockerContainersParams;
-  const { fetchDockerContainers } = await import('./api/docker');
-  return fetchDockerContainers(params);
+registerWidget('services', async (params) => {
+  params = params as ServicesParams;
+  const { fetchContainerData, getContainerHost } = await import('./api/container');
+  const { checkEndpoint } = await import('./api/endpoint');
+
+  const results: (ContainerData | EndpointData)[] = [];
+
+  for (const service of params.services) {
+    if (service.type === 'container') {
+      const host = getContainerHost(service);
+      const data = await fetchContainerData(host, service.id);
+      results.push(data);
+    } else if (service.type === 'endpoint') {
+      const data = await checkEndpoint(service.name, service.statusCheckUrl);
+      results.push(data);
+    }
+  }
+
+  return results;
 });

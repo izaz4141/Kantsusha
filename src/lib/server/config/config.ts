@@ -18,7 +18,6 @@ const EXTERNAL_CONFIG_PATH = './config/config.yaml';
 const DEFAULT_CONFIG_PATH = !dev
   ? path.resolve(ENTRYDIR, 'config.yaml')
   : path.resolve(BASE_DIR, 'src/lib/server/config.yaml');
-console.log(DEFAULT_CONFIG_PATH);
 export interface ParsedConfig {
   presets: Record<string, ThemePreset>;
   css: string;

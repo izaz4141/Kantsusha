@@ -1,17 +1,4 @@
-import type { AnyWidgetParams, BaseWidgetParams, ContainerParams } from './widget.params';
-
-export interface DockerContainerData {
-  name: string;
-  image: string;
-  status: 'running' | 'exited' | 'paused' | 'restarting' | 'created' | 'removing' | 'dead';
-  health: 'healthy' | 'unhealthy' | 'starting' | null;
-  state: string;
-  statusText: string;
-  cpuPercent: number;
-  memoryUsage: number;
-  memoryLimit: number;
-  memoryPercent: number;
-}
+import type { AnyWidgetParams, BaseWidgetParams, WrapperParams } from './widget.params';
 
 export interface RssArticle {
   title: string;
@@ -43,24 +30,50 @@ export interface RedditPost {
   thumbnail?: string;
 }
 
+export interface ContainerData {
+  name: string;
+  image: string;
+  status: 'running' | 'exited' | 'paused' | 'restarting' | 'created' | 'removing' | 'dead';
+  health: 'healthy' | 'unhealthy' | 'starting' | null;
+  state: string;
+  statusText: string;
+  cpuPercent: number;
+  memoryUsage: number;
+  memoryLimit: number;
+  memoryPercent: number;
+}
+
+export interface EndpointData {
+  name: string;
+  status: 'online' | 'offline' | 'unknown';
+  statusCode?: number;
+  responseTime?: number;
+}
+
 export interface TabbedData {
   ids: string[];
   widgets: BaseWidgetParams[] | [];
 }
 
-export type BaseWidgetData = RssArticle[] | CalendarEvent[] | RedditPost[] | DockerContainerData[];
+export type BaseWidgetData =
+  | RssArticle[]
+  | CalendarEvent[]
+  | RedditPost[]
+  | ContainerData[]
+  | EndpointData[]
+  | (ContainerData | EndpointData)[];
 export interface BaseWidgetInfo {
   data: BaseWidgetData;
   params: BaseWidgetParams;
 }
 
-export type ContainerWidgetData = TabbedData;
-export interface ContainerWidgetInfo {
-  data: ContainerWidgetData;
-  params: ContainerParams;
+export type WrapperWidgetData = TabbedData;
+export interface WrapperWidgetInfo {
+  data: WrapperWidgetData;
+  params: WrapperParams;
 }
 
-export type AnyWidgetData = BaseWidgetData | ContainerWidgetData;
+export type AnyWidgetData = BaseWidgetData | WrapperWidgetData;
 export interface AnyWidgetInfo {
   data: AnyWidgetData;
   params: AnyWidgetParams;

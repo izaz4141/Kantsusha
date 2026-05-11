@@ -6,7 +6,7 @@
 - `bun --bun run build` - Production build
 - `bun --bun run check` - Typecheck
 - `bun --bun run lint` - Prettier + ESLint
-- `bun --bun run db:push` / `db:generate` - Database migrations
+- `bun --bun run format` - Prettier Format
 - `bun --bun run test` - Run unit tests (vitest)
 
 ## Key Architecture
@@ -21,6 +21,7 @@
 - Use Tailwind CSS with theme tokens from `src/lib/server/config.yaml`
 - Never use pure CSS classes - use Tailwind utilities + theme tokens
 - Theme tokens: `background`, `surface`, `text`, `primary`, `border` (see src/routes/layout.css)
+- **Dynamic styling**: Never use string interpolation for Tailwind classes (e.g., `class="{dynamicVar}"`). Unused classes are removed at compile time. Instead use `style=` attribute for dynamic values.
 
 ## Database
 

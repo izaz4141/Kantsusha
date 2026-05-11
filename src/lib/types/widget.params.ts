@@ -5,13 +5,7 @@ export const TIME_REGEX = /^(\d+)(s|m|h|d|w|mo|y)$/;
 export const REDDIT_SORT_REGEX = /^(top|hot|new|controversial)$/;
 export const REDDIT_TIME_REGEX = /^(hour|day|week|month|year|all)$/;
 
-export const WidgetTypeSchema = z.enum([
-  'calendar',
-  'rss',
-  'reddit',
-  'docker-containers',
-  'tabbed',
-]);
+export const WidgetTypeSchema = z.enum(['calendar', 'rss', 'reddit', 'services', 'tabbed']);
 export type WidgetType = z.infer<typeof WidgetTypeSchema>;
 
 export const ICalFeedSchema = z.object({
@@ -70,30 +64,46 @@ export const RedditParamsSchema = z
   });
 export type RedditParams = z.infer<typeof RedditParamsSchema>;
 
-export const DockerContainerSchema = z.object({
+export const ContainerParamsSchema = z.object({
+  type: z.literal('container'),
+  id: z.string(),
   name: z.string(),
   description: z.string().optional(),
   url: z.string().optional(),
   icon: z.string().optional(),
+  target: z.string().default('_blank').optional(),
+  sockPath: z.string().optional(),
 });
-export type DockerContainer = z.infer<typeof DockerContainerSchema>;
+export type ContainerParams = z.infer<typeof ContainerParamsSchema>;
 
-export const DockerContainersParamsSchema = z.object({
-  type: z.literal('docker-containers'),
+export const EndpointParamsSchema = z.object({
+  type: z.literal('endpoint'),
+  name: z.string(),
+  description: z.string().optional(),
+  url: z.string(),
+  icon: z.string().optional(),
+  target: z.string().default('_blank').optional(),
+  statusCheck: z.boolean().optional(),
+  statusCheckUrl: z.string().optional(),
+});
+export type EndpointParams = z.infer<typeof EndpointParamsSchema>;
+
+export const ServicesParamsSchema = z.object({
+  type: z.literal('services'),
   title: z.string().optional(),
+  target: z.string().default('_blank').optional(),
   cache: z.string().optional(),
   update: z.string().regex(TIME_REGEX).optional(),
-  sockPath: z.string().optional(),
   column: z.number().int().positive().default(3),
-  containers: z.record(z.string(), DockerContainerSchema),
+  services: z.discriminatedUnion('type', [ContainerParamsSchema, EndpointParamsSchema]).array(),
 });
-export type DockerContainersParams = z.infer<typeof DockerContainersParamsSchema>;
+export type ServicesParams = z.infer<typeof ServicesParamsSchema>;
 
 const BaseWidgetParamsSchema = z.discriminatedUnion('type', [
   CalendarParamsSchema,
   RssParamsSchema,
   RedditParamsSchema,
-  DockerContainersParamsSchema,
+  ServicesParamsSchema,
 ]);
 export type BaseWidgetParams = z.infer<typeof BaseWidgetParamsSchema>;
 
@@ -106,11 +116,11 @@ export const TabbedParamsSchema = z.object({
 });
 export type TabbedParams = z.infer<typeof TabbedParamsSchema>;
 
-const ContainerWidgetParams = z.discriminatedUnion('type', [TabbedParamsSchema]);
-export type ContainerParams = z.infer<typeof ContainerWidgetParams>;
+const WrapperWidgetParams = z.discriminatedUnion('type', [TabbedParamsSchema]);
+export type WrapperParams = z.infer<typeof WrapperWidgetParams>;
 
 export const AnyWidgetParamsSchema = z.discriminatedUnion('type', [
   ...BaseWidgetParamsSchema.options,
-  ...ContainerWidgetParams.options,
+  ...WrapperWidgetParams.options,
 ]);
 export type AnyWidgetParams = z.infer<typeof AnyWidgetParamsSchema>;
