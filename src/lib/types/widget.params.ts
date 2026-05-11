@@ -5,6 +5,8 @@ export const TIME_REGEX = /^(\d+)(s|m|h|d|w|mo|y)$/;
 export const REDDIT_SORT_REGEX = /^(top|hot|new|controversial)$/;
 export const REDDIT_TIME_REGEX = /^(hour|day|week|month|year|all)$/;
 
+export const TARGET_REGEX = /^(_blank|_self|_parent|_top)$/;
+
 export const WidgetTypeSchema = z.enum(['calendar', 'rss', 'reddit', 'services', 'tabbed']);
 export type WidgetType = z.infer<typeof WidgetTypeSchema>;
 
@@ -71,7 +73,7 @@ export const ContainerParamsSchema = z.object({
   description: z.string().optional(),
   url: z.string().optional(),
   icon: z.string().optional(),
-  target: z.string().default('_blank').optional(),
+  target: z.string().regex(TARGET_REGEX).default('_blank').optional(),
   sockPath: z.string().optional(),
 });
 export type ContainerParams = z.infer<typeof ContainerParamsSchema>;
@@ -82,7 +84,7 @@ export const EndpointParamsSchema = z.object({
   description: z.string().optional(),
   url: z.string(),
   icon: z.string().optional(),
-  target: z.string().default('_blank').optional(),
+  target: z.string().regex(TARGET_REGEX).default('_blank').optional(),
   statusCheck: z.boolean().optional(),
   statusCheckUrl: z.string().optional(),
 });
@@ -91,7 +93,7 @@ export type EndpointParams = z.infer<typeof EndpointParamsSchema>;
 export const ServicesParamsSchema = z.object({
   type: z.literal('services'),
   title: z.string().optional(),
-  target: z.string().default('_blank').optional(),
+  target: z.string().regex(TARGET_REGEX).default('_blank').optional(),
   cache: z.string().optional(),
   update: z.string().regex(TIME_REGEX).optional(),
   column: z.number().int().positive().default(3),
