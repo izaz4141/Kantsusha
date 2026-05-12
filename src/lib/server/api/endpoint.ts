@@ -1,4 +1,5 @@
 import type { EndpointData } from '$lib/types/widget.data';
+import { fetchURL } from '$lib/utils/network';
 
 export async function checkEndpoint(
   name: string,
@@ -10,10 +11,10 @@ export async function checkEndpoint(
 
   const startTime = Date.now();
   try {
-    const response = await fetch(statusCheckUrl, {
-      method: 'HEAD',
-      signal: AbortSignal.timeout(5000),
-    });
+    const response = (await fetchURL(statusCheckUrl, {
+      method: 'GET',
+      skipBody: true,
+    })) as Response;
     return {
       name,
       status: response.ok ? 'online' : 'offline',

@@ -20,7 +20,6 @@
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  let currentPanel = $state(0);
   let menuEl = $state<HTMLDivElement>();
   let headerTranslate = $state(0);
   let numPanel = $derived(uiState.numPanel);
@@ -75,13 +74,12 @@
               aria-label="Go to panel {i}"
               class="rounded-lg px-2 py-2 transition-all duration-300"
               onclick={() => {
-                currentPanel = i;
-                window.dispatchEvent(new CustomEvent('navigate-panel', { detail: i }));
+                uiState.currentPanel = i;
               }}
             >
               <div
                 class="h-2.5 rounded-full transition-all duration-300
-              {currentPanel === i ? 'w-9 bg-primary' : 'w-2.5 bg-gray-400'}"
+              {uiState.currentPanel === i ? 'w-9 bg-primary' : 'w-2.5 bg-gray-400'}"
               ></div>
             </button>
           {/each}

@@ -1,12 +1,10 @@
 <script lang="ts">
-  import { onMount, onDestroy } from 'svelte';
-  import { browser } from '$app/environment';
+  import { onMount } from 'svelte';
   import { uiState } from '$lib/stores/global.svelte';
   import type { LayoutProps } from '$lib/types/layout';
 
-  let { panels, currentPanel = $bindable(0) }: LayoutProps = $props();
-
-  let handler: ((e: Event) => void) | undefined;
+  let { panels, currentPanel = $bindable(Math.ceil(panels.length / 2) - 1) }: LayoutProps =
+    $props();
 
   function getPanelStyle(size: string): string {
     if (size === 'small') return 'width: 300px; flex: none;';
@@ -21,22 +19,11 @@
   onMount(() => {
     uiState.layoutType = 'default';
     uiState.numPanel = panels.length;
-
-    if (!browser) return;
-    handler = (e: Event) => {
-      const customEvent = e as CustomEvent<number>;
-      currentPanel = customEvent.detail;
-    };
-    window.addEventListener('navigate-panel', handler as EventListener);
-  });
-
-  onDestroy(() => {
-    if (handler) {
-      window.removeEventListener('navigate-panel', handler);
-    }
+    uiState.currentPanel = currentPanel;
   });
 </script>
 
+<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 {@html `<style>
   @media (width >= 48rem) {
     ${dynamicStyles}
@@ -47,7 +34,7 @@
   {#each panels as panel, i (i)}
     <div
       class="flex h-full w-full flex-col gap-y-4 panel-{i}"
-      class:hidden={currentPanel !== i}
+      class:hidden={uiState.currentPanel !== i}
       class:md:flex={true}
     >
       {@render panel.content(i)}

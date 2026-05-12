@@ -5,6 +5,7 @@ export async function fetchURL(
     returnText?: boolean;
     userAgent?: string;
     method?: string;
+    skipBody?: boolean;
   } = { method: 'GET' },
 ): Promise<string | unknown> {
   const maxRetries = 5;
@@ -41,6 +42,10 @@ export async function fetchURL(
           // Ignore JSON parse errors, use generic message
         }
         throw new Error(errorMessage);
+      }
+
+      if (options?.skipBody) {
+        return response;
       }
 
       if (options?.returnText === false) {

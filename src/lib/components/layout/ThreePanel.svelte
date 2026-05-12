@@ -1,29 +1,14 @@
 <script lang="ts">
-  import { onMount, onDestroy } from 'svelte';
-  import { browser } from '$app/environment';
+  import { onMount } from 'svelte';
   import { uiState } from '$lib/stores/global.svelte';
   import type { LayoutProps } from '$lib/types/layout';
 
-  let { panels, currentPanel = $bindable(0) }: LayoutProps = $props();
-
-  let handler: ((e: Event) => void) | undefined;
+  let { panels, currentPanel = $bindable(1) }: LayoutProps = $props();
 
   onMount(() => {
     uiState.layoutType = 'three-panel';
     uiState.numPanel = panels.length;
-
-    if (!browser) return;
-    handler = (e: Event) => {
-      const customEvent = e as CustomEvent<number>;
-      currentPanel = customEvent.detail;
-    };
-    window.addEventListener('navigate-panel', handler as EventListener);
-  });
-
-  onDestroy(() => {
-    if (handler) {
-      window.removeEventListener('navigate-panel', handler);
-    }
+    uiState.currentPanel = currentPanel;
   });
 </script>
 
