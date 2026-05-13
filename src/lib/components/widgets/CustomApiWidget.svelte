@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { BaseWidgetInfo, CustomApiData } from '$lib/types/widget.data';
-  // import type { CustomApiParams } from '$lib/types/widget.params';
+  import type { CustomApiParams } from '$lib/types/widget.params';
 
   interface Props {
     result: BaseWidgetInfo;
@@ -10,7 +10,11 @@
   let { result, class: className = '' }: Props = $props();
 
   let data = $derived(result.data as CustomApiData);
-  // let params = $derived(result.params as CustomApiParams);
+  let params = $derived(result.params as CustomApiParams);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  let fetched = $derived(data.fetched);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  let options = $derived(params.options);
 </script>
 
 <svelte:head>
