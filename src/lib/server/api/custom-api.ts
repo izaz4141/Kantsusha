@@ -575,8 +575,33 @@ function processExpressionsInText(content: string, context: Record<string, unkno
 }
 
 function processTemplate(html: string, context: Record<string, unknown>): string {
-  const blocks = tokenizeTemplate(html);
-  return processBlocks(blocks, context);
+  const scripts: string[] = [];
+  const styles: string[] = [];
+
+  let processed = html;
+
+  processed = processed.replace(/<script[\s\S]*?<\/script>/gi, (match) => {
+    scripts.push(match);
+    return `__SCRIPT_${scripts.length - 1}__`;
+  });
+
+  processed = processed.replace(/<style[\s\S]*?<\/style>/gi, (match) => {
+    styles.push(match);
+    return `__STYLE_${styles.length - 1}__`;
+  });
+
+  const blocks = tokenizeTemplate(processed);
+  let result = processBlocks(blocks, context);
+
+  for (let i = styles.length - 1; i >= 0; i--) {
+    result = result.replace(`__STYLE_${i}__`, styles[i]);
+  }
+
+  for (let i = scripts.length - 1; i >= 0; i--) {
+    result = result.replace(`__SCRIPT_${i}__`, scripts[i]);
+  }
+
+  return result;
 }
 
 export function compileTemplate(
