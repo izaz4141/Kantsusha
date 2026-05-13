@@ -7,13 +7,20 @@ export const REDDIT_TIME_REGEX = /^(hour|day|week|month|year|all)$/;
 
 export const TARGET_REGEX = /^(_blank|_self|_parent|_top)$/;
 
-export const WidgetTypeSchema = z.enum(['calendar', 'rss', 'reddit', 'services', 'tabbed']);
+export const WidgetTypeSchema = z.enum([
+  'calendar',
+  'rss',
+  'reddit',
+  'services',
+  'custom-api',
+  'tabbed',
+]);
 export type WidgetType = z.infer<typeof WidgetTypeSchema>;
 
 const CommonWidgetParamsSchema = z.object({
   title: z.string().optional(),
-  cache: z.string().optional(),
-  update: z.string().regex(TIME_REGEX).optional(),
+  cache: z.string().regex(TIME_REGEX).default('1h').optional(),
+  update: z.string().regex(TIME_REGEX).default('1h').optional(),
 });
 export type CommonWidgetParams = z.infer<typeof CommonWidgetParamsSchema>;
 
@@ -103,11 +110,31 @@ export const ServicesParamsSchema = CommonWidgetParamsSchema.merge(
 );
 export type ServicesParams = z.infer<typeof ServicesParamsSchema>;
 
+export const ApiRequestSchema = z.object({
+  method: z.enum(['get', 'post']).default('get'),
+  url: z.string(),
+  type: z.enum(['text', 'json']).default('json'),
+  headers: z.record(z.string(), z.string()).optional(),
+  body: z.string().optional(),
+});
+export type ApiRequest = z.infer<typeof ApiRequestSchema>;
+
+export const CustomApiParamsSchema = CommonWidgetParamsSchema.merge(
+  z.object({
+    type: z.literal('custom-api'),
+    options: z.record(z.string(), z.unknown()).optional(),
+    fetch: z.record(z.string(), ApiRequestSchema).optional(),
+    template: z.string(),
+  }),
+);
+export type CustomApiParams = z.infer<typeof CustomApiParamsSchema>;
+
 const BaseWidgetParamsSchema = z.discriminatedUnion('type', [
   CalendarParamsSchema,
   RssParamsSchema,
   RedditParamsSchema,
   ServicesParamsSchema,
+  CustomApiParamsSchema,
 ]);
 export type BaseWidgetParams = z.infer<typeof BaseWidgetParamsSchema>;
 

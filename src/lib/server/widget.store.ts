@@ -8,6 +8,7 @@ import type {
   RssParams,
   TabbedParams,
   ServicesParams,
+  CustomApiParams,
 } from '$lib/types/widget.params';
 import type {
   AnyWidgetData,
@@ -166,4 +167,10 @@ registerWidget('services', async (params) => {
   }
 
   return results;
+});
+
+registerWidget('custom-api', async (params) => {
+  params = params as CustomApiParams;
+  const { renderCustomTemplate } = await import('./api/custom-api');
+  return renderCustomTemplate(params);
 });

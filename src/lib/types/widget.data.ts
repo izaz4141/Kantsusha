@@ -55,13 +55,27 @@ export interface TabbedData {
   widgets: BaseWidgetParams[] | [];
 }
 
+export interface FetchedData {
+  id: string;
+  type: 'text' | 'json';
+  data: unknown;
+  error?: string;
+}
+
+export interface CustomApiData {
+  fetched: Record<string, FetchedData>;
+  html: string;
+  css: string;
+}
+
 export type BaseWidgetData =
   | RssArticle[]
   | CalendarEvent[]
   | RedditPost[]
   | ContainerData[]
   | EndpointData[]
-  | (ContainerData | EndpointData)[];
+  | (ContainerData | EndpointData)[]
+  | CustomApiData;
 export interface BaseWidgetInfo {
   data: BaseWidgetData;
   params: BaseWidgetParams;

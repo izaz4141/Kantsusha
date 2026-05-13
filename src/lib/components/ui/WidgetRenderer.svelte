@@ -5,6 +5,7 @@
   import RssWidget from '$lib/components/widgets/RssWidget.svelte';
   import RedditWidget from '$lib/components/widgets/RedditWidget.svelte';
   import ServicesWidget from '$lib/components/widgets/ServicesWidget.svelte';
+  import CustomApiWidget from '$lib/components/widgets/CustomApiWidget.svelte';
   import type { BaseWidgetInfo } from '$lib/types/widget.data';
   import { fetchURL } from '$lib/utils/network';
   import { timeToMs } from '$lib/utils/time';
@@ -99,4 +100,6 @@
   <RedditWidget result={widgetInfo} />
 {:else if type === 'services' && widgetInfo}
   <ServicesWidget result={widgetInfo} />
+{:else if type === 'custom-api' && widgetInfo}
+  <CustomApiWidget result={widgetInfo} />
 {/if}

@@ -6,6 +6,7 @@ export async function fetchURL(
     userAgent?: string;
     method?: string;
     skipBody?: boolean;
+    body?: string;
   } = { method: 'GET' },
 ): Promise<string | unknown> {
   const maxRetries = 5;
@@ -27,6 +28,7 @@ export async function fetchURL(
         method: options.method,
         headers,
         signal: controller.signal,
+        body: options.body,
       });
 
       clearTimeout(timeoutId);
