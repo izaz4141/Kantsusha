@@ -26,7 +26,7 @@
   let hasMore = $derived(collapseAfter < thumbnails.length);
 </script>
 
-<div class="rounded-lg border border-border bg-surface p-4 {className}">
+<div class={className}>
   {#if thumbnails.length === 0}
     <div class="flex items-center justify-center py-4" transition:slide={{ duration: 300 }}>
       <span class="text-text-muted">No items found</span>

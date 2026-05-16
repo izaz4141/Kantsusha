@@ -81,25 +81,24 @@
   </div>
 {/if}
 
-{#if loading}
-  <div class=" flex items-center justify-center rounded-lg border border-border bg-surface p-4">
-    <span class="text-text-muted">Loading widget...</span>
-  </div>
-{:else if error}
-  <div
-    class="flex items-center justify-center rounded-lg border border-border bg-surface p-4"
-    transition:slide={{ duration: 300 }}
-  >
-    <span class="text-error">{error}</span>
-  </div>
-{:else if type === 'calendar' && widgetInfo}
-  <CalendarWidget result={widgetInfo} />
-{:else if type === 'rss' && widgetInfo}
-  <RssWidget result={widgetInfo} />
-{:else if type === 'reddit' && widgetInfo}
-  <RedditWidget result={widgetInfo} />
-{:else if type === 'services' && widgetInfo}
-  <ServicesWidget result={widgetInfo} />
-{:else if type === 'custom-api' && widgetInfo}
-  <CustomApiWidget result={widgetInfo} />
-{/if}
+<div class="rounded-lg border border-border bg-surface p-4">
+  {#if loading}
+    <div class="flex items-center justify-center">
+      <span class="text-text-muted">Loading widget...</span>
+    </div>
+  {:else if error}
+    <div class="flex items-center justify-center" transition:slide={{ duration: 300 }}>
+      <span class="text-error">{error}</span>
+    </div>
+  {:else if type === 'calendar' && widgetInfo}
+    <CalendarWidget result={widgetInfo} />
+  {:else if type === 'rss' && widgetInfo}
+    <RssWidget result={widgetInfo} />
+  {:else if type === 'reddit' && widgetInfo}
+    <RedditWidget result={widgetInfo} />
+  {:else if type === 'services' && widgetInfo}
+    <ServicesWidget result={widgetInfo} />
+  {:else if type === 'custom-api' && widgetInfo}
+    <CustomApiWidget result={widgetInfo} />
+  {/if}
+</div>

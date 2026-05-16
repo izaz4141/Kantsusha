@@ -26,7 +26,7 @@
   }
 </script>
 
-<div class="rounded-lg border border-border bg-surface p-4 {className}">
+<div class={className}>
   {#if params.services.length === 0}
     <div class="flex items-center justify-center py-4">
       <span class="text-text-muted">No services found</span>

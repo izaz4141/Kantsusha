@@ -105,7 +105,7 @@
   );
 </script>
 
-<div class="rounded-lg border border-border bg-surface p-4 {className}">
+<div class={className}>
   <div class="mb-4 flex items-center justify-between" transition:slide={{ duration: 300 }}>
     <button
       type="button"
