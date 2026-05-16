@@ -195,7 +195,7 @@ async function loadYAML(filePath: string): Promise<Record<string, unknown> | nul
     return null;
   }
 
-  return (await resolveIncludes(parsed, path.dirname(filePath))) as Record<string, unknown>;
+  return parsed as Record<string, unknown>;
 }
 
 function mergeConfig(
@@ -230,14 +230,21 @@ async function loadConfig(): Promise<Record<string, unknown>> {
     throw new Error('Failed to load default config.yaml');
   }
 
+  const defaultsResolved = await resolveIncludes(defaults, path.dirname(DEFAULT_CONFIG_PATH));
+
   const external = await loadYAML(EXTERNAL_CONFIG_PATH);
   if (!external) {
     console.log('No external config found, using default config');
-    return defaults;
+    return defaultsResolved as Record<string, unknown>;
   }
 
+  const externalResolved = await resolveIncludes(external, path.dirname(EXTERNAL_CONFIG_PATH));
+
   console.log('Merging external config with defaults');
-  return mergeConfig(defaults, external);
+  return mergeConfig(
+    defaultsResolved as Record<string, unknown>,
+    externalResolved as Record<string, unknown>,
+  );
 }
 
 export async function getCached(): Promise<ParsedConfig> {
