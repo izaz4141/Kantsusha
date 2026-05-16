@@ -249,6 +249,7 @@ export async function getCached(): Promise<ParsedConfig> {
     includedFiles.clear();
 
     const rawConfig = await loadConfig();
+    const updatedMtime = await getConfigMtime();
 
     const rawPresets = rawConfig.presets;
     const presets =
@@ -265,7 +266,7 @@ export async function getCached(): Promise<ParsedConfig> {
 
     configCache = {
       data: { presets, css, pages },
-      mtime: currentMtime,
+      mtime: updatedMtime,
     };
   }
 
