@@ -18,6 +18,117 @@ const EXTERNAL_CONFIG_PATH = './config/config.yaml';
 const DEFAULT_CONFIG_PATH = !dev
   ? path.resolve(ENTRYDIR, 'config.yaml')
   : path.resolve(BASE_DIR, 'src/lib/server/config.yaml');
+
+const includedFiles = new Set<string>();
+
+function deepMerge(target: unknown, source: unknown): unknown {
+  if (source === null || source === undefined) return target;
+  if (typeof source !== 'object') return source;
+
+  if (Array.isArray(source)) return source;
+  if (Array.isArray(target)) return source;
+
+  const result = { ...(target as Record<string, unknown>) };
+  for (const [key, value] of Object.entries(source as Record<string, unknown>)) {
+    result[key] = deepMerge(result[key], value);
+  }
+  return result;
+}
+
+async function resolveIncludes(obj: unknown, baseDir: string): Promise<unknown> {
+  if (obj === null || obj === undefined) return obj;
+
+  if (Array.isArray(obj)) {
+    const resolved: unknown[] = [];
+    for (const item of obj) {
+      if (item && typeof item === 'object' && !Array.isArray(item)) {
+        const itemObj = item as Record<string, unknown>;
+        if ('$include' in itemObj) {
+          const includePath = itemObj.$include;
+          if (typeof includePath !== 'string') {
+            console.warn(`Warning: $include must be a string, skipping`);
+            resolved.push(item);
+            continue;
+          }
+
+          const resolvedPath = path.resolve(baseDir, includePath);
+          includedFiles.add(resolvedPath);
+
+          const included = await loadYAML(resolvedPath);
+          if (included === null) {
+            console.warn(`Warning: Failed to load included file: ${includePath}`);
+            resolved.push(item);
+            continue;
+          }
+
+          const includedResolved = await resolveIncludes(included, path.dirname(resolvedPath));
+
+          const { $include, ...overrides } = itemObj;
+          if (Object.keys(overrides).length > 0) {
+            if (Array.isArray(includedResolved)) {
+              for (const item of includedResolved) {
+                resolved.push(deepMerge(item, overrides));
+              }
+            } else {
+              resolved.push(deepMerge(includedResolved, overrides));
+            }
+          } else {
+            if (Array.isArray(includedResolved)) {
+              resolved.push(...includedResolved);
+            } else {
+              resolved.push(includedResolved);
+            }
+          }
+        } else {
+          resolved.push(await resolveIncludes(item, baseDir));
+        }
+      } else {
+        resolved.push(await resolveIncludes(item, baseDir));
+      }
+    }
+    return resolved;
+  }
+
+  if (typeof obj === 'object') {
+    const objRecord = obj as Record<string, unknown>;
+    if ('$include' in objRecord) {
+      const includePath = objRecord.$include;
+      if (typeof includePath !== 'string') {
+        console.warn(`Warning: $include must be a string, skipping`);
+        return obj;
+      }
+
+      const resolvedPath = path.resolve(baseDir, includePath);
+      includedFiles.add(resolvedPath);
+
+      const included = await loadYAML(resolvedPath);
+      if (included === null) {
+        console.warn(`Warning: Failed to load included file: ${includePath}`);
+        return obj;
+      }
+
+      const includedResolved = await resolveIncludes(included, path.dirname(resolvedPath));
+
+      const { $include, ...overrides } = objRecord;
+      if (Object.keys(overrides).length > 0) {
+        if (Array.isArray(includedResolved)) {
+          return includedResolved.map((item) => deepMerge(item, overrides));
+        }
+        return deepMerge(includedResolved, overrides);
+      }
+      return includedResolved;
+    }
+
+    const result: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(objRecord)) {
+      result[key] = await resolveIncludes(value, baseDir);
+    }
+    return result;
+  }
+
+  return obj;
+}
+
 export interface ParsedConfig {
   presets: Record<string, ThemePreset>;
   css: string;
@@ -33,6 +144,11 @@ async function getConfigMtime(): Promise<number> {
   }
   if (await exists(EXTERNAL_CONFIG_PATH)) {
     mtime = Math.max(mtime, (await stat(EXTERNAL_CONFIG_PATH)).mtimeMs);
+  }
+  for (const filePath of includedFiles) {
+    if (await exists(filePath)) {
+      mtime = Math.max(mtime, (await stat(filePath)).mtimeMs);
+    }
   }
   return mtime;
 }
@@ -56,7 +172,7 @@ async function loadYAML(filePath: string): Promise<Record<string, unknown> | nul
     return null;
   }
 
-  return parsed as Record<string, unknown>;
+  return (await resolveIncludes(parsed, path.dirname(filePath))) as Record<string, unknown>;
 }
 
 function mergeConfig(
@@ -108,6 +224,7 @@ export async function getCached(): Promise<ParsedConfig> {
     if (configCache) {
       clearWidgetCache();
     }
+    includedFiles.clear();
 
     const rawConfig = await loadConfig();
 
