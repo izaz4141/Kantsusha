@@ -18,6 +18,140 @@ const EXTERNAL_CONFIG_PATH = './config/config.yaml';
 const DEFAULT_CONFIG_PATH = !dev
   ? path.resolve(ENTRYDIR, 'config.yaml')
   : path.resolve(BASE_DIR, 'src/lib/server/config.yaml');
+
+const includedFiles = new Set<string>();
+
+function deepMerge(target: unknown, source: unknown): unknown {
+  if (source === null || source === undefined) return target;
+  if (typeof source !== 'object') return source;
+
+  if (Array.isArray(source)) return source;
+  if (Array.isArray(target)) return source;
+
+  const result =
+    typeof target === 'object' && target !== null ? { ...(target as Record<string, unknown>) } : {};
+  for (const [key, value] of Object.entries(source as Record<string, unknown>)) {
+    result[key] = deepMerge(result[key], value);
+  }
+  return result;
+}
+
+async function resolveIncludes(
+  obj: unknown,
+  baseDir: string,
+  visited: Set<string> = new Set(),
+): Promise<unknown> {
+  if (obj === null || obj === undefined) return obj;
+
+  if (Array.isArray(obj)) {
+    const resolved: unknown[] = [];
+    for (const item of obj) {
+      if (item && typeof item === 'object' && !Array.isArray(item)) {
+        const itemObj = item as Record<string, unknown>;
+        if ('$include' in itemObj) {
+          const includePath = itemObj.$include;
+          if (typeof includePath !== 'string') {
+            console.warn(`Warning: $include must be a string, skipping`);
+            resolved.push(item);
+            continue;
+          }
+
+          const resolvedPath = path.resolve(baseDir, includePath);
+
+          if (visited.has(resolvedPath)) {
+            throw new Error(`Circular $include detected: ${includePath}`);
+          }
+          visited.add(resolvedPath);
+          includedFiles.add(resolvedPath);
+
+          const included = await loadYAML(resolvedPath);
+          if (included === null) {
+            visited.delete(resolvedPath);
+            console.warn(`Warning: Failed to load included file: ${includePath}`);
+            resolved.push(item);
+            continue;
+          }
+
+          const includedResolved = await resolveIncludes(
+            included,
+            path.dirname(resolvedPath),
+            visited,
+          );
+          visited.delete(resolvedPath);
+
+          const { $include, ...overrides } = itemObj;
+          if (Object.keys(overrides).length > 0) {
+            if (Array.isArray(includedResolved)) {
+              for (const item of includedResolved) {
+                resolved.push(deepMerge(item, overrides));
+              }
+            } else {
+              resolved.push(deepMerge(includedResolved, overrides));
+            }
+          } else {
+            if (Array.isArray(includedResolved)) {
+              resolved.push(...includedResolved);
+            } else {
+              resolved.push(includedResolved);
+            }
+          }
+        } else {
+          resolved.push(await resolveIncludes(item, baseDir, visited));
+        }
+      } else {
+        resolved.push(await resolveIncludes(item, baseDir, visited));
+      }
+    }
+    return resolved;
+  }
+
+  if (typeof obj === 'object') {
+    const objRecord = obj as Record<string, unknown>;
+    if ('$include' in objRecord) {
+      const includePath = objRecord.$include;
+      if (typeof includePath !== 'string') {
+        console.warn(`Warning: $include must be a string, skipping`);
+        return obj;
+      }
+
+      const resolvedPath = path.resolve(baseDir, includePath);
+
+      if (visited.has(resolvedPath)) {
+        throw new Error(`Circular $include detected: ${includePath}`);
+      }
+      visited.add(resolvedPath);
+      includedFiles.add(resolvedPath);
+
+      const included = await loadYAML(resolvedPath);
+      if (included === null) {
+        visited.delete(resolvedPath);
+        console.warn(`Warning: Failed to load included file: ${includePath}`);
+        return obj;
+      }
+
+      const includedResolved = await resolveIncludes(included, path.dirname(resolvedPath), visited);
+      visited.delete(resolvedPath);
+
+      const { $include, ...overrides } = objRecord;
+      if (Object.keys(overrides).length > 0) {
+        if (Array.isArray(includedResolved)) {
+          return includedResolved.map((item) => deepMerge(item, overrides));
+        }
+        return deepMerge(includedResolved, overrides);
+      }
+      return includedResolved;
+    }
+
+    const result: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(objRecord)) {
+      result[key] = await resolveIncludes(value, baseDir, visited);
+    }
+    return result;
+  }
+
+  return obj;
+}
+
 export interface ParsedConfig {
   presets: Record<string, ThemePreset>;
   css: string;
@@ -33,6 +167,11 @@ async function getConfigMtime(): Promise<number> {
   }
   if (await exists(EXTERNAL_CONFIG_PATH)) {
     mtime = Math.max(mtime, (await stat(EXTERNAL_CONFIG_PATH)).mtimeMs);
+  }
+  for (const filePath of includedFiles) {
+    if (await exists(filePath)) {
+      mtime = Math.max(mtime, (await stat(filePath)).mtimeMs);
+    }
   }
   return mtime;
 }
@@ -91,14 +230,21 @@ async function loadConfig(): Promise<Record<string, unknown>> {
     throw new Error('Failed to load default config.yaml');
   }
 
+  const defaultsResolved = await resolveIncludes(defaults, path.dirname(DEFAULT_CONFIG_PATH));
+
   const external = await loadYAML(EXTERNAL_CONFIG_PATH);
   if (!external) {
     console.log('No external config found, using default config');
-    return defaults;
+    return defaultsResolved as Record<string, unknown>;
   }
 
+  const externalResolved = await resolveIncludes(external, path.dirname(EXTERNAL_CONFIG_PATH));
+
   console.log('Merging external config with defaults');
-  return mergeConfig(defaults, external);
+  return mergeConfig(
+    defaultsResolved as Record<string, unknown>,
+    externalResolved as Record<string, unknown>,
+  );
 }
 
 export async function getCached(): Promise<ParsedConfig> {
@@ -108,8 +254,10 @@ export async function getCached(): Promise<ParsedConfig> {
     if (configCache) {
       clearWidgetCache();
     }
+    includedFiles.clear();
 
     const rawConfig = await loadConfig();
+    const updatedMtime = await getConfigMtime();
 
     const rawPresets = rawConfig.presets;
     const presets =
@@ -126,7 +274,7 @@ export async function getCached(): Promise<ParsedConfig> {
 
     configCache = {
       data: { presets, css, pages },
-      mtime: currentMtime,
+      mtime: updatedMtime,
     };
   }
 
