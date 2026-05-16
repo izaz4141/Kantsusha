@@ -28,7 +28,8 @@ function deepMerge(target: unknown, source: unknown): unknown {
   if (Array.isArray(source)) return source;
   if (Array.isArray(target)) return source;
 
-  const result = { ...(target as Record<string, unknown>) };
+  const result =
+    typeof target === 'object' && target !== null ? { ...(target as Record<string, unknown>) } : {};
   for (const [key, value] of Object.entries(source as Record<string, unknown>)) {
     result[key] = deepMerge(result[key], value);
   }
