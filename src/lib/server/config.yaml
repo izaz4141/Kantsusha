@@ -67,6 +67,169 @@ pages:
                 sort: top
                 time: month
                 limit: 10
+          - type: services
+            title: Media
+            target: _blank
+            column: 3
+            services:
+              # - type: container
+              #   id: jellyfin
+              #   sockPath: tcp://socket-proxy:2375
+              #   name: Jellyfin
+              #   description: Media Player
+              #   url: https://jf.${SUBHOST}
+              #   icon: di:jellyfin.svg
+
+              # - type: container
+              #   id: immich-server
+              #   sockPath: tcp://socket-proxy:2375
+              #   name: Immich
+              #   description: Gallery
+              #   url: https://im.${SUBHOST}
+              #   icon: sh:immich
+
+              # - type: container
+              #   id: vaultwarden
+              #   sockPath: tcp://socket-proxy:2375
+              #   name: VaultWarden
+              #   description: Password Manager
+              #   url: https://vw.${SUBHOST}
+              #   icon: auto di:vaultwarden
+
+              - type: endpoint
+                name: Jellyfin1
+                description: Media Player
+                icon: di:jellyfin
+                url: https://jf.${SUBHOST}
+                target: _blank
+                statusCheck: true
+                statusCheckUrl: http://jellyfin:8096
+              - type: endpoint
+                name: Jellyfin2
+                description: Media Player
+                icon: di:jellyfin
+                url: https://jf.${SUBHOST}
+                target: _blank
+                statusCheck: true
+                statusCheckUrl: http://jellyfin:8096
+              - type: endpoint
+                name: Jellyfin3
+                description: Media Player
+                icon: di:jellyfin
+                url: https://jf.${SUBHOST}
+                target: _blank
+                statusCheck: true
+                statusCheckUrl: http://jellyfin:8096
+              - type: endpoint
+                name: Jellyfin4
+                description: Media Player
+                icon: di:jellyfin
+                url: https://jf.${SUBHOST}
+                target: _blank
+                statusCheck: true
+                statusCheckUrl: https://google.com
+
+      - size: 25%
+        widgets:
+          - type: calendar
+            icals:
+              - url: 'https://calendar.google.com/calendar/ical/id.indonesian%23holiday%40group.v.calendar.google.com/public/basic.ics'
+                limit: 50
+
+          - type: custom-api
+            title: Hourly Forecast
+            cache: 1h
+            options:
+              location: Yogyakarta
+            fetch:
+              geo:
+                method: get
+                url: 'https://geocoding-api.open-meteo.com/v1/search?name=${options.location}&count=1&language=en&format=json'
+                type: json
+              weather:
+                method: get
+                url: 'https://api.open-meteo.com/v1/forecast?latitude=${fetched.geo.results[0].latitude}&longitude=${fetched.geo.results[0].longitude}&hourly=temperature_2m,weathercode&forecast_days=3&timezone=auto'
+                type: json
+            template: |
+              <script>
+                const temps = fetched.weather.hourly.temperature_2m || [];
+                const codes = fetched.weather.hourly.weathercode || [];
+                const now = new Date().getHours();
+                const icons = {0:'☀️',1:'⛅',2:'☁️',3:'🌧️',45:'🌫️',48:'🌫️',51:'🌧️',53:'🌧️',55:'🌧️',61:'🌧️',63:'🌧️',65:'🌧️',71:'❄️',73:'❄️',75:'❄️',77:'❄️',80:'🌧️',81:'🌧️',82:'🌧️',95:'⛈️',96:'⛈️',99:'⛈️'};
+
+                async function updateWeather(location) {
+                  const container = document.getElementById('weather-container');
+                  if (!container) return;
+
+                  container.innerHTML = '<div style="padding:1rem;">Loading...</div>';
+
+                  try {
+                    const geoRes = await fetch('https://geocoding-api.open-meteo.com/v1/search?name=' + encodeURIComponent(location) + '&count=1&language=en&format=json');
+                    const geoData = await geoRes.json();
+
+                    if (!geoData.results || geoData.results.length === 0) {
+                      container.innerHTML = '<div style="padding:1rem;color:#ff6b6b;">Location not found</div>';
+                      return;
+                    }
+
+                    const { latitude, longitude } = geoData.results[0];
+
+                    const weatherRes = await fetch('https://api.open-meteo.com/v1/forecast?latitude=' + latitude + '&longitude=' + longitude + '&hourly=temperature_2m,weathercode&forecast_days=3&timezone=auto');
+                    const weatherData = await weatherRes.json();
+
+                    const newTemps = weatherData.hourly.temperature_2m || [];
+                    const newCodes = weatherData.hourly.weathercode || [];
+                    const now = new Date().getHours();
+                    const icons = {0:'☀️',1:'⛅',2:'☁️',3:'🌧️',45:'🌫️',48:'🌫️',51:'🌧️',53:'🌧️',55:'🌧️',61:'🌧️',63:'🌧️',65:'🌧️',71:'❄️',73:'❄️',75:'❄️',77:'❄️',80:'🌧️',81:'🌧️',82:'🌧️',95:'⛈️',96:'⛈️',99:'⛈️'};
+
+                    console.log('New temps:', newTemps);
+                    console.log('New codes:', newCodes);
+
+                    const html = newTemps.map((temp, i) => `
+                      <div class="weather-item ${i === now ? 'weather-now' : ''}">
+                        <div style="font-size:10px;opacity:0.7;">${i === now ? 'Now' : i + ':00'}</div>
+                        <div style="font-size:1.2rem;margin:4px 0;">${Math.floor(temp)}°</div>
+                        <div style="font-size:16px;">${icons[newCodes[i]] || '🌤️'}</div>
+                      </div>
+                    `).join('');
+
+                    console.log('New HTML:', html);
+                    container.innerHTML = html;
+                  } catch (err) {
+                    console.error('Error:', err);
+                    container.innerHTML = '<div style="padding:1rem;color:#ff6b6b;">Failed to fetch weather</div>';
+                  }
+                }
+              </script>
+              <style>
+                .weather-scroll::-webkit-scrollbar{display:none;}
+                .weather-scroll{-ms-overflow-style:none;scrollbar-width:none;}
+                .weather-now{background:rgba(255,255,255,0.05);border-radius:8px;}
+                .weather-item{min-width:60px;text-align:center;padding:0.5rem;}
+              </style>
+              <template>
+                <div style="display:flex;flex-direction:column;gap:0.5rem;">
+                  <div style="display:flex;align-items:center;gap:0.5rem;">
+                    <span style="font-size:12px;opacity:0.7;">Location:</span>
+                    <input
+                      id="location-input"
+                      value="{options.location}"
+                      style="background:transparent;border:1px solid rgba(255,255,255,0.2);color:inherit;padding:2px 6px;border-radius:4px;font-size:12px;width:120px;"
+                      onkeydown="if(event.key==='Enter'){updateWeather(this.value)}"
+                    />
+                  </div>
+                  <div id="weather-container" style="display:flex;overflow-x:auto;" class="weather-scroll">
+                    {#each temps as temp, i}
+                      <div class="weather-item {i === now ? 'weather-now' : ''}">
+                        <div style="font-size:10px;opacity:0.7;">{i === now ? 'Now' : i + ':00'}</div>
+                        <div style="font-size:1.2rem;margin:4px 0;">{Math.floor(temp)}°</div>
+                        <div style="font-size:16px;">{icons[codes[i]] || '🌤️'}</div>
+                      </div>
+                    {/each}
+                  </div>
+                </div>
+              </template>
+
   - name: About
     layout: slim
     columns:

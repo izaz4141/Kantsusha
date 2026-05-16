@@ -65,7 +65,8 @@ export interface FetchedData {
 export interface CustomApiData {
   fetched: Record<string, FetchedData>;
   html: string;
-  css: string;
+  style: string;
+  script: string;
 }
 
 export type BaseWidgetData =

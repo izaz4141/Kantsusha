@@ -14,6 +14,10 @@ declare global {
     // interface PageState {}
     // interface Platform {}
   }
+
+  interface Window {
+    __customApi: Record<string, unknown>;
+  }
 }
 
 export {};
