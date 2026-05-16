@@ -35,7 +35,11 @@ function deepMerge(target: unknown, source: unknown): unknown {
   return result;
 }
 
-async function resolveIncludes(obj: unknown, baseDir: string): Promise<unknown> {
+async function resolveIncludes(
+  obj: unknown,
+  baseDir: string,
+  visited: Set<string> = new Set(),
+): Promise<unknown> {
   if (obj === null || obj === undefined) return obj;
 
   if (Array.isArray(obj)) {
@@ -52,16 +56,27 @@ async function resolveIncludes(obj: unknown, baseDir: string): Promise<unknown> 
           }
 
           const resolvedPath = path.resolve(baseDir, includePath);
+
+          if (visited.has(resolvedPath)) {
+            throw new Error(`Circular $include detected: ${includePath}`);
+          }
+          visited.add(resolvedPath);
           includedFiles.add(resolvedPath);
 
           const included = await loadYAML(resolvedPath);
           if (included === null) {
+            visited.delete(resolvedPath);
             console.warn(`Warning: Failed to load included file: ${includePath}`);
             resolved.push(item);
             continue;
           }
 
-          const includedResolved = await resolveIncludes(included, path.dirname(resolvedPath));
+          const includedResolved = await resolveIncludes(
+            included,
+            path.dirname(resolvedPath),
+            visited,
+          );
+          visited.delete(resolvedPath);
 
           const { $include, ...overrides } = itemObj;
           if (Object.keys(overrides).length > 0) {
@@ -80,10 +95,10 @@ async function resolveIncludes(obj: unknown, baseDir: string): Promise<unknown> 
             }
           }
         } else {
-          resolved.push(await resolveIncludes(item, baseDir));
+          resolved.push(await resolveIncludes(item, baseDir, visited));
         }
       } else {
-        resolved.push(await resolveIncludes(item, baseDir));
+        resolved.push(await resolveIncludes(item, baseDir, visited));
       }
     }
     return resolved;
@@ -99,15 +114,22 @@ async function resolveIncludes(obj: unknown, baseDir: string): Promise<unknown> 
       }
 
       const resolvedPath = path.resolve(baseDir, includePath);
+
+      if (visited.has(resolvedPath)) {
+        throw new Error(`Circular $include detected: ${includePath}`);
+      }
+      visited.add(resolvedPath);
       includedFiles.add(resolvedPath);
 
       const included = await loadYAML(resolvedPath);
       if (included === null) {
+        visited.delete(resolvedPath);
         console.warn(`Warning: Failed to load included file: ${includePath}`);
         return obj;
       }
 
-      const includedResolved = await resolveIncludes(included, path.dirname(resolvedPath));
+      const includedResolved = await resolveIncludes(included, path.dirname(resolvedPath), visited);
+      visited.delete(resolvedPath);
 
       const { $include, ...overrides } = objRecord;
       if (Object.keys(overrides).length > 0) {
@@ -121,7 +143,7 @@ async function resolveIncludes(obj: unknown, baseDir: string): Promise<unknown> 
 
     const result: Record<string, unknown> = {};
     for (const [key, value] of Object.entries(objRecord)) {
-      result[key] = await resolveIncludes(value, baseDir);
+      result[key] = await resolveIncludes(value, baseDir, visited);
     }
     return result;
   }
