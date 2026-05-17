@@ -22,6 +22,8 @@ export const DANGEROUS_GLOBALS = [
   '__filename',
   'import',
   'import.meta',
+  'constructor',
+  '__proto__',
 ];
 
 export const SAFE_GLOBALS: Record<string, unknown> = {
@@ -58,8 +60,10 @@ export function evaluateValue(expr: string, context: Record<string, unknown>): u
   const values = Object.values(context);
   const func = new Function(...keys, `"use strict"; return (${expr});`);
   try {
-    return func(...values);
-  } catch {
+    const result = func(...values);
+    return result;
+  } catch (e) {
+    console.error('[evaluateValue] expr:', expr, 'ERROR:', e);
     return undefined;
   }
 }
@@ -77,8 +81,22 @@ export function substituteVariables(content: string, context: Record<string, unk
     const lineStart = content.lastIndexOf('\n', offset - 1);
     const lineBefore = content.slice(lineStart + 1, offset);
     if (/on\w+=/i.test(lineBefore.trim())) {
-      const transformed = expr.replace(/^([a-zA-Z_$][a-zA-Z0-9_$]*)/, 'window.__customApi.$1');
-      return match.replace(expr, transformed);
+      const firstWord = expr
+        .split(';')[0]
+        .trim()
+        .match(/^[a-zA-Z_$][a-zA-Z0-9_$]*/)?.[0];
+      if (firstWord) {
+        const customContext = { ...context };
+        for (const key of Object.keys(SAFE_GLOBALS)) {
+          delete customContext[key];
+        }
+        delete customContext['options'];
+        if (firstWord in customContext) {
+          const transformed = expr.replace(/^([a-zA-Z_$][a-zA-Z0-9_$]*)/, 'window.__customApi.$1');
+          return match.replace(expr, transformed);
+        }
+        return match;
+      }
     }
     return evaluateExpression(expr, context);
   });
@@ -150,7 +168,13 @@ export function evaluateScript(
   const wrappedScript = `"use strict"; ${script}; ${returnStmt}`;
 
   const func = new Function(...Object.keys(safeContext), wrappedScript);
-  const result = func(...Object.values(safeContext));
+  let result: unknown;
+  try {
+    result = func(...Object.values(safeContext));
+  } catch (e) {
+    console.error('[evaluateScript] Error executing script:', e);
+    return {};
+  }
 
   let vars: Record<string, unknown> = {};
   if (result && typeof result === 'object') {
@@ -231,7 +255,7 @@ export function tokenizeTemplate(html: string): ParsedBlock[] {
       continue;
     }
 
-    const constMatch = remaining.match(/^\s*\{@const\s+(\w+)\s*=\s*(.+?)\}/);
+    const constMatch = remaining.match(/^\s*\{@const\s+(\w+)\s*=\s*(.+)\}/);
     if (constMatch) {
       const matchIndex = constMatch.index ?? 0;
       blocks.push({ type: 'text', content: remaining.slice(0, matchIndex) });
@@ -360,10 +384,10 @@ function processBlocks(
 
     if (block.type === 'const') {
       try {
-        const value = evaluateExpression(block.constExpr!, context);
+        const value = evaluateValue(block.constExpr!, context);
         context[block.constName!] = value;
       } catch (e) {
-        console.error(e);
+        console.error('[@const ERROR]', block.constName, e);
       }
       i++;
       continue;
@@ -380,14 +404,17 @@ function processBlocks(
         items = [];
       }
 
-      if (!Array.isArray(items) || items.length === 0) {
+      const isArray = Array.isArray(items);
+      const isSetOrMap = items instanceof Set || items instanceof Map;
+      if (!isArray && !isSetOrMap) {
         i++;
         continue;
       }
 
-      for (let idx = 0; idx < items.length; idx++) {
+      let idx = 0;
+      for (const item of items as Iterable<unknown>) {
         const iterContext: Record<string, unknown> = { ...context };
-        iterContext[block.eachVar!] = items[idx];
+        iterContext[block.eachVar!] = item;
         if (block.eachIndex) {
           iterContext[block.eachIndex] = idx;
         }
@@ -395,6 +422,7 @@ function processBlocks(
         if (innerBlocks.length > 0) {
           result += processBlocks(innerBlocks, iterContext, evaluate);
         }
+        idx++;
       }
 
       i++;
@@ -407,24 +435,24 @@ function processBlocks(
       let selectedBlocks: ParsedBlock[] | null = null;
 
       try {
-        const conditionResult = evaluateExpression(block.condition!, context);
+        const conditionResult = evaluateValue(block.condition!, context);
         if (conditionResult) {
           selectedBlocks = ifBlocks;
         }
       } catch (e) {
-        console.error(e);
+        console.error('[If block ERROR]', e);
       }
 
       if (!selectedBlocks) {
         for (const elseIf of elseIfs) {
           try {
-            const result2 = evaluateExpression(elseIf.condition, context);
+            const result2 = evaluateValue(elseIf.condition, context);
             if (result2) {
               selectedBlocks = tokenizeTemplate(elseIf.content);
               break;
             }
           } catch (e) {
-            console.error(e);
+            console.error('[If block ERROR]', e);
           }
         }
       }
@@ -447,7 +475,7 @@ function processBlocks(
 
       let showUnless = false;
       try {
-        const conditionResult = evaluateExpression(block.condition!, context);
+        const conditionResult = evaluateValue(block.condition!, context);
         if (!conditionResult) {
           showUnless = true;
         }
@@ -510,7 +538,6 @@ export function compileTemplate(
     ...SAFE_GLOBALS,
     ...additionalContext,
   };
-
   return processTemplate(parsed.html, context, true);
 }
 
