@@ -74,8 +74,9 @@ export function evaluateExpression(expr: string, context: Record<string, unknown
 export function substituteVariables(content: string, context: Record<string, unknown>): string {
   const exprPattern = /\{(?!\/?#|\{|\/|:)([^{}]+)\}/g;
   return content.replace(exprPattern, (match, expr, offset) => {
-    const before = content.slice(0, offset);
-    if (/on\w+=/i.test(before)) {
+    const lineStart = content.lastIndexOf('\n', offset - 1);
+    const lineBefore = content.slice(lineStart + 1, offset);
+    if (/on\w+=/i.test(lineBefore.trim())) {
       const transformed = expr.replace(/^([a-zA-Z_$][a-zA-Z0-9_$]*)/, 'window.__customApi.$1');
       return match.replace(expr, transformed);
     }
