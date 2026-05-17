@@ -1,0 +1,496 @@
+- type: custom-api
+  title: Hourly Forecast
+  cache: 3h
+  options:
+    location: Yogyakarta, Indonesia
+    temp_unit: celsius
+    numBefore: 3
+    numAfter: 36
+    color_blue: '#46F0F0'
+    color_clear: '#FFA500'
+    color_partly: '#EBE387'
+    color_cloud: '#A9A9A9'
+    color_smog: '#D3D3D3'
+    color_drizzle: '#5F9EA0'
+    color_rain: '#4682B4'
+    color_freezing_rain: '#B0E0E6'
+    color_snow: '#FFFFFF'
+    color_thunderstorm: '#696969'
+    color_other: '#FFFFFF'
+  fetch:
+    geo:
+      method: get
+      url: 'https://geocoding-api.open-meteo.com/v1/search?name=${options.location}&count=1&language=en&format=json'
+      type: json
+    weather:
+      method: get
+      url: 'https://api.open-meteo.com/v1/forecast?latitude=${fetched.geo.results[0].latitude}&longitude=${fetched.geo.results[0].longitude}&temperature_unit=${options.temp_unit}&hourly=temperature_2m,weathercode&forecast_days=3&timezone=auto'
+      type: json
+  template: |
+    <script>
+      const icons = {
+        0: { icon: 'nf-weather-day_sunny', color: options.color_clear, desc: 'Clear sky' },
+        1: { icon: 'nf-weather-day_cloudy_gusts', color: options.color_partly, desc: 'Mainly clear' },
+        2: { icon: 'nf-weather-day_cloudy', color: options.color_partly, desc: 'Partly cloudy' },
+        3: { icon: 'nf-weather-cloudy', color: options.color_cloud, desc: 'Overcast' },
+        45: { icon: 'nf-weather-fog', color: options.color_smog, desc: 'Foggy' },
+        48: { icon: 'nf-weather-fog', color: options.color_smog, desc: 'Foggy' },
+        51: { icon: 'nf-weather-sprinkle', color: options.color_drizzle, desc: 'Light drizzle' },
+        53: { icon: 'nf-weather-rain_mix', color: options.color_drizzle, desc: 'Drizzle' },
+        55: { icon: 'nf-weather-rain_mix', color: options.color_drizzle, desc: 'Drizzle' },
+        61: { icon: 'nf-weather-rain', color: options.color_rain, desc: 'Slight rain' },
+        63: { icon: 'nf-weather-showers', color: options.color_rain, desc: 'Moderate rain' },
+        65: { icon: 'nf-weather-rain_wind', color: options.color_rain, desc: 'Heavy rain' },
+        66: { icon: 'nf-weather-sleet', color: options.color_freezing_rain, desc: 'Freezing rain' },
+        67: { icon: 'nf-weather-sleet', color: options.color_freezing_rain, desc: 'Freezing rain' },
+        71: { icon: 'nf-weather-snow', color: options.color_snow, desc: 'Slight snow fall' },
+        73: { icon: 'nf-weather-snow_wind', color: options.color_snow, desc: 'Heavy snow fall' },
+        75: { icon: 'nf-weather-snow_wind', color: options.color_snow, desc: 'Heavy snow fall' },
+        77: { icon: 'nf-weather-snowflake_cold', color: options.color_snow, desc: 'Snow grains' },
+        80: { icon: 'nf-weather-day_showers', color: options.color_rain, desc: 'Rain showers' },
+        81: { icon: 'nf-weather-day_showers', color: options.color_rain, desc: 'Rain showers' },
+        82: { icon: 'nf-weather-day_showers', color: options.color_rain, desc: 'Rain showers' },
+        85: { icon: 'nf-weather-snow', color: options.color_snow, desc: 'Slight snow fall' },
+        86: { icon: 'nf-weather-snow_wind', color: options.color_snow, desc: 'Heavy snow fall' },
+        95: { icon: 'nf-weather-thunderstorm', color: options.color_thunderstorm, desc: 'Thunderstorm' },
+        96: { icon: 'nf-weather-storm_showers', color: options.color_thunderstorm, desc: 'Thunderstorm with hail' },
+        99: { icon: 'nf-weather-storm_showers', color: options.color_thunderstorm, desc: 'Thunderstorm with hail' }
+      };
+
+      function computeChart() {
+        const hourly = fetched.weather.hourly;
+        if (!hourly || !hourly.time) return { svg: '', columns: '', temps: [], dates: [], codes: [] };
+
+        const numBefore = options.numBefore || 3;
+        const numAfter = options.numAfter || 36;
+        const now = new Date();
+        const serverHour = now.getHours();
+
+        const startIdx = Math.max(0, serverHour - numBefore);
+        const endIdx = serverHour + numAfter;
+
+        const times = hourly.time.slice(startIdx, endIdx);
+        const temps = hourly.temperature_2m.slice(startIdx, endIdx);
+        const codes = hourly.weathercode.slice(startIdx, endIdx);
+
+        if (temps.length === 0) return { svg: '', columns: '', temps: [], dates: [], codes: [] };
+
+        const validTemps = temps.filter(t => typeof t === 'number');
+        const minTemp = validTemps.length > 0 ? Math.min(...validTemps) - 2 : 0;
+        const maxTemp = validTemps.length > 0 ? Math.max(...validTemps) + 3 : 30;
+        const tempRange = maxTemp - minTemp;
+
+        const colWidth = 65;
+        const chartWidth = temps.length * colWidth;
+        const chartHeight = 100;
+        const scaleY = (val) => chartHeight - ((val - minTemp) / tempRange * (chartHeight * 0.8));
+
+        let pathD = '';
+        let fillD = '';
+        temps.forEach((t, i) => {
+          const x = i * colWidth + colWidth / 2;
+          const y = scaleY(t);
+          pathD += (i === 0 ? 'M' : 'L') + x + ',' + y + ' ';
+          fillD += (i === 0 ? 'M' : 'L') + x + ',' + y + ' ';
+        });
+        fillD += 'L' + ((temps.length - 1) * colWidth + colWidth / 2) + ',' + chartHeight + ' L' + (colWidth / 2) + ',' + chartHeight + ' Z';
+
+        const svgPath = `<path d="${fillD}" fill="rgba(70, 240, 240, 0.05)" /><path d="${pathD}" stroke="${options.color_blue}" stroke-width="1.5" fill="none" opacity="0.6" />`;
+
+        let tempLabels = '';
+        temps.forEach((t, i) => {
+          const x = i * colWidth + colWidth / 2;
+          const y = scaleY(t) - 10;
+          tempLabels += `<text x="${x}" y="${y}" fill="var(--color-text-highlight)" font-size="10" font-weight="500" text-anchor="middle" opacity="0.8">${Math.round(t)}°</text>`;
+        });
+
+        const columns = times.map((time, i) => {
+          const isCurrent = i === numBefore;
+          const date = new Date(time);
+          const hour = date.getHours();
+          const timeStr = isCurrent ? 'Now' : String(hour).padStart(2, '0') + ':00';
+          const code = typeof codes[i] === 'number' ? codes[i] : 0;
+          const iconData = icons[code] || { icon: 'nf-weather-na', color: options.color_other, desc: 'Unknown' };
+
+          return `<div class="hour-col ${isCurrent ? 'is-now' : ''}" style="position: relative; z-index: 1; width: 65px; display: flex; flex-direction: column; align-items: center;">
+            <p style="margin: 0 0 10px 0; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; color: ${isCurrent ? options.color_blue : 'var(--color-text-subdue)'}; font-weight: ${isCurrent ? '700' : '400'}; opacity: 0.8;">${timeStr}</p>
+            <i class="nf ${iconData.icon}" title="${iconData.desc}" style="font-size: 20px; color: ${iconData.color}; margin-bottom: 4px; cursor: help; opacity: 0.9;"></i>
+            <div style="flex-grow: 1;"></div>
+          </div>`;
+        }).join('');
+
+        return { svg: svgPath + tempLabels, columns, temps, dates: times, codes };
+      }
+
+      async function updateWeather(location) {
+        const container = document.getElementById('weather-widget');
+        if (!container) return;
+
+        container.innerHTML = '<div style="padding:1rem;display:flex;justify-content:center;align-items:center;gap:8px;"><i class="nf nf-fa-spinner loading-spinner"></i><span style="color:var(--color-text-muted);">Loading...</span></div>';
+
+        try {
+          const geoRes = await fetch('https://geocoding-api.open-meteo.com/v1/search?name=' + encodeURIComponent(location) + '&count=1&language=en&format=json');
+          const geoData = await geoRes.json();
+
+          if (!geoData.results || geoData.results.length === 0) {
+            container.innerHTML = '<div style="padding:1rem;color:#ff6b6b;">Location not found</div>';
+            return;
+          }
+
+          const { latitude, longitude } = geoData.results[0];
+          const tempUnit = options.temp_unit || 'celsius';
+
+          const weatherRes = await fetch('https://api.open-meteo.com/v1/forecast?latitude=' + latitude + '&longitude=' + longitude + '&temperature_unit=' + tempUnit + '&hourly=temperature_2m,weathercode&forecast_days=3&timezone=auto');
+          const weatherData = await weatherRes.json();
+
+          window.__weatherData = {
+            location: location,
+            geo: geoData,
+            weather: weatherData
+          };
+
+          renderWidget();
+        } catch (err) {
+          console.error('Error:', err);
+          container.innerHTML = '<div style="padding:1rem;color:#ff6b6b;">Failed to fetch weather</div>';
+        }
+      }
+
+      function renderWidget() {
+        const data = window.__weatherData;
+        const currentLocation = (data && data.location) || options.location;
+        if (!data || !data.weather || !data.weather.hourly) {
+          document.getElementById('weather-widget').innerHTML = '<div style="padding:1rem;">No data</div>';
+          return;
+        }
+
+        const hourly = data.weather.hourly;
+        const times = hourly.time;
+        const temps = hourly.temperature_2m;
+        const codes = hourly.weathercode;
+
+        const numBefore = options.numBefore || 3;
+        const numAfter = options.numAfter || 36;
+        const now = new Date();
+        const serverHour = now.getHours();
+
+        const startIdx = Math.max(0, serverHour - numBefore);
+        const endIdx = serverHour + numAfter;
+
+        const slicedTimes = times.slice(startIdx, endIdx);
+        const slicedTemps = temps.slice(startIdx, endIdx);
+        const slicedCodes = codes.slice(startIdx, endIdx);
+
+        if (slicedTemps.length === 0) return;
+
+        const validTemps = slicedTemps.filter(t => typeof t === 'number');
+        const minTemp = validTemps.length > 0 ? Math.min(...validTemps) - 2 : 0;
+        const maxTemp = validTemps.length > 0 ? Math.max(...validTemps) + 3 : 30;
+        const tempRange = maxTemp - minTemp;
+
+        const colWidth = 65;
+        const chartWidth = slicedTemps.length * colWidth;
+        const chartHeight = 100;
+
+        const scaleY = (val) => chartHeight - ((val - minTemp) / tempRange * (chartHeight * 0.8));
+
+        let pathD = '';
+        let fillD = '';
+        let tempLabels = '';
+
+        slicedTemps.forEach((t, i) => {
+          const x = i * colWidth + colWidth / 2;
+          const y = scaleY(t);
+          pathD += (i === 0 ? 'M' : 'L') + x + ',' + y + ' ';
+          fillD += (i === 0 ? 'M' : 'L') + x + ',' + y + ' ';
+
+          const labelY = scaleY(t) - 10;
+          tempLabels += '<text class="temp-label" x="' + x + '" y="' + labelY + '">' + Math.round(t) + '°</text>';
+        });
+
+        fillD += 'L' + ((slicedTemps.length - 1) * colWidth + colWidth / 2) + ',' + chartHeight + ' L' + (colWidth / 2) + ',' + chartHeight + ' Z';
+
+        const svgHtml = '<svg width="' + chartWidth + '" height="60%" viewBox="0 0 ' + chartWidth + ' 100" preserveAspectRatio="none" style="position: absolute; bottom: 0; left: 0; overflow: visible; z-index: 0; pointer-events: none;"><path d="' + fillD + '" fill="rgba(70, 240, 240, 0.05)" /><path d="' + pathD + '" stroke="' + options.color_blue + '" stroke-width="1.5" fill="none" opacity="0.6" />' + tempLabels + '</svg>';
+
+        const columnsHtml = slicedTimes.map((time, i) => {
+          const isCurrent = i === numBefore;
+          const date = new Date(time);
+          const hour = date.getHours();
+          const timeStr = isCurrent ? 'Now' : (hour < 10 ? '0' + hour : hour) + ':00';
+          const code = typeof slicedCodes[i] === 'number' ? slicedCodes[i] : 0;
+          const iconData = icons[code] || { icon: 'nf-weather-na', color: options.color_other, desc: 'Unknown' };
+
+          return '<div class="hour-col ' + (isCurrent ? 'is-now' : '') + '"><p class="time-label" style="color: ' + (isCurrent ? options.color_blue : 'var(--color-text-subdue)') + '; font-weight: ' + (isCurrent ? '700' : '400') + ';">' + timeStr + '</p><i class="nf ' + iconData.icon + ' weather-icon" title="' + iconData.desc + '" style="color: ' + iconData.color + ';"></i><div class="flex-spacer"></div></div>';
+        }).join('');
+
+        const widgetHtml = `
+          <link rel="stylesheet" href="https://www.nerdfonts.com/assets/css/webfont.css">
+          <div class="widget-container">
+            <div class="location-header">
+              <div id="loc-display" class="location-wrapper" onclick="this.style.display='none'; const el=document.getElementById('loc-edit'); el.style.display='block'; el.focus(); el.setSelectionRange(0, el.value.length);">
+                <i class="nf nf-fa-map_marker search-icon"></i>
+                <span class="location-text">${currentLocation}</span>
+              </div>
+              <input type="text" id="loc-edit" class="location-input" style="display: none;" value="${currentLocation}" onkeydown="if(event.key==='Enter' && this.value.trim()!==''){updateWeather(this.value.trim())}else if(event.key==='Escape'){this.style.display='none';document.getElementById('loc-display').style.display='flex';}" onblur="this.style.display='none';document.getElementById('loc-display').style.display='flex';">
+            </div>
+            <button class="scroll-btn-floating" style="left: 0;" onclick="document.getElementById('weather-track').scrollBy({left: -195, behavior: 'smooth'})">
+              <i class="nf nf-fa-chevron_left scroll-icon"></i>
+            </button>
+            <button class="scroll-btn-floating" style="right: 0;" onclick="document.getElementById('weather-track').scrollBy({left: 195, behavior: 'smooth'})">
+              <i class="nf nf-fa-chevron_right scroll-icon"></i>
+            </button>
+            <div id="weather-track" class="hide-scroll" style="display: flex; overflow-x: auto; scroll-behavior: smooth; width: 100%; height: calc(100% - 4.5rem);">
+              <div style="display: flex; position: relative; width: max-content; height: 100%;">
+                ${svgHtml}
+                ${columnsHtml}
+              </div>
+            </div>
+          </div>
+        `;
+
+        document.getElementById('weather-widget').innerHTML = widgetHtml;
+      }
+    </script>
+
+    <style>
+      .hide-scroll::-webkit-scrollbar { display: none; }
+      .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+
+      .widget-container {
+        position: relative;
+        width: calc(100% + 2rem);
+        height: 18.5rem;
+        margin: -1rem;
+        overflow: hidden;
+        background: var(--color-background-subtle);
+      }
+
+      .location-header {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1.2rem 1rem 0.5rem 1rem;
+        z-index: 110;
+        position: relative;
+      }
+
+      .location-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+        padding: 6px 16px;
+        border-radius: 100px;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        backdrop-filter: blur(10px);
+      }
+
+      .location-wrapper:hover {
+        background: rgba(255, 255, 255, 0.08);
+        border-color: rgba(255, 255, 255, 0.15);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      }
+
+      .location-text {
+        font-size: 0.85rem;
+        font-weight: 500;
+        letter-spacing: 0.3px;
+        color: var(--color-text-highlight);
+        text-transform: uppercase;
+        opacity: 0.9;
+      }
+
+      .location-input {
+        background: rgba(15, 15, 15, 0.8);
+        border: 1px solid {options.color_blue};
+        color: white;
+        border-radius: 100px;
+        padding: 6px 20px;
+        font-size: 0.85rem;
+        width: 220px;
+        outline: none;
+        text-align: center;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 0 15px rgba(0,0,0,0.3);
+        animation: fadeIn 0.2s ease;
+      }
+
+        @keyframes fadeIn {
+          from { opacity: 0; transform: scale(0.95); }
+          to { opacity: 1; transform: scale(1); }
+        }
+
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+
+        .loading-spinner {
+          font-size: 16px;
+          animation: spin 1s linear infinite;
+          color: var(--color-text-muted);
+        }
+
+      .search-icon {
+        font-size: 0.75rem;
+        color: {options.color_blue};
+        opacity: 0.7;
+      }
+
+      .scroll-btn-floating {
+        position: absolute;
+        top: 60%;
+        transform: translateY(-50%);
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: white;
+        font-size: 18px;
+        cursor: pointer;
+        width: 36px;
+        height: 36px;
+        border-radius: 50% !important;
+        z-index: 100;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+        backdrop-filter: blur(8px);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        margin: 0 10px;
+      }
+
+      .scroll-btn-floating:hover {
+        background: rgba(255, 255, 255, 0.15);
+        border-color: {options.color_blue};
+        transform: translateY(-50%) scale(1.1);
+      }
+
+      .widget-container:hover .scroll-btn-floating { opacity: 1; }
+
+      .hour-col {
+        min-width: 65px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        position: relative;
+        padding: 12px 0;
+      }
+      .is-now { background: rgba(255,255,255,0.02); }
+
+      .scroll-icon {
+        font-size: 12px;
+        opacity: 0.8;
+      }
+
+      .temp-label {
+        font-size: 10px;
+        font-weight: 500;
+        text-anchor: middle;
+        opacity: 0.8;
+        fill: var(--color-text-muted);
+      }
+
+      .time-label {
+        margin: 0 0 10px 0;
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        opacity: 0.8;
+      }
+
+      .weather-icon {
+        font-size: 20px;
+        margin-bottom: 4px;
+        cursor: help;
+        opacity: 0.9;
+      }
+
+      .flex-spacer {
+        flex-grow: 1;
+      }
+    </style>
+
+    <template>
+      {@const numBefore = options.numBefore || 3}
+      {@const numAfter = options.numAfter || 36}
+      {@const hourly = fetched.weather.hourly}
+      {@const times = hourly.time}
+      {@const temps = hourly.temperature_2m}
+      {@const codes = hourly.weathercode}
+      {@const validTemps = temps.filter(t => typeof t === 'number')}
+      {@const minTemp = validTemps.length > 0 ? Math.min(...validTemps) - 2 : 0}
+      {@const maxTemp = validTemps.length > 0 ? Math.max(...validTemps) + 3 : 30}
+      {@const tempRange = maxTemp - minTemp}
+      {@const now = new Date().getHours()}
+      {@const startIdx = Math.max(0, now - numBefore)}
+      {@const endIdx = now + numAfter}
+      {@const slicedTimes = times.slice(startIdx, endIdx)}
+      {@const slicedTemps = temps.slice(startIdx, endIdx)}
+      {@const slicedCodes = codes.slice(startIdx, endIdx)}
+      {@const colWidth = 65}
+      {@const chartWidth = slicedTemps.length * colWidth}
+      {@const chartHeight = 100}
+      {@const scaleY = (val) => chartHeight - ((val - minTemp) / tempRange * (chartHeight * 0.8))}
+      {@const firstTemp = slicedTemps[0]}
+      {@const lastTemp = slicedTemps[slicedTemps.length - 1]}
+      {@const pathD = 'M0,' + scaleY(firstTemp) + ' ' + slicedTemps.map((t, i) => (i === 0 ? 'L' : '') + (i * colWidth + colWidth / 2) + ',' + scaleY(t)).join(' ') + ' L' + chartWidth + ',' + scaleY(lastTemp)}
+      {@const fillD = pathD + ' L' + chartWidth + ',' + chartHeight + ' L0,' + chartHeight + ' Z'}
+
+      <link rel="stylesheet" href="https://www.nerdfonts.com/assets/css/webfont.css">
+
+      <div class="widget-container" id="weather-widget">
+        <div class="location-header">
+          <div id="loc-display" class="location-wrapper" onclick="this.style.display='none'; const el=document.getElementById('loc-edit'); el.style.display='block'; el.focus(); el.setSelectionRange(0, el.value.length);">
+            <i class="nf nf-fa-map_marker search-icon"></i>
+            <span class="location-text">{options.location}</span>
+          </div>
+
+          <input type="text" id="loc-edit" class="location-input" style="display: none;"
+                 value="{options.location}"
+                 onkeydown="if(event.key==='Enter' && this.value.trim()!==''){updateWeather(this.value.trim())}else if(event.key==='Escape'){this.style.display='none';document.getElementById('loc-display').style.display='flex';}"
+                 onblur="this.style.display='none';document.getElementById('loc-display').style.display='flex';">
+        </div>
+
+        <button class="scroll-btn-floating" style="left: 0;" onclick="document.getElementById('weather-track').scrollBy({left: -195, behavior: 'smooth'})">
+          <i class="nf nf-fa-chevron_left scroll-icon"></i>
+        </button>
+        <button class="scroll-btn-floating" style="right: 0;" onclick="document.getElementById('weather-track').scrollBy({left: 195, behavior: 'smooth'})">
+          <i class="nf nf-fa-chevron_right scroll-icon"></i>
+        </button>
+
+        <div id="weather-track" class="hide-scroll" style="display: flex; overflow-x: auto; scroll-behavior: smooth; width: 100%; height: calc(100% - 4.5rem);">
+          <div style="display: flex; position: relative; width: max-content; height: 100%;">
+
+            <svg width="{chartWidth}" height="60%" viewBox="0 0 {chartWidth} {chartHeight}" preserveAspectRatio="none" style="position: absolute; bottom: 0; left: 0; overflow: visible; z-index: 0; pointer-events: none;">
+              <path d="{fillD}" fill="rgba(70, 240, 240, 0.05)" />
+              <path d="{pathD}" stroke="{options.color_blue}" stroke-width="1.5" fill="none" opacity="0.6" />
+              {#each slicedTemps as t, i}
+                <text class="temp-label" x="{i * colWidth + colWidth / 2}" y="{scaleY(t) - 10}">{Math.round(t)}°</text>
+              {/each}
+            </svg>
+
+            {#each slicedTimes as time, i}
+              {@const isCurrent = i === numBefore}
+              {@const date = new Date(time)}
+              {@const hour = date.getHours()}
+              {@const timeStr = isCurrent ? 'Now' : (hour < 10 ? '0' + hour : String(hour)) + ':00'}
+              {@const code = typeof slicedCodes[i] === 'number' ? slicedCodes[i] : 0}
+              {@const iconData = {0:'nf-weather-day_sunny',1:'nf-weather-day_cloudy_gusts',2:'nf-weather-day_cloudy',3:'nf-weather-cloudy',45:'nf-weather-fog',48:'nf-weather-fog',51:'nf-weather-sprinkle',53:'nf-weather-rain_mix',55:'nf-weather-rain_mix',61:'nf-weather-rain',63:'nf-weather-showers',65:'nf-weather-rain_wind',66:'nf-weather-sleet',67:'nf-weather-sleet',71:'nf-weather-snow',73:'nf-weather-snow_wind',75:'nf-weather-snow_wind',77:'nf-weather-snowflake_cold',80:'nf-weather-day_showers',81:'nf-weather-day_showers',82:'nf-weather-day_showers',85:'nf-weather-snow',86:'nf-weather-snow_wind',95:'nf-weather-thunderstorm',96:'nf-weather-storm_showers',99:'nf-weather-storm_showers'}[code] || 'nf-weather-na'}
+              {@const iconColor = code === 0 ? options.color_clear : code <= 2 ? options.color_partly : code <= 3 ? options.color_cloud : code <= 48 ? options.color_smog : code <= 55 ? options.color_drizzle : code <= 67 ? options.color_rain : code <= 77 ? options.color_snow : code <= 82 ? options.color_rain : code <= 86 ? options.color_snow : options.color_thunderstorm}
+              {@const iconDesc = code === 0 ? 'Clear sky' : code === 1 ? 'Mainly clear' : code === 2 ? 'Partly cloudy' : code === 3 ? 'Overcast' : code <= 48 ? 'Foggy' : code <= 55 ? 'Drizzle' : code <= 67 ? 'Rain' : code <= 77 ? 'Snow' : code <= 82 ? 'Rain showers' : code <= 86 ? 'Snow showers' : 'Thunderstorm'}
+              <div class="hour-col {isCurrent ? 'is-now' : ''}" style="position: relative; z-index: 1; width: 65px; display: flex; flex-direction: column; align-items: center;">
+                <p class="time-label" style="color: {isCurrent ? options.color_blue : 'var(--color-text-subdue)'}; font-weight: {isCurrent ? '700' : '400'};">
+                  {timeStr}
+                </p>
+                <i class="nf {iconData} weather-icon" title="{iconDesc}" style="color: {iconColor};"></i>
+                <div class="flex-spacer"></div>
+              </div>
+            {/each}
+          </div>
+        </div>
+      </div>
+    </template>
