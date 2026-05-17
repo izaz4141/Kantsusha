@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import WidgetRenderer from './WidgetRenderer.svelte';
+  import PulseLoader from '$lib/components/shared/PulseLoader.svelte';
   import { fetchURL } from '$lib/utils/network';
   import type { TabbedData, AnyWidgetInfo } from '$lib/types/widget.data';
 
@@ -45,12 +46,13 @@
 </script>
 
 {#if loading}
-  <div class="flex items-center justify-center rounded-lg border border-border bg-surface p-4">
-    <span class="text-text-muted">Loading tabs...</span>
+  <div class="flex items-center justify-center rounded-lg border border-border bg-surface">
+    <PulseLoader message="Loading tabs..." />
   </div>
 {:else if error}
-  <div class="flex items-center justify-center rounded-lg border border-border bg-surface p-4">
-    <span class="text-error">{error}</span>
+  <div class="flex items-center justify-center gap-2 rounded-lg border border-error/30 bg-error/10 p-4">
+    <span class="text-error">⚠</span>
+    <span class="text-error text-sm">{error}</span>
   </div>
 {:else if tabData}
   <div class="mx-2 flex flex-row items-center justify-between">

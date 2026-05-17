@@ -7,6 +7,7 @@
   import ServicesWidget from '$lib/components/widgets/ServicesWidget.svelte';
   import CustomApiWidget from '$lib/components/widgets/CustomApiWidget.svelte';
   import type { BaseWidgetInfo } from '$lib/types/widget.data';
+  import PulseLoader from '$lib/components/shared/PulseLoader.svelte';
   import { fetchURL } from '$lib/utils/network';
   import { timeToMs } from '$lib/utils/time';
 
@@ -83,12 +84,11 @@
 
 <div class={widgetInfo?.params.frameless ? '' : 'rounded-lg border border-border bg-surface p-4'}>
   {#if loading}
-    <div class="flex items-center justify-center">
-      <span class="text-text-muted">Loading widget...</span>
-    </div>
+    <PulseLoader />
   {:else if error}
-    <div class="flex items-center justify-center" transition:slide={{ duration: 300 }}>
-      <span class="text-error">{error}</span>
+    <div class="flex items-center justify-center gap-2 rounded border border-error/30 bg-error/10 px-3 py-4" transition:slide={{ duration: 300 }}>
+      <span class="text-error">⚠</span>
+      <span class="text-error text-sm">{error}</span>
     </div>
   {:else if type === 'calendar' && widgetInfo}
     <CalendarWidget result={widgetInfo} />
