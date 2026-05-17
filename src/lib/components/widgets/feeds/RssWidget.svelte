@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { RssArticle, BaseWidgetInfo } from '$lib/types/widget.data';
   import type { RssParams } from '$lib/types/widget.params';
-  import ListView from '../ui/ListView.svelte';
+  import FeedRenderer from '$lib/components/ui/FeedRenderer.svelte';
   import { dateToNow } from '$lib/utils/time';
 
   interface Props {
@@ -20,6 +20,7 @@
   let params = $derived(result.params as RssParams);
   let showThumbnail = $derived(params.showThumbnail ?? false);
   let collapseAfter = $derived(params.collapseAfter ?? 5);
+  let view = $derived(params.view ?? 'list');
 </script>
 
 {#snippet renderDetails(index: number)}
@@ -42,7 +43,8 @@
   {/if}
 {/snippet}
 
-<ListView
+<FeedRenderer
+  {view}
   {showThumbnail}
   {collapseAfter}
   thumbnails={articles.map((a: RssArticle) => a.thumbnail ?? '')}

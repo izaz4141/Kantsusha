@@ -2,8 +2,8 @@
   import { onMount, onDestroy } from 'svelte';
   import { slide } from 'svelte/transition';
   import CalendarWidget from '$lib/components/widgets/CalendarWidget.svelte';
-  import RssWidget from '$lib/components/widgets/RssWidget.svelte';
-  import RedditWidget from '$lib/components/widgets/RedditWidget.svelte';
+  import RssWidget from '$lib/components/widgets/feeds/RssWidget.svelte';
+  import RedditWidget from '$lib/components/widgets/feeds/RedditWidget.svelte';
   import ServicesWidget from '$lib/components/widgets/ServicesWidget.svelte';
   import CustomApiWidget from '$lib/components/widgets/CustomApiWidget.svelte';
   import type { BaseWidgetInfo } from '$lib/types/widget.data';
@@ -86,9 +86,12 @@
   {#if loading}
     <PulseLoader />
   {:else if error}
-    <div class="flex items-center justify-center gap-2 rounded border border-error/30 bg-error/10 px-3 py-4" transition:slide={{ duration: 300 }}>
+    <div
+      class="flex items-center justify-center gap-2 rounded border border-error/30 bg-error/10 px-3 py-4"
+      transition:slide={{ duration: 300 }}
+    >
       <span class="text-error">⚠</span>
-      <span class="text-error text-sm">{error}</span>
+      <span class="text-sm text-error">{error}</span>
     </div>
   {:else if type === 'calendar' && widgetInfo}
     <CalendarWidget result={widgetInfo} />

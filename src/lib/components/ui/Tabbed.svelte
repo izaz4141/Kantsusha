@@ -50,9 +50,11 @@
     <PulseLoader message="Loading tabs..." />
   </div>
 {:else if error}
-  <div class="flex items-center justify-center gap-2 rounded-lg border border-error/30 bg-error/10 p-4">
+  <div
+    class="flex items-center justify-center gap-2 rounded-lg border border-error/30 bg-error/10 p-4"
+  >
     <span class="text-error">⚠</span>
-    <span class="text-error text-sm">{error}</span>
+    <span class="text-sm text-error">{error}</span>
   </div>
 {:else if tabData}
   <div class="mx-2 flex flex-row items-center justify-between">

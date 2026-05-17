@@ -25,6 +25,16 @@ const CommonWidgetParamsSchema = z.object({
 });
 export type CommonWidgetParams = z.infer<typeof CommonWidgetParamsSchema>;
 
+export const FeedWidgetParamsSchema = CommonWidgetParamsSchema.merge(
+  z.object({
+    showThumbnail: z.boolean().default(false),
+    collapseAfter: z.number().int().positive().default(5),
+    limit: z.number().int().positive().default(10),
+    view: z.enum(['list', 'card']).default('list'),
+  }),
+);
+export type FeedWidgetParams = z.infer<typeof FeedWidgetParamsSchema>;
+
 export const ICalFeedSchema = z.object({
   url: z.string(),
   color: z.string().optional(),
@@ -47,27 +57,21 @@ export const RssFeedSchema = z.object({
 });
 export type RssFeed = z.infer<typeof RssFeedSchema>;
 
-export const RssParamsSchema = CommonWidgetParamsSchema.merge(
+export const RssParamsSchema = FeedWidgetParamsSchema.merge(
   z.object({
     type: z.literal('rss'),
     title: z.string().default('RSS Feed'),
-    showThumbnail: z.boolean().default(false),
-    collapseAfter: z.number().int().positive().default(5),
-    limit: z.number().int().positive().default(10),
     feeds: z.array(RssFeedSchema).min(1),
   }),
 );
 export type RssParams = z.infer<typeof RssParamsSchema>;
 
-export const RedditParamsSchema = CommonWidgetParamsSchema.merge(
+export const RedditParamsSchema = FeedWidgetParamsSchema.merge(
   z.object({
     type: z.literal('reddit'),
     subreddit: z.string().min(1),
     sort: z.string().regex(REDDIT_SORT_REGEX).default('top'),
     time: z.string().regex(REDDIT_TIME_REGEX).default('month'),
-    limit: z.number().int().positive().default(10),
-    showThumbnail: z.boolean().default(false),
-    collapseAfter: z.number().int().positive().default(5),
   }),
 ).overwrite((data) => {
   return {
