@@ -21,6 +21,7 @@ const CommonWidgetParamsSchema = z.object({
   title: z.string().optional(),
   cache: z.string().regex(TIME_REGEX).default('1h').optional(),
   update: z.string().regex(TIME_REGEX).default('1h').optional(),
+  frameless: z.boolean().default(false).optional(),
 });
 export type CommonWidgetParams = z.infer<typeof CommonWidgetParamsSchema>;
 

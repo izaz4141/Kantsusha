@@ -81,7 +81,7 @@
   </div>
 {/if}
 
-<div class="rounded-lg border border-border bg-surface p-4">
+<div class={widgetInfo?.params.frameless ? '' : 'rounded-lg border border-border bg-surface p-4'}>
   {#if loading}
     <div class="flex items-center justify-center">
       <span class="text-text-muted">Loading widget...</span>
