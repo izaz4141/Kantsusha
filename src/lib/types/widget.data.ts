@@ -30,6 +30,14 @@ export interface RedditPost {
   thumbnail?: string;
 }
 
+export interface YouTubeVideo {
+  title: string;
+  videoId: string;
+  pubDate: Date;
+  channelTitle: string;
+  thumbnail: string;
+}
+
 export interface ContainerData {
   name: string;
   image: string;
@@ -73,6 +81,7 @@ export type BaseWidgetData =
   | RssArticle[]
   | CalendarEvent[]
   | RedditPost[]
+  | YouTubeVideo[]
   | ContainerData[]
   | EndpointData[]
   | (ContainerData | EndpointData)[]

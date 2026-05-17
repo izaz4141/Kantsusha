@@ -1,6 +1,6 @@
 <script lang="ts">
-  import type { RssArticle, BaseWidgetInfo } from '$lib/types/widget.data';
-  import type { RssParams } from '$lib/types/widget.params';
+  import type { YouTubeVideo, BaseWidgetInfo } from '$lib/types/widget.data';
+  import type { YouTubeParams } from '$lib/types/widget.params';
   import FeedRenderer from '$lib/components/ui/FeedRenderer.svelte';
   import { dateToNow } from '$lib/utils/time';
 
@@ -11,34 +11,34 @@
 
   let { result, class: className = '' }: Props = $props();
 
-  let articles = $derived(
-    (result.data as RssArticle[]).map((a) => ({
-      ...a,
-      pubDate: new Date(a.pubDate),
+  let videos = $derived(
+    (result.data as YouTubeVideo[]).map((v) => ({
+      ...v,
+      pubDate: new Date(v.pubDate),
     })),
   );
-  let params = $derived(result.params as RssParams);
+  let params = $derived(result.params as YouTubeParams);
   let showThumbnail = $derived(params.showThumbnail ?? false);
   let collapseAfter = $derived(params.collapseAfter ?? 5);
-  let view = $derived(params.view ?? 'list');
+  let view = $derived(params.view ?? 'card');
 </script>
 
 {#snippet renderDetails(index: number)}
-  {#if articles[index]}
+  {#if videos[index]}
     <a
-      href={articles[index].link}
+      href={'https://youtube.com/watch?v=' + videos[index].videoId}
       target="_blank"
       rel="external noopener noreferrer"
       class="relative inline-block text-sm font-semibold text-primary"
     >
       <span class="line-clamp-2">
-        {articles[index].title}
+        {videos[index].title}
       </span>
     </a>
     <div class="flex gap-x-1 text-xs text-text">
-      <span>{dateToNow(articles[index].pubDate)}</span>
+      <span>{dateToNow(videos[index].pubDate)}</span>
       <span class="text-text-muted select-none">&bull;</span>
-      <span>{articles[index].source}</span>
+      <span>{videos[index].channelTitle}</span>
     </div>
   {/if}
 {/snippet}
@@ -47,7 +47,7 @@
   {view}
   {showThumbnail}
   {collapseAfter}
-  thumbnails={articles.map((a: RssArticle) => a.thumbnail ?? '')}
+  thumbnails={videos.map((v: YouTubeVideo) => v.thumbnail ?? '')}
   details={renderDetails}
   class={className}
 />

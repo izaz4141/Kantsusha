@@ -18,12 +18,12 @@
     </div>
   {:else}
     <div
-      class="scrollbar-thin -mb-2 flex gap-3 overflow-x-auto pb-2"
+      class="scrollbar-thin -mb-2 flex gap-3 overflow-x-scroll pb-2"
       transition:slide={{ duration: 300 }}
     >
       {#each thumbnails as _, i (`card_${i}`)}
         <div
-          class="group transition-slide flex max-w-36 shrink-0 flex-col overflow-hidden rounded border border-border bg-surface md:max-w-40"
+          class="group transition-slide flex max-w-36 shrink-0 flex-col overflow-hidden rounded border border-border bg-surface md:max-w-44"
           transition:slide={{ duration: 300 }}
         >
           {#if thumbnails[i] !== ''}

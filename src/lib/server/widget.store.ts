@@ -6,6 +6,7 @@ import type {
   CalendarParams,
   RedditParams,
   RssParams,
+  YouTubeParams,
   TabbedParams,
   ServicesParams,
   CustomApiParams,
@@ -140,6 +141,12 @@ registerWidget('reddit', async (params) => {
   params = params as RedditParams;
   const { fetchRedditPosts } = await import('./api/reddit');
   return fetchRedditPosts(params.subreddit, params.sort, params.limit, params.time);
+});
+
+registerWidget('youtube', async (params) => {
+  params = params as YouTubeParams;
+  const { fetchYouTube } = await import('./api/youtube');
+  return fetchYouTube(params.channels, params.limit, params.includeShorts);
 });
 
 registerWidget('tabbed', async (params) => {

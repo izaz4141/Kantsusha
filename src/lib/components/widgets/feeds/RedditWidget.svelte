@@ -37,7 +37,7 @@
       rel="external noopener noreferrer"
       class="relative inline-block text-sm font-semibold text-primary"
     >
-      <span class="line-clamp-2 text-justify">
+      <span class="line-clamp-2">
         {posts[index].title}
       </span>
     </a>

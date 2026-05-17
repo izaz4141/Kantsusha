@@ -11,6 +11,7 @@ export const WidgetTypeSchema = z.enum([
   'calendar',
   'rss',
   'reddit',
+  'youtube',
   'services',
   'custom-api',
   'tabbed',
@@ -81,6 +82,17 @@ export const RedditParamsSchema = FeedWidgetParamsSchema.merge(
 });
 export type RedditParams = z.infer<typeof RedditParamsSchema>;
 
+export const YouTubeParamsSchema = FeedWidgetParamsSchema.merge(
+  z.object({
+    type: z.literal('youtube'),
+    title: z.string().default('YouTube'),
+    channels: z.array(z.string()).min(1),
+    view: z.enum(['list', 'card']).default('card'),
+    includeShorts: z.boolean().default(false),
+  }),
+);
+export type YouTubeParams = z.infer<typeof YouTubeParamsSchema>;
+
 export const ContainerParamsSchema = z.object({
   type: z.literal('container'),
   id: z.string(),
@@ -138,6 +150,7 @@ const BaseWidgetParamsSchema = z.discriminatedUnion('type', [
   CalendarParamsSchema,
   RssParamsSchema,
   RedditParamsSchema,
+  YouTubeParamsSchema,
   ServicesParamsSchema,
   CustomApiParamsSchema,
 ]);

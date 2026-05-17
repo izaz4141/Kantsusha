@@ -4,6 +4,7 @@
   import CalendarWidget from '$lib/components/widgets/CalendarWidget.svelte';
   import RssWidget from '$lib/components/widgets/feeds/RssWidget.svelte';
   import RedditWidget from '$lib/components/widgets/feeds/RedditWidget.svelte';
+  import YouTubeWidget from '$lib/components/widgets/feeds/YouTubeWidget.svelte';
   import ServicesWidget from '$lib/components/widgets/ServicesWidget.svelte';
   import CustomApiWidget from '$lib/components/widgets/CustomApiWidget.svelte';
   import type { BaseWidgetInfo } from '$lib/types/widget.data';
@@ -99,6 +100,8 @@
     <RssWidget result={widgetInfo} />
   {:else if type === 'reddit' && widgetInfo}
     <RedditWidget result={widgetInfo} />
+  {:else if type === 'youtube' && widgetInfo}
+    <YouTubeWidget result={widgetInfo} />
   {:else if type === 'services' && widgetInfo}
     <ServicesWidget result={widgetInfo} />
   {:else if type === 'custom-api' && widgetInfo}
