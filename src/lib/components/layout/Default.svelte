@@ -33,7 +33,7 @@
 <div class="flex h-full w-full md:gap-x-4">
   {#each panels as panel, i (i)}
     <div
-      class="flex h-full w-full flex-col gap-y-4 panel-{i}"
+      class="flex h-full min-w-0 flex-col gap-y-4 panel-{i}"
       class:hidden={uiState.currentPanel !== i}
       class:md:flex={true}
     >
