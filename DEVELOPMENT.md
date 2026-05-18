@@ -71,9 +71,9 @@ pages:
       - size: 25%
         widgets:
           - type: calendar
-            icals:
-              - url: 'https://...'
-                limit: 50
+            cals:
+              - type: ics
+                url: 'https://...'
       - size: full
         widgets:
           - type: tabbed

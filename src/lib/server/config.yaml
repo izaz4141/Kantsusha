@@ -42,15 +42,22 @@ pages:
       - size: 25%
         widgets:
           - type: calendar
-            icals:
-              - url: 'https://calendar.google.com/calendar/ical/id.indonesian%23holiday%40group.v.calendar.google.com/public/basic.ics'
-                limit: 50
+            cals:
+              - type: ics
+                url: 'https://calendar.google.com/calendar/ical/id.indonesian%23holiday%40group.v.calendar.google.com/public/basic.ics'
 
           - type: rss
             title: SELFTHOST RSS
+            view: list
             showThumbnail: true
             feeds:
               - url: 'https://selfh.st/rss'
+
+          - type: twitch-channel
+            channels:
+              - zy0xxx
+              - zajef77
+              - esl_dota2
       - size: full
         widgets:
           - type: tabbed
@@ -67,6 +74,7 @@ pages:
                 sort: top
                 time: month
                 limit: 10
+
           - type: services
             title: Media
             target: _blank
@@ -132,11 +140,14 @@ pages:
       - size: 25%
         widgets:
           - type: calendar
-            icals:
-              - url: 'https://calendar.google.com/calendar/ical/id.indonesian%23holiday%40group.v.calendar.google.com/public/basic.ics'
-                limit: 50
+            frameless: true
+            cals:
+              - type: ics
+                url: 'https://calendar.google.com/calendar/ical/id.indonesian%23holiday%40group.v.calendar.google.com/public/basic.ics'
 
           - $include: weather-hourly.yaml
+            title: ''
+            frameless: true
 
   - name: About
     layout: slim
@@ -144,9 +155,9 @@ pages:
       - size: full
         widgets:
           - type: calendar
-            icals:
-              - url: 'https://calendar.google.com/calendar/ical/id.indonesian%23holiday%40group.v.calendar.google.com/public/basic.ics'
-                limit: 50
+            cals:
+              - type: ics
+                url: 'https://calendar.google.com/calendar/ical/id.indonesian%23holiday%40group.v.calendar.google.com/public/basic.ics'
           - type: docker-containers
             title: Download
             sockPath: tcp://socket-proxy:2375

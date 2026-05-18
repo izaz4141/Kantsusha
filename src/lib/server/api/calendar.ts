@@ -1,6 +1,6 @@
 import { fetchURL } from '$lib/utils/network';
 import type { CalendarEvent } from '$lib/types/widget.data';
-import type { ICalFeed } from '$lib/types/widget.params';
+import type { CalFeed } from '$lib/types/widget.params';
 
 function parseICSDate(dateStr: string): Date {
   if (!dateStr) return new Date();
@@ -71,8 +71,120 @@ function parseVEVENT(vevent: string, color: string): CalendarEvent | null {
   };
 }
 
+function formatCalDAVDate(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}${month}${day}`;
+}
+
+async function fetchCalDAVCalendarColor(feed: CalFeed): Promise<string | null> {
+  const propfindXml = `<?xml version="1.0" encoding="UTF-8"?>
+<d:propfind xmlns:d="DAV:" xmlns:cd="http://apple.com/ns/ical/">
+  <d:prop>
+    <cd:calendar-color />
+  </d:prop>
+</d:propfind>`;
+
+  try {
+    const response = await fetchURL(feed.url, {
+      method: 'PROPFIND',
+      customHeaders: {
+        'Content-Type': 'application/xml; charset=utf-8',
+        Depth: '0',
+        ...feed.headers,
+      },
+      body: propfindXml,
+    });
+
+    const xml = response as string;
+    const colorMatch = xml.match(/<cd:calendar-color[^>]*>([^<]+)<\/cd:calendar-color>/i);
+    return colorMatch ? colorMatch[1].trim() : null;
+  } catch (err) {
+    console.error(`Error fetching calendar color for ${feed.url}:`, err);
+    return null;
+  }
+}
+
+async function fetchCalDAVCalendar(
+  feed: CalFeed,
+  range: number,
+): Promise<{ ics: string; color: string | null }> {
+  if (range <= 0) {
+    console.error('Caldav range request cant have range <= 0');
+    return { ics: '', color: null };
+  }
+
+  const now = new Date();
+  const pastDate = new Date(now.getTime() - range * 24 * 60 * 60 * 1000);
+  const futureDate = new Date(now.getTime() + range * 24 * 60 * 60 * 1000);
+
+  if (pastDate >= futureDate) {
+    return { ics: '', color: null };
+  }
+
+  const startStr = formatCalDAVDate(pastDate) + 'T000000Z';
+  const endStr = formatCalDAVDate(futureDate) + 'T235959Z';
+
+  const caldavXml = `<?xml version="1.0" encoding="UTF-8"?>
+<c:calendar-query xmlns:d="DAV:" xmlns:c="urn:ietf:params:xml:ns:caldav">
+  <d:prop>
+    <d:displayname />
+    <c:calendar-data />
+  </d:prop>
+  <c:filter>
+    <c:comp-filter name="VCALENDAR">
+      <c:comp-filter name="VEVENT">
+        <c:time-range start="${startStr}" end="${endStr}"/>
+      </c:comp-filter>
+    </c:comp-filter>
+  </c:filter>
+</c:calendar-query>`;
+
+  const eventsResponse = await fetchURL(feed.url, {
+    method: 'REPORT',
+    customHeaders: {
+      'Content-Type': 'application/xml; charset=utf-8',
+      Depth: '1',
+      ...feed.headers,
+    },
+    body: caldavXml,
+  });
+
+  const icsRaw = eventsResponse as string;
+  if (icsRaw.includes('<d:error') || icsRaw.includes('<D:error')) {
+    console.error(`CalDAV error response from ${feed.url}:`, icsRaw);
+    return { ics: '', color: null };
+  }
+
+  const feedColor = await fetchCalDAVCalendarColor(feed);
+
+  return { ics: icsRaw, color: feedColor };
+}
+
+function parseCalDAVMultistatus(xml: string): string[] {
+  const icalBlocks: string[] = [];
+  const calendarDataMatches = xml.matchAll(/<c:calendar-data>([\s\S]*?)<\/c:calendar-data>/gi);
+
+  for (const match of calendarDataMatches) {
+    const content = match[1].trim();
+    const decoded = content
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&amp;/g, '&')
+      .replace(/&#10;/g, '\n');
+
+    if (decoded.includes('BEGIN:VCALENDAR')) {
+      icalBlocks.push(decoded);
+    }
+  }
+
+  return icalBlocks;
+}
+
 export async function fetchCalendar(
-  icals: ICalFeed[],
+  cals: CalFeed[],
+  range: number = 183,
   limit: number = 50,
 ): Promise<CalendarEvent[]> {
   const allEvents: CalendarEvent[] = [];
@@ -88,12 +200,24 @@ export async function fetchCalendar(
   ];
 
   await Promise.all(
-    icals.map(async (ical, index) => {
+    cals.map(async (cal, index) => {
       try {
-        const ics = (await fetchURL(ical.url, { customHeaders: ical.headers })) as string;
-        const color = ical.color || colors[index % colors.length];
+        let feedColor: string | undefined;
+        let icsContent: string;
 
-        const veventMatches = ics.matchAll(/BEGIN:VEVENT[\s\S]*?END:VEVENT/gi);
+        if (cal.type === 'caldav') {
+          const result = await fetchCalDAVCalendar(cal, range);
+          icsContent = result.ics;
+          feedColor = result.color || undefined;
+          const icalBlocks = parseCalDAVMultistatus(icsContent);
+          icsContent = icalBlocks.join('\n');
+        } else {
+          icsContent = (await fetchURL(cal.url, { customHeaders: cal.headers })) as string;
+        }
+
+        const color = cal.color || feedColor || colors[index % colors.length];
+
+        const veventMatches = icsContent.matchAll(/BEGIN:VEVENT[\s\S]*?END:VEVENT/gi);
 
         for (const match of veventMatches) {
           const event = parseVEVENT(match[0], color);
@@ -102,7 +226,7 @@ export async function fetchCalendar(
           }
         }
       } catch (err) {
-        console.error(`Error fetching ${ical.url}:`, err);
+        console.error(`Error fetching ${cal.url}:`, err);
       }
     }),
   );

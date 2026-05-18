@@ -135,7 +135,7 @@ registerWidget('rss', async (params) => {
 registerWidget('calendar', async (params) => {
   params = params as CalendarParams;
   const { fetchCalendar } = await import('./api/calendar');
-  return fetchCalendar(params.icals, params.limit);
+  return fetchCalendar(params.cals, params.range, params.limit);
 });
 
 registerWidget('reddit', async (params) => {

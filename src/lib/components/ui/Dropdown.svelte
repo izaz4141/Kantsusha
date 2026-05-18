@@ -9,7 +9,13 @@
     overlay?: boolean;
   }
 
-  let { open = $bindable(false), trigger, children, class: className = '', overlay = false }: Props = $props();
+  let {
+    open = $bindable(false),
+    trigger,
+    children,
+    class: className = '',
+    overlay = false,
+  }: Props = $props();
 
   function close() {
     open = false;

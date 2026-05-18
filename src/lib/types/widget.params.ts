@@ -37,17 +37,19 @@ export const FeedWidgetParamsSchema = CommonWidgetParamsSchema.merge(
 );
 export type FeedWidgetParams = z.infer<typeof FeedWidgetParamsSchema>;
 
-export const ICalFeedSchema = z.object({
+export const CalFeedSchema = z.object({
+  type: z.enum(['ics', 'caldav']).default('ics'),
   url: z.string(),
   color: z.string().optional(),
   headers: z.record(z.string(), z.string()).optional(),
 });
-export type ICalFeed = z.infer<typeof ICalFeedSchema>;
+export type CalFeed = z.infer<typeof CalFeedSchema>;
 
 export const CalendarParamsSchema = CommonWidgetParamsSchema.merge(
   z.object({
     type: z.literal('calendar'),
-    icals: z.array(ICalFeedSchema).min(1),
+    cals: z.array(CalFeedSchema).min(1),
+    range: z.number().int().positive().default(183),
     limit: z.number().int().positive().default(50),
   }),
 );

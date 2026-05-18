@@ -33,7 +33,7 @@
 <div class="flex flex-col gap-3 {className}">
   {#each channels as channel, i (channel.username)}
     <div class="group flex items-center justify-start gap-x-3">
-<div class="relative shrink-0">
+      <div class="relative shrink-0">
         <div
           bind:this={avatarRefs[i]}
           class="relative h-12 w-12 shrink-0 overflow-hidden rounded-full border-3 transition-colors"
@@ -50,19 +50,19 @@
             rel="external noopener noreferrer"
             class="block h-full w-full"
           >
-          {#if channel.avatarUrl}
-            <img
-              src={channel.avatarUrl}
-              alt={channel.nickname}
-              class="h-full w-full rounded-full object-cover p-0.5 brightness-80 group-hover:brightness-100"
-            />
-          {:else}
-            <div
-              class="flex h-full w-full items-center justify-center rounded-full bg-surface p-0.5 text-text-muted"
-            >
-              ?
-            </div>
-          {/if}
+            {#if channel.avatarUrl}
+              <img
+                src={channel.avatarUrl}
+                alt={channel.nickname}
+                class="h-full w-full rounded-full object-cover p-0.5 brightness-80 group-hover:brightness-100"
+              />
+            {:else}
+              <div
+                class="flex h-full w-full items-center justify-center rounded-full bg-surface p-0.5 text-text-muted"
+              >
+                ?
+              </div>
+            {/if}
           </a>
         </div>
 
