@@ -10,6 +10,7 @@ import type {
   TabbedParams,
   ServicesParams,
   CustomApiParams,
+  TwitchChannelParams,
 } from '$lib/types/widget.params';
 import type {
   AnyWidgetData,
@@ -180,4 +181,10 @@ registerWidget('custom-api', async (params) => {
   params = params as CustomApiParams;
   const { renderCustomTemplate } = await import('./api/custom-api');
   return renderCustomTemplate(params);
+});
+
+registerWidget('twitch-channel', async (params) => {
+  params = params as TwitchChannelParams;
+  const { fetchTwitchChannels } = await import('./api/twitch-channel');
+  return fetchTwitchChannels(params.channels, params.sort);
 });

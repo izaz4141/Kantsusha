@@ -38,6 +38,19 @@ export interface YouTubeVideo {
   thumbnail: string;
 }
 
+export interface TwitchChannel {
+  username: string;
+  nickname: string;
+  avatarUrl: string;
+  isLive: boolean;
+  category?: string;
+  categorySlug?: string;
+  streamTitle?: string;
+  viewerCount: number;
+  startedAt?: Date;
+  thumbnailUrl?: string;
+}
+
 export interface ContainerData {
   name: string;
   image: string;
@@ -82,6 +95,7 @@ export type BaseWidgetData =
   | CalendarEvent[]
   | RedditPost[]
   | YouTubeVideo[]
+  | TwitchChannel[]
   | ContainerData[]
   | EndpointData[]
   | (ContainerData | EndpointData)[]

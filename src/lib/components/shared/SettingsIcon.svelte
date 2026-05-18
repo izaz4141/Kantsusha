@@ -38,7 +38,7 @@
     </svg>
   </button>
 
-  <Dropdown bind:open={isOpen} trigger={triggerEl}>
+  <Dropdown bind:open={isOpen} trigger={triggerEl} overlay={true}>
     <ThemeOptions />
   </Dropdown>
 </div>

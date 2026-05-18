@@ -5,6 +5,7 @@
   import RssWidget from '$lib/components/widgets/feeds/RssWidget.svelte';
   import RedditWidget from '$lib/components/widgets/feeds/RedditWidget.svelte';
   import YouTubeWidget from '$lib/components/widgets/feeds/YouTubeWidget.svelte';
+  import TwitchChannelWidget from '$lib/components/widgets/TwitchChannelWidget.svelte';
   import ServicesWidget from '$lib/components/widgets/ServicesWidget.svelte';
   import CustomApiWidget from '$lib/components/widgets/CustomApiWidget.svelte';
   import type { BaseWidgetInfo } from '$lib/types/widget.data';
@@ -102,6 +103,8 @@
     <RedditWidget result={widgetInfo} />
   {:else if type === 'youtube' && widgetInfo}
     <YouTubeWidget result={widgetInfo} />
+  {:else if type === 'twitch-channel' && widgetInfo}
+    <TwitchChannelWidget result={widgetInfo} />
   {:else if type === 'services' && widgetInfo}
     <ServicesWidget result={widgetInfo} />
   {:else if type === 'custom-api' && widgetInfo}

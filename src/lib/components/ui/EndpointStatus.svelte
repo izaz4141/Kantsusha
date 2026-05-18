@@ -97,6 +97,18 @@
               <span class="text-text-muted">Status</span>
               <span class="text-text">{endpointData.status}</span>
             </div>
+            {#if endpointData.responseTime && endpointData.status == 'online'}
+              <div class="flex justify-between">
+                <span class="text-text-muted">Response</span>
+                <span
+                  class={endpointData.responseTime < 500
+                    ? 'text-success'
+                    : endpointData.responseTime < 1000
+                      ? 'text-warning'
+                      : 'text-error'}>{endpointData.responseTime}ms</span
+                >
+              </div>
+            {/if}
           {/if}
         </div>
       </Dropdown>

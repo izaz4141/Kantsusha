@@ -6,9 +6,10 @@
     trigger: HTMLElement;
     children: Snippet;
     class?: string;
+    overlay?: boolean;
   }
 
-  let { open = $bindable(false), trigger, children, class: className = '' }: Props = $props();
+  let { open = $bindable(false), trigger, children, class: className = '', overlay = false }: Props = $props();
 
   function close() {
     open = false;
@@ -85,11 +86,13 @@
     </div>
   </div>
 
-  <button
-    type="button"
-    class="fixed inset-0 z-40 cursor-default border-none bg-transparent"
-    style="transform: translate3d(0,0,0)"
-    onclick={close}
-    aria-label="Close dropdown"
-  ></button>
+  {#if overlay}
+    <button
+      type="button"
+      class="fixed inset-0 z-40 cursor-default border-none bg-transparent"
+      style="transform: translate3d(0,0,0)"
+      onclick={close}
+      aria-label="Close dropdown"
+    ></button>
+  {/if}
 {/if}

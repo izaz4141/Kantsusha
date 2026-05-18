@@ -15,6 +15,7 @@ export const WidgetTypeSchema = z.enum([
   'services',
   'custom-api',
   'tabbed',
+  'twitch-channel',
 ]);
 export type WidgetType = z.infer<typeof WidgetTypeSchema>;
 
@@ -93,6 +94,16 @@ export const YouTubeParamsSchema = FeedWidgetParamsSchema.merge(
 );
 export type YouTubeParams = z.infer<typeof YouTubeParamsSchema>;
 
+export const TwitchChannelParamsSchema = CommonWidgetParamsSchema.merge(
+  z.object({
+    type: z.literal('twitch-channel'),
+    title: z.string().default('Twitch Channels'),
+    channels: z.array(z.string()).min(1),
+    sort: z.enum(['live', 'views']).default('live'),
+  }),
+);
+export type TwitchChannelParams = z.infer<typeof TwitchChannelParamsSchema>;
+
 export const ContainerParamsSchema = z.object({
   type: z.literal('container'),
   id: z.string(),
@@ -153,6 +164,7 @@ const BaseWidgetParamsSchema = z.discriminatedUnion('type', [
   YouTubeParamsSchema,
   ServicesParamsSchema,
   CustomApiParamsSchema,
+  TwitchChannelParamsSchema,
 ]);
 export type BaseWidgetParams = z.infer<typeof BaseWidgetParamsSchema>;
 
