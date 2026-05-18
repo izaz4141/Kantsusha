@@ -2,6 +2,8 @@
 
 A personal dashboard/homepage built with SvelteKit, featuring customizable widgets and themes.
 
+Largely inspired by [glanceapp/glance](https://github.com/glanceapp/glance).
+
 ## Features
 
 - **Widget system**: Defaults, with custom later
