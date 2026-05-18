@@ -50,7 +50,7 @@ export const CalendarParamsSchema = CommonWidgetParamsSchema.merge(
   z.object({
     type: z.literal('calendar'),
     cals: z.array(CalFeedSchema).min(1),
-    range: z.number().int().positive().default(183),
+    range: z.string().regex(TIME_REGEX).default('183d'),
     limit: z.number().int().positive().default(50),
   }),
 );

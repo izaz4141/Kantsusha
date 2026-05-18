@@ -1,4 +1,5 @@
 import { fetchURL } from '$lib/utils/network';
+import { timeToMs } from '$lib/utils/time';
 import type { CalendarEvent } from '$lib/types/widget.data';
 import type { CalFeed } from '$lib/types/widget.params';
 
@@ -75,7 +76,10 @@ function formatCalDAVDate(date: Date): string {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0');
   const day = String(date.getDate()).padStart(2, '0');
-  return `${year}${month}${day}`;
+  const hour = String(date.getUTCHours()).padStart(2, '0');
+  const min = String(date.getUTCMinutes()).padStart(2, '0');
+  const sec = String(date.getUTCSeconds()).padStart(2, '0');
+  return `${year}${month}${day}T${hour}${min}${sec}Z`;
 }
 
 async function fetchCalDAVCalendarColor(feed: CalFeed): Promise<string | null> {
@@ -108,23 +112,24 @@ async function fetchCalDAVCalendarColor(feed: CalFeed): Promise<string | null> {
 
 async function fetchCalDAVCalendar(
   feed: CalFeed,
-  range: number,
+  range: string,
 ): Promise<{ ics: string; color: string | null }> {
-  if (range <= 0) {
+  const rangeMs = timeToMs(range) ?? 0;
+  if (rangeMs <= 0) {
     console.error('Caldav range request cant have range <= 0');
     return { ics: '', color: null };
   }
 
   const now = new Date();
-  const pastDate = new Date(now.getTime() - range * 24 * 60 * 60 * 1000);
-  const futureDate = new Date(now.getTime() + range * 24 * 60 * 60 * 1000);
+  const pastDate = new Date(now.getTime() - rangeMs);
+  const futureDate = new Date(now.getTime() + rangeMs);
 
   if (pastDate >= futureDate) {
     return { ics: '', color: null };
   }
 
-  const startStr = formatCalDAVDate(pastDate) + 'T000000Z';
-  const endStr = formatCalDAVDate(futureDate) + 'T235959Z';
+  const startStr = formatCalDAVDate(pastDate);
+  const endStr = formatCalDAVDate(futureDate);
 
   const caldavXml = `<?xml version="1.0" encoding="UTF-8"?>
 <c:calendar-query xmlns:d="DAV:" xmlns:c="urn:ietf:params:xml:ns:caldav">
@@ -184,7 +189,7 @@ function parseCalDAVMultistatus(xml: string): string[] {
 
 export async function fetchCalendar(
   cals: CalFeed[],
-  range: number = 183,
+  range: string = '183d',
   limit: number = 50,
 ): Promise<CalendarEvent[]> {
   const allEvents: CalendarEvent[] = [];
