@@ -16,6 +16,7 @@ export const WidgetTypeSchema = z.enum([
   'custom-api',
   'tabbed',
   'twitch-channel',
+  'markets',
 ]);
 export type WidgetType = z.infer<typeof WidgetTypeSchema>;
 
@@ -89,6 +90,7 @@ export const YouTubeParamsSchema = FeedWidgetParamsSchema.merge(
   z.object({
     type: z.literal('youtube'),
     title: z.string().default('YouTube'),
+    frameless: z.boolean().default(true),
     channels: z.array(z.string()).min(1),
     view: z.enum(['list', 'card']).default('card'),
     includeShorts: z.boolean().default(false),
@@ -105,6 +107,23 @@ export const TwitchChannelParamsSchema = CommonWidgetParamsSchema.merge(
   }),
 );
 export type TwitchChannelParams = z.infer<typeof TwitchChannelParamsSchema>;
+
+export const MarketEntrySchema = z.object({
+  code: z.string(),
+  range: z.string().regex(TIME_REGEX).default('30d').optional(),
+  interval: z.string().regex(TIME_REGEX).default('1d').optional(),
+});
+export type MarketEntry = z.infer<typeof MarketEntrySchema>;
+
+export const MarketsParamsSchema = CommonWidgetParamsSchema.merge(
+  z.object({
+    type: z.literal('markets'),
+    title: z.string().default('Markets'),
+    frameless: z.boolean().default(true),
+    markets: z.array(MarketEntrySchema).min(1),
+  }),
+);
+export type MarketsParams = z.infer<typeof MarketsParamsSchema>;
 
 export const ContainerParamsSchema = z.object({
   type: z.literal('container'),
@@ -167,6 +186,7 @@ const BaseWidgetParamsSchema = z.discriminatedUnion('type', [
   ServicesParamsSchema,
   CustomApiParamsSchema,
   TwitchChannelParamsSchema,
+  MarketsParamsSchema,
 ]);
 export type BaseWidgetParams = z.infer<typeof BaseWidgetParamsSchema>;
 

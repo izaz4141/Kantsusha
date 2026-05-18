@@ -8,6 +8,7 @@
   import TwitchChannelWidget from '$lib/components/widgets/TwitchChannelWidget.svelte';
   import ServicesWidget from '$lib/components/widgets/ServicesWidget.svelte';
   import CustomApiWidget from '$lib/components/widgets/CustomApiWidget.svelte';
+  import MarketsWidget from '$lib/components/widgets/MarketsWidget.svelte';
   import type { BaseWidgetInfo } from '$lib/types/widget.data';
   import PulseLoader from '$lib/components/shared/PulseLoader.svelte';
   import { fetchURL } from '$lib/utils/network';
@@ -109,5 +110,7 @@
     <ServicesWidget result={widgetInfo} />
   {:else if type === 'custom-api' && widgetInfo}
     <CustomApiWidget result={widgetInfo} />
+  {:else if type === 'markets' && widgetInfo}
+    <MarketsWidget result={widgetInfo} />
   {/if}
 </div>

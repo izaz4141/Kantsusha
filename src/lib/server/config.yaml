@@ -145,9 +145,16 @@ pages:
               - type: ics
                 url: 'https://calendar.google.com/calendar/ical/id.indonesian%23holiday%40group.v.calendar.google.com/public/basic.ics'
 
-          - $include: weather-hourly.yaml
-            title: ''
-            frameless: true
+          # - $include: weather-hourly.yaml
+          #   title: ''
+          #   frameless: true
+          - type: markets
+            markets:
+              - code: IDR=X
+              - code: MSFT
+                range: 15d
+              - code: NVDA
+                range: 15d
 
   - name: About
     layout: slim

@@ -90,6 +90,17 @@ export interface CustomApiData {
   script: string;
 }
 
+export interface MarketData {
+  code: string;
+  displayName: string;
+  currency: string;
+  prices: number[];
+  timestamps: number[];
+  currentPrice: number;
+  changePercent: number;
+  lastTimestamp: number;
+}
+
 export type BaseWidgetData =
   | RssArticle[]
   | CalendarEvent[]
@@ -99,7 +110,8 @@ export type BaseWidgetData =
   | ContainerData[]
   | EndpointData[]
   | (ContainerData | EndpointData)[]
-  | CustomApiData;
+  | CustomApiData
+  | MarketData[];
 export interface BaseWidgetInfo {
   data: BaseWidgetData;
   params: BaseWidgetParams;

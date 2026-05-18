@@ -11,6 +11,7 @@ import type {
   ServicesParams,
   CustomApiParams,
   TwitchChannelParams,
+  MarketsParams,
 } from '$lib/types/widget.params';
 import type {
   AnyWidgetData,
@@ -187,4 +188,10 @@ registerWidget('twitch-channel', async (params) => {
   params = params as TwitchChannelParams;
   const { fetchTwitchChannels } = await import('./api/twitch-channel');
   return fetchTwitchChannels(params.channels, params.sort);
+});
+
+registerWidget('markets', async (params) => {
+  params = params as MarketsParams;
+  const { fetchMarketData } = await import('./api/markets');
+  return fetchMarketData(params.markets);
 });
