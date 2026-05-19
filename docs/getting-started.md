@@ -41,11 +41,11 @@ theme: dark
 
 ## Environment Variables
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `KANTSUSHA_DATABASE_URL` | SQLite database path | `./db/kantsusha.db` |
-| `KANTSUSHA_ORIGINS` | Allowed origins | `http://localhost:*,http://127.0.0.1:*` |
-| `KANTSUSHA_AUTH_SECRET` | Auth secret | - |
+| Variable                 | Description          | Default                                 |
+| ------------------------ | -------------------- | --------------------------------------- |
+| `KANTSUSHA_DATABASE_URL` | SQLite database path | `./db/kantsusha.db`                     |
+| `KANTSUSHA_ORIGINS`      | Allowed origins      | `http://localhost:*,http://127.0.0.1:*` |
+| `KANTSUSHA_AUTH_SECRET`  | Auth secret          | -                                       |
 
 ## Running
 

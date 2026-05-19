@@ -1,20 +1,18 @@
 # Tabbed Widget
 
-Container widget that displays multiple widgets in tabs.
+Container widget that displays multiple widgets in tabs. You can place any other widget inside the `widgets` array to create tabbed content.
 
 ## Parameters
 
-| Parameter | Type | Required | Default | Description |
-|-----------|------|----------|---------|-------------|
-| `type` | string | Yes | - | `tabbed` |
-| `widgets` | BaseWidget[] | Yes | - | Array of widgets |
-| `id` | string | No | `N/A` | Tab container ID |
+| Parameter | Type         | Required | Description      |
+| --------- | ------------ | -------- | ---------------- |
+| `type`    | string       | Yes      | `tabbed`         |
+| `widgets` | BaseWidget[] | Yes      | Array of widgets |
 
 ## Example
 
 ```yaml
 - type: tabbed
-  id: news-feeds
   widgets:
     - type: reddit
       title: Tech

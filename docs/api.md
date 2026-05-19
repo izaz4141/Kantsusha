@@ -17,24 +17,24 @@ Fetches widget data by ID.
 }
 ```
 
-| Field | Description |
-|-------|-------------|
-| `data` | Widget-specific data |
+| Field    | Description                |
+| -------- | -------------------------- |
+| `data`   | Widget-specific data       |
 | `params` | Original config parameters |
 
 ## Widget Data Types
 
-| Widget | Data |
-|--------|------|
-| `calendar` | `CalendarEvent[]` |
-| `rss` | `RssArticle[]` |
-| `reddit` | `RedditPost[]` |
-| `youtube` | `YouTubeVideo[]` |
+| Widget           | Data              |
+| ---------------- | ----------------- | ---------------- |
+| `calendar`       | `CalendarEvent[]` |
+| `rss`            | `RssArticle[]`    |
+| `reddit`         | `RedditPost[]`    |
+| `youtube`        | `YouTubeVideo[]`  |
 | `twitch-channel` | `TwitchChannel[]` |
-| `markets` | `MarketData[]` |
-| `services` | `(ContainerData | EndpointData)[]` |
-| `custom-api` | `CustomApiData` |
-| `tabbed` | `TabbedData` |
+| `markets`        | `MarketData[]`    |
+| `services`       | `(ContainerData   | EndpointData)[]` |
+| `custom-api`     | `CustomApiData`   |
+| `tabbed`         | `TabbedData`      |
 
 ## Caching
 

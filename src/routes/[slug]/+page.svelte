@@ -4,6 +4,7 @@
   import Slim from '$lib/components/layout/Slim.svelte';
   import WidgetRenderer from '$lib/components/ui/WidgetRenderer.svelte';
   import Tabbed from '$lib/components/ui/Tabbed.svelte';
+  import SplitColumn from '$lib/components/ui/SplitColumn.svelte';
   import type { LayoutProps } from '$lib/types/layout';
   import type { PageData } from './$types';
   import type { Component } from 'svelte';
@@ -32,6 +33,8 @@
       {#if wid}
         {#if widget.type === 'tabbed'}
           <Tabbed id={wid} />
+        {:else if widget.type === 'split-column'}
+          <SplitColumn id={wid} />
         {:else}
           <WidgetRenderer id={wid} type={widget.type} />
         {/if}

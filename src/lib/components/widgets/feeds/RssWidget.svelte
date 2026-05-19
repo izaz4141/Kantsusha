@@ -25,20 +25,22 @@
 
 {#snippet renderDetails(index: number)}
   {#if articles[index]}
-    <a
-      href={articles[index].link}
-      target="_blank"
-      rel="external noopener noreferrer"
-      class="relative inline-block text-sm font-semibold text-primary"
-    >
-      <span class="line-clamp-2">
-        {articles[index].title}
-      </span>
-    </a>
-    <div class="flex gap-x-1 text-xs text-text">
-      <span>{dateToNow(articles[index].pubDate)}</span>
-      <span class="text-text-muted select-none">&bull;</span>
-      <span>{articles[index].source}</span>
+    <div class="flex flex-col">
+      <a
+        href={articles[index].link}
+        target="_blank"
+        rel="external noopener noreferrer"
+        class="relative inline-block text-sm font-semibold text-primary"
+      >
+        <span class="line-clamp-2">
+          {articles[index].title}
+        </span>
+      </a>
+      <div class="flex gap-x-1 text-xs text-text">
+        <span>{dateToNow(articles[index].pubDate)}</span>
+        <span class="text-text-muted select-none">&bull;</span>
+        <span>{articles[index].source}</span>
+      </div>
     </div>
   {/if}
 {/snippet}

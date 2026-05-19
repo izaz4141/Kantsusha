@@ -48,7 +48,7 @@ pages:
 
           - type: rss
             title: SELFTHOST RSS
-            view: list
+            view: card
             showThumbnail: true
             feeds:
               - url: 'https://selfh.st/rss'
@@ -60,11 +60,13 @@ pages:
               - esl_dota2
       - size: full
         widgets:
-          - type: tabbed
+          - type: split-column
+            title: Reddit
             widgets:
               - type: reddit
                 cache: 2h
                 update: 30m
+                view: card
                 subreddit: selfhosted
                 sort: top
                 time: month

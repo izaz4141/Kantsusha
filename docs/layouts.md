@@ -16,6 +16,7 @@ pages:
 ```
 
 Features:
+
 - Panel switching via header buttons
 - Column sizes: `25%`, `50%`, `full`, `small`, or any CSS unit
 
@@ -33,6 +34,7 @@ pages:
 ```
 
 Best for:
+
 - Content-focused pages
 - Reading RSS/Reddit feeds
 
@@ -54,5 +56,6 @@ pages:
 ```
 
 Best for:
+
 - Dense information display
 - Multiple widget types at once

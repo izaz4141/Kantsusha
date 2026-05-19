@@ -4,21 +4,21 @@ Display events from ICS or CalDAV calendars.
 
 ## Parameters
 
-| Parameter | Type | Required | Default | Description |
-|-----------|------|----------|---------|-------------|
-| `type` | string | Yes | - | `calendar` |
-| `cals` | CalFeed[] | Yes | - | Array of calendars (min 1) |
-| `range` | duration | No | `183d` | Date range to fetch |
-| `limit` | number | No | `50` | Max events to display |
+| Parameter | Type      | Required | Default | Description                |
+| --------- | --------- | -------- | ------- | -------------------------- |
+| `type`    | string    | Yes      | -       | `calendar`                 |
+| `cals`    | CalFeed[] | Yes      | -       | Array of calendars (min 1) |
+| `range`   | duration  | No       | `183d`  | Date range to fetch        |
+| `limit`   | number    | No       | `50`    | Max events to display      |
 
 ### CalFeed Object
 
-| Field | Type | Required | Default | Description |
-|-------|------|----------|---------|-------------|
-| `type` | string | No | `ics` | `ics` or `caldav` |
-| `url` | string | Yes | - | Calendar feed URL |
-| `color` | string | No | - | Hex color for events |
-| `headers` | object | No | - | Custom HTTP headers |
+| Field     | Type   | Required | Default | Description          |
+| --------- | ------ | -------- | ------- | -------------------- |
+| `type`    | string | No       | `ics`   | `ics` or `caldav`    |
+| `url`     | string | Yes      | -       | Calendar feed URL    |
+| `color`   | string | No       | -       | Hex color for events |
+| `headers` | object | No       | -       | Custom HTTP headers  |
 
 ## Example
 

@@ -31,21 +31,23 @@
 
 {#snippet renderDetails(index: number)}
   {#if posts[index]}
-    <a
-      href={posts[index].permalink}
-      target="_blank"
-      rel="external noopener noreferrer"
-      class="relative inline-block text-sm font-semibold text-primary"
-    >
-      <span class="line-clamp-2">
-        {posts[index].title}
-      </span>
-    </a>
-    <div class="flex gap-x-2 text-xs text-text-muted">
-      <span class="text-success">↑ {formatScore(posts[index].score)}</span>
-      <span class="text-text">󰻞 {posts[index].numComments}</span>
-      <span> {dateToNow(posts[index].pubDate)}</span>
-      <span>by {posts[index].author}</span>
+    <div class="flex flex-col">
+      <a
+        href={posts[index].permalink}
+        target="_blank"
+        rel="external noopener noreferrer"
+        class="relative inline-block text-sm font-semibold text-primary"
+      >
+        <span class="line-clamp-2">
+          {posts[index].title}
+        </span>
+      </a>
+      <div class="flex gap-x-2 text-xs text-text-muted">
+        <span class="text-success">↑ {formatScore(posts[index].score)}</span>
+        <span class="text-text">󰻞 {posts[index].numComments}</span>
+        <span> {dateToNow(posts[index].pubDate)}</span>
+        <span>by {posts[index].author}</span>
+      </div>
     </div>
   {/if}
 {/snippet}

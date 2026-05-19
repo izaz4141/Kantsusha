@@ -4,14 +4,14 @@ Display latest videos from YouTube channels.
 
 ## Parameters
 
-| Parameter | Type | Required | Default | Description |
-|-----------|------|----------|---------|-------------|
-| `type` | string | Yes | - | `youtube` |
-| `channels` | string[] | Yes | - | Channel IDs or @handles |
-| `title` | string | No | `YouTube` | Widget title |
-| `view` | string | No | `card` | `list` or `card` |
-| `includeShorts` | boolean | No | `false` | Include Shorts |
-| `frameless` | boolean | No | `true` | Hide header |
+| Parameter       | Type     | Required | Default   | Description             |
+| --------------- | -------- | -------- | --------- | ----------------------- |
+| `type`          | string   | Yes      | -         | `youtube`               |
+| `channels`      | string[] | Yes      | -         | Channel IDs or @handles |
+| `title`         | string   | No       | `YouTube` | Widget title            |
+| `view`          | string   | No       | `card`    | `list` or `card`        |
+| `includeShorts` | boolean  | No       | `false`   | Include Shorts          |
+| `frameless`     | boolean  | No       | `true`    | Hide header             |
 
 ## Example
 

@@ -4,12 +4,12 @@ Display live status of Twitch channels.
 
 ## Parameters
 
-| Parameter | Type | Required | Default | Description |
-|-----------|------|----------|---------|-------------|
-| `type` | string | Yes | - | `twitch-channel` |
-| `channels` | string[] | Yes | - | Twitch usernames |
-| `title` | string | No | `Twitch Channels` | Widget title |
-| `sort` | string | No | `live` | `live` or `views` |
+| Parameter  | Type     | Required | Default           | Description       |
+| ---------- | -------- | -------- | ----------------- | ----------------- |
+| `type`     | string   | Yes      | -                 | `twitch-channel`  |
+| `channels` | string[] | Yes      | -                 | Twitch usernames  |
+| `title`    | string   | No       | `Twitch Channels` | Widget title      |
+| `sort`     | string   | No       | `live`            | `live` or `views` |
 
 ## Example
 
@@ -25,10 +25,10 @@ Display live status of Twitch channels.
 
 ## Sort Options
 
-| Value | Description |
-|-------|-------------|
-| `live` | Live channels first, then offline |
-| `views` | Sort by viewer count |
+| Value   | Description                       |
+| ------- | --------------------------------- |
+| `live`  | Live channels first, then offline |
+| `views` | Sort by viewer count              |
 
 ## Use Cases
 

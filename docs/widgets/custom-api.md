@@ -4,22 +4,22 @@ Fetch data from any API and render with a custom HTML template.
 
 ## Parameters
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `type` | string | Yes | `custom-api` |
-| `fetch` | object | No | Named fetch requests |
-| `template` | string | Yes | HTML template |
-| `options` | object | No | Additional config |
+| Parameter  | Type   | Required | Description          |
+| ---------- | ------ | -------- | -------------------- |
+| `type`     | string | Yes      | `custom-api`         |
+| `fetch`    | object | No       | Named fetch requests |
+| `template` | string | Yes      | HTML template        |
+| `options`  | object | No       | Additional config    |
 
 ### ApiRequest Object
 
-| Field | Type | Required | Default | Description |
-|-------|------|----------|---------|-------------|
-| `method` | string | No | `get` | `get` or `post` |
-| `url` | string | Yes | - | Request URL |
-| `type` | string | No | `json` | `json` or `text` |
-| `headers` | object | No | - | HTTP headers |
-| `body` | string | No | - | POST body |
+| Field     | Type   | Required | Default | Description      |
+| --------- | ------ | -------- | ------- | ---------------- |
+| `method`  | string | No       | `get`   | `get` or `post`  |
+| `url`     | string | Yes      | -       | Request URL      |
+| `type`    | string | No       | `json`  | `json` or `text` |
+| `headers` | object | No       | -       | HTTP headers     |
+| `body`    | string | No       | -       | POST body        |
 
 ## Template Structure
 
@@ -33,15 +33,21 @@ Templates use Svelte-like syntax with three blocks:
 
 <style>
   /* CSS styles */
-  .card { color: var(--color-text); }
+  .card {
+    color: var(--color-text);
+  }
 </style>
 
 <template>
   <!-- HTML content - can include style, link, div, etc. -->
   <!-- Cannot include script blocks inside template -->
   <div class="card">
-    <link rel="stylesheet" href="...">
-    <style>.inline { color: red; }</style>
+    <link rel="stylesheet" href="..." />
+    <style>
+      .inline {
+        color: red;
+      }
+    </style>
     <h2>Hello ${name}</h2>
   </div>
 </template>
@@ -49,12 +55,12 @@ Templates use Svelte-like syntax with three blocks:
 
 ### Block Rules
 
-| Block | Location | Allowed Content |
-|-------|----------|-----------------|
-| `<script>` | Root level | JavaScript (computed values, helpers) |
-| `<style>` | Root level | CSS rules |
-| `<template>` | Root level | HTML, `<style>`, `<link>`, `<div>`, etc. |
-| Inside `<template>` | - | **NOT** `<script>` |
+| Block               | Location   | Allowed Content                          |
+| ------------------- | ---------- | ---------------------------------------- |
+| `<script>`          | Root level | JavaScript (computed values, helpers)    |
+| `<style>`           | Root level | CSS rules                                |
+| `<template>`        | Root level | HTML, `<style>`, `<link>`, `<div>`, etc. |
+| Inside `<template>` | -          | **NOT** `<script>`                       |
 
 ### Interpolation
 

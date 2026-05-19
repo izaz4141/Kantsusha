@@ -25,20 +25,22 @@
 
 {#snippet renderDetails(index: number)}
   {#if videos[index]}
-    <a
-      href={'https://youtube.com/watch?v=' + videos[index].videoId}
-      target="_blank"
-      rel="external noopener noreferrer"
-      class="relative inline-block text-sm font-semibold text-primary"
-    >
-      <span class="line-clamp-2">
-        {videos[index].title}
-      </span>
-    </a>
-    <div class="flex gap-x-1 text-xs text-text">
-      <span>{dateToNow(videos[index].pubDate)}</span>
-      <span class="text-text-muted select-none">&bull;</span>
-      <span>{videos[index].channelTitle}</span>
+    <div class="flex flex-col">
+      <a
+        href={'https://youtube.com/watch?v=' + videos[index].videoId}
+        target="_blank"
+        rel="external noopener noreferrer"
+        class="relative inline-block text-sm font-semibold text-primary"
+      >
+        <span class="line-clamp-2">
+          {videos[index].title}
+        </span>
+      </a>
+      <div class="flex gap-x-1 text-xs text-text">
+        <span>{dateToNow(videos[index].pubDate)}</span>
+        <span class="text-text-muted select-none">&bull;</span>
+        <span>{videos[index].channelTitle}</span>
+      </div>
     </div>
   {/if}
 {/snippet}

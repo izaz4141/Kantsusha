@@ -1,4 +1,4 @@
-import type { AnyWidgetParams, BaseWidgetParams, WrapperParams } from './widget.params';
+import type { AnyWidgetParams, BaseWidgetParams, WrapperWidgetParams } from './widget.params';
 
 export interface RssArticle {
   title: string;
@@ -73,7 +73,10 @@ export interface EndpointData {
 
 export interface TabbedData {
   ids: string[];
-  widgets: BaseWidgetParams[] | [];
+}
+
+export interface SplitColumnData {
+  ids: string[];
 }
 
 export interface FetchedData {
@@ -117,10 +120,10 @@ export interface BaseWidgetInfo {
   params: BaseWidgetParams;
 }
 
-export type WrapperWidgetData = TabbedData;
+export type WrapperWidgetData = TabbedData | SplitColumnData;
 export interface WrapperWidgetInfo {
   data: WrapperWidgetData;
-  params: WrapperParams;
+  params: WrapperWidgetParams;
 }
 
 export type AnyWidgetData = BaseWidgetData | WrapperWidgetData;

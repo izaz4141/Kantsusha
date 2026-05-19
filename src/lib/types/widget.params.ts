@@ -7,19 +7,6 @@ export const REDDIT_TIME_REGEX = /^(hour|day|week|month|year|all)$/;
 
 export const TARGET_REGEX = /^(_blank|_self|_parent|_top)$/;
 
-export const WidgetTypeSchema = z.enum([
-  'calendar',
-  'rss',
-  'reddit',
-  'youtube',
-  'services',
-  'custom-api',
-  'tabbed',
-  'twitch-channel',
-  'markets',
-]);
-export type WidgetType = z.infer<typeof WidgetTypeSchema>;
-
 const CommonWidgetParamsSchema = z.object({
   title: z.string().optional(),
   cache: z.string().regex(TIME_REGEX).default('1h').optional(),
@@ -199,11 +186,30 @@ export const TabbedParamsSchema = CommonWidgetParamsSchema.merge(
 );
 export type TabbedParams = z.infer<typeof TabbedParamsSchema>;
 
-const WrapperWidgetParams = z.discriminatedUnion('type', [TabbedParamsSchema]);
-export type WrapperParams = z.infer<typeof WrapperWidgetParams>;
+const CSS_PERCENT_REGEX = /^(\d+(\.\d+)?)%$/;
+
+export const SplitColumnWidgetEntrySchema = BaseWidgetParamsSchema.and(
+  z.object({ size: z.string().regex(CSS_PERCENT_REGEX).optional() }),
+);
+export type SplitColumnWidgetEntry = z.infer<typeof SplitColumnWidgetEntrySchema>;
+
+export const SplitColumnParamsSchema = CommonWidgetParamsSchema.merge(
+  z.object({
+    type: z.literal('split-column'),
+    id: z.string().default('N/A'),
+    widgets: z.array(SplitColumnWidgetEntrySchema).min(1),
+  }),
+);
+export type SplitColumnParams = z.infer<typeof SplitColumnParamsSchema>;
+
+export const WrapperWidgetParamsSchema = z.discriminatedUnion('type', [
+  TabbedParamsSchema,
+  SplitColumnParamsSchema,
+]);
+export type WrapperWidgetParams = z.infer<typeof WrapperWidgetParamsSchema>;
 
 export const AnyWidgetParamsSchema = z.discriminatedUnion('type', [
   ...BaseWidgetParamsSchema.options,
-  ...WrapperWidgetParams.options,
+  ...WrapperWidgetParamsSchema.options,
 ]);
 export type AnyWidgetParams = z.infer<typeof AnyWidgetParamsSchema>;

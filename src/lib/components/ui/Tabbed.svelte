@@ -4,6 +4,7 @@
   import PulseLoader from '$lib/components/shared/PulseLoader.svelte';
   import { fetchURL } from '$lib/utils/network';
   import type { TabbedData, AnyWidgetInfo } from '$lib/types/widget.data';
+  import type { TabbedParams } from '$lib/types/widget.params';
 
   interface Props {
     id: string;
@@ -14,6 +15,7 @@
   let loading = $state(true);
   let error = $state<string | null>(null);
   let tabData = $state<TabbedData | null>(null);
+  let tabParams = $state<TabbedParams | null>(null);
   let active = $state(0);
   let reloading = $state(false);
 
@@ -40,8 +42,8 @@
     reloading = false;
   }
 
-  onMount(() => {
-    fetchTabbedData(true);
+  onMount(async () => {
+    await fetchTabbedData(true);
   });
 </script>
 
@@ -56,10 +58,10 @@
     <span class="text-error">⚠</span>
     <span class="text-sm text-error">{error}</span>
   </div>
-{:else if tabData}
+{:else if tabParams && tabData}
   <div class="mx-2 flex flex-row items-center justify-between">
-    <div class="flex flex-row gap-2 overflow-x-auto">
-      {#each tabData.widgets as widget, i (`${widget.type}_${i}`)}
+    <div class="flex flex-row gap-2 overflow-x-scroll">
+      {#each tabParams.widgets as widget, i (`${widget.type}_${i}`)}
         <button
           type="button"
           class="flex shrink-0 text-sm font-medium uppercase {active === i
@@ -82,7 +84,7 @@
   </div>
   {#each tabData.ids as _, i (i)}
     <div class:hidden={active !== i}>
-      <WidgetRenderer id={tabData.ids[i]} type={tabData.widgets[i].type} showTitle={false} />
+      <WidgetRenderer id={tabData.ids[i]} type={tabParams.widgets[i].type} showTitle={false} />
     </div>
   {/each}
 {/if}

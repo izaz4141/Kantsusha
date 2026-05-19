@@ -25,12 +25,12 @@ pages:
 
 ### Column Sizes
 
-| Size | Description |
-|------|-------------|
-| `25%` | Narrow column |
-| `50%` | Half width |
-| `full` | Full width |
-| `small` | Compact |
+| Size    | Description   |
+| ------- | ------------- |
+| `25%`   | Narrow column |
+| `50%`   | Half width    |
+| `full`  | Full width    |
+| `small` | Compact       |
 
 ## Widgets
 
@@ -48,12 +48,12 @@ widgets:
 
 All widgets support:
 
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `title` | string | - | Widget header |
-| `cache` | duration | `1h` | Cache duration |
-| `update` | duration | `1h` | Update interval |
-| `frameless` | boolean | `false` | Hide header |
+| Parameter   | Type     | Default | Description     |
+| ----------- | -------- | ------- | --------------- |
+| `title`     | string   | -       | Widget header   |
+| `cache`     | duration | `1h`    | Cache duration  |
+| `update`    | duration | `1h`    | Update interval |
+| `frameless` | boolean  | `false` | Hide header     |
 
 ### Duration Format
 
@@ -67,7 +67,7 @@ All widgets support:
 ## Theme
 
 ```yaml
-theme: dark  # light, sepia, dark, high-contrast
+theme: dark # light, sepia, dark, high-contrast
 ```
 
 See [Theming](theming.md) for customization options.

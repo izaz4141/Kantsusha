@@ -8,11 +8,15 @@ import type {
   RssParams,
   YouTubeParams,
   TabbedParams,
+  SplitColumnParams,
   ServicesParams,
   CustomApiParams,
   TwitchChannelParams,
   MarketsParams,
+  SplitColumnWidgetEntry,
+  WrapperWidgetParams,
 } from '$lib/types/widget.params';
+import { WrapperWidgetParamsSchema } from '$lib/types/widget.params';
 import type {
   AnyWidgetData,
   AnyWidgetInfo,
@@ -62,28 +66,35 @@ export function createWidget(id: string, type: string, params: AnyWidgetParams):
   return widget;
 }
 
-export function createTabbedWidget(id: string, widgets: BaseWidgetParams[]): Widget {
+export function createWrapperWidget(
+  id: string,
+  type: WrapperWidgetParams['type'],
+  params: WrapperWidgetParams,
+): Widget {
   const nestedIds: string[] = [];
+  const widgets: SplitColumnWidgetEntry[] | BaseWidgetParams[] = params.widgets;
   for (let i = 0; i < widgets.length; i++) {
     const widget = widgets[i];
-    const nestedParams = widget;
-    const nestedId = `${id}:tab:${i}`;
-    const nested = createWidget(nestedId, widget.type, nestedParams);
+    const nestedId = `${id}:wrapper:${i}`;
+    const nested = createWidget(nestedId, widget.type, widget);
     nestedIds.push(nested.id);
   }
-  const tabbed = createWidget(id, 'tabbed', { type: 'tabbed', id, widgets });
-  tabbed.data = { ids: nestedIds, widgets };
-  return tabbed;
+  const wrapper = createWidget(id, type, { ...params, id: id });
+  wrapper.data = { ids: nestedIds };
+  return wrapper;
 }
 
-export function getOrCreateWidget(id: string, widget: AnyWidgetParams): string {
+export function getOrCreateWidget(id: string, params: AnyWidgetParams): string {
   const existing = getWidget(id);
   if (existing) return existing.id;
 
-  const created =
-    widget.type === 'tabbed'
-      ? createTabbedWidget(id, widget.widgets)
-      : createWidget(id, widget.type, widget);
+  const created = WrapperWidgetParamsSchema.options.some((o) => o.shape.type.value == params.type)
+    ? createWrapperWidget(
+        id,
+        params.type as WrapperWidgetParams['type'],
+        params as WrapperWidgetParams,
+      )
+    : createWidget(id, params.type, params);
   return created.id;
 }
 
@@ -153,6 +164,12 @@ registerWidget('youtube', async (params) => {
 
 registerWidget('tabbed', async (params) => {
   params = params as TabbedParams;
+  const widget = widgetCache.get(params.id);
+  return widget?.data ?? [];
+});
+
+registerWidget('split-column', async (params) => {
+  params = params as SplitColumnParams;
   const widget = widgetCache.get(params.id);
   return widget?.data ?? [];
 });
