@@ -41,17 +41,19 @@ pages:
     columns:
       - size: 25%
         widgets:
-          - type: calendar
-            cals:
-              - type: ics
-                url: 'https://calendar.google.com/calendar/ical/id.indonesian%23holiday%40group.v.calendar.google.com/public/basic.ics'
+          - type: tabbed
+            widgets:
+              - type: calendar
+                cals:
+                  - type: ics
+                    url: 'https://calendar.google.com/calendar/ical/id.indonesian%23holiday%40group.v.calendar.google.com/public/basic.ics'
 
-          - type: rss
-            title: SELFTHOST RSS
-            view: card
-            showThumbnail: true
-            feeds:
-              - url: 'https://selfh.st/rss'
+              - type: rss
+                title: SELFTHOST RSS
+                view: card
+                showThumbnail: true
+                feeds:
+                  - url: 'https://selfh.st/rss'
 
           - type: twitch-channel
             channels:
@@ -60,17 +62,24 @@ pages:
               - esl_dota2
       - size: full
         widgets:
-          - type: split-column
+          - type: tabbed
             title: Reddit
             widgets:
-              - type: reddit
-                cache: 2h
-                update: 30m
-                view: card
-                subreddit: selfhosted
-                sort: top
-                time: month
-                limit: 10
+              - type: split-row
+                widgets:
+                  - type: reddit
+                    cache: 2h
+                    update: 30m
+                    view: card
+                    subreddit: selfhosted
+                    sort: top
+                    time: month
+                    limit: 10
+                  - type: rss
+                    view: card
+                    showThumbnail: true
+                    feeds:
+                      - url: 'https://selfh.st/rss'
               - type: reddit
                 subreddit: privacy
                 sort: top

@@ -4,10 +4,10 @@ Container widget that displays multiple widgets in tabs. You can place any other
 
 ## Parameters
 
-| Parameter | Type         | Required | Description      |
-| --------- | ------------ | -------- | ---------------- |
-| `type`    | string       | Yes      | `tabbed`         |
-| `widgets` | BaseWidget[] | Yes      | Array of widgets |
+| Parameter | Type              | Required | Description      |
+| --------- | ----------------- | -------- | ---------------- |
+| `type`    | string            | Yes      | `tabbed`         |
+| `widgets` | AnyWidgetParams[] | Yes      | Array of widgets |
 
 ## Example
 
@@ -32,7 +32,7 @@ Container widget that displays multiple widgets in tabs. You can place any other
 
 ## Nested Widgets
 
-Any base widget type can be nested:
+Any widget type can be nested, including other container widgets:
 
 - `calendar`
 - `rss`
@@ -42,6 +42,9 @@ Any base widget type can be nested:
 - `markets`
 - `services`
 - `custom-api`
+- `tabbed`
+- `split-column`
+- `split-row`
 
 ## Use Cases
 

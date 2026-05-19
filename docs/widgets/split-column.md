@@ -4,10 +4,10 @@ Container widget that displays multiple widgets side-by-side in a single panel. 
 
 ## Parameters
 
-| Parameter | Type                     | Required | Description      |
-| --------- | ------------------------ | -------- | ---------------- |
-| `type`    | string                   | Yes      | `split-column`   |
-| `widgets` | SplitColumnWidgetEntry[] | Yes      | Array of widgets |
+| Parameter | Type              | Required | Description      |
+| --------- | ----------------- | -------- | ---------------- |
+| `type`    | string            | Yes      | `split-column`   |
+| `widgets` | AnyWidgetParams[] | Yes      | Array of widgets |
 
 ### Widget Entry Parameters
 
@@ -37,7 +37,7 @@ Each widget in the `widgets` array can include:
 
 ## Nested Widgets
 
-Any base widget type can be nested:
+Any widget type can be nested, including other container widgets:
 
 - `calendar`
 - `rss`
@@ -47,6 +47,9 @@ Any base widget type can be nested:
 - `markets`
 - `services`
 - `custom-api`
+- `tabbed`
+- `split-column`
+- `split-row`
 
 ## Use Cases
 

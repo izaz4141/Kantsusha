@@ -71,14 +71,6 @@ export interface EndpointData {
   responseTime?: number;
 }
 
-export interface TabbedData {
-  ids: string[];
-}
-
-export interface SplitColumnData {
-  ids: string[];
-}
-
 export interface FetchedData {
   id: string;
   type: 'text' | 'json';
@@ -120,7 +112,7 @@ export interface BaseWidgetInfo {
   params: BaseWidgetParams;
 }
 
-export type WrapperWidgetData = TabbedData | SplitColumnData;
+export type WrapperWidgetData = { ids: string[] };
 export interface WrapperWidgetInfo {
   data: WrapperWidgetData;
   params: WrapperWidgetParams;

@@ -2,19 +2,19 @@ import { LRUCache } from 'lru-cache';
 
 import type {
   AnyWidgetParams,
-  BaseWidgetParams,
   CalendarParams,
   RedditParams,
   RssParams,
   YouTubeParams,
   TabbedParams,
   SplitColumnParams,
+  SplitRowParams,
   ServicesParams,
   CustomApiParams,
   TwitchChannelParams,
   MarketsParams,
-  SplitColumnWidgetEntry,
   WrapperWidgetParams,
+  WrapperWidgetEntry,
 } from '$lib/types/widget.params';
 import { WrapperWidgetParamsSchema } from '$lib/types/widget.params';
 import type {
@@ -72,11 +72,23 @@ export function createWrapperWidget(
   params: WrapperWidgetParams,
 ): Widget {
   const nestedIds: string[] = [];
-  const widgets: SplitColumnWidgetEntry[] | BaseWidgetParams[] = params.widgets;
+  const widgets = params.widgets as WrapperWidgetEntry[];
   for (let i = 0; i < widgets.length; i++) {
-    const widget = widgets[i];
+    const widget = widgets[i] as AnyWidgetParams;
     const nestedId = `${id}:wrapper:${i}`;
-    const nested = createWidget(nestedId, widget.type, widget);
+    const isWrapper = WrapperWidgetParamsSchema.options.some(
+      (o) => o.shape.type.value == widget.type,
+    );
+    const nested = isWrapper
+      ? createWrapperWidget(
+          nestedId,
+          widget.type as WrapperWidgetParams['type'],
+          widget as WrapperWidgetParams,
+        )
+      : createWidget(nestedId, widget.type, widget);
+    if (isWrapper) {
+      (params.widgets as WrapperWidgetParams[])[i].id = nestedId;
+    }
     nestedIds.push(nested.id);
   }
   const wrapper = createWidget(id, type, { ...params, id: id });
@@ -170,6 +182,12 @@ registerWidget('tabbed', async (params) => {
 
 registerWidget('split-column', async (params) => {
   params = params as SplitColumnParams;
+  const widget = widgetCache.get(params.id);
+  return widget?.data ?? [];
+});
+
+registerWidget('split-row', async (params) => {
+  params = params as SplitRowParams;
   const widget = widgetCache.get(params.id);
   return widget?.data ?? [];
 });

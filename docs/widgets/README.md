@@ -2,18 +2,19 @@
 
 ## Available Widgets
 
-| Widget                                      | Description                  |
-| ------------------------------------------- | ---------------------------- |
-| [Calendar](widgets/calendar.md)             | ICS/CalDAV calendar events   |
-| [RSS](widgets/rss.md)                       | RSS/Atom feed aggregation    |
-| [Reddit](widgets/reddit.md)                 | Subreddit posts              |
-| [YouTube](widgets/youtube.md)               | YouTube channel videos       |
-| [Twitch Channel](widgets/twitch-channel.md) | Twitch stream status         |
-| [Markets](widgets/markets.md)               | Stock/crypto prices          |
-| [Services](widgets/services.md)             | Links with status checks     |
-| [Custom API](widgets/custom-api.md)         | Generic API widget           |
-| [Tabbed](widgets/tabbed.md)                 | Container for nested widgets |
-| [Split Column](widgets/split-column.md)     | Side-by-side widget layout   |
+| Widget                                      | Description                    |
+| ------------------------------------------- | ------------------------------ |
+| [Calendar](widgets/calendar.md)             | ICS/CalDAV calendar events     |
+| [RSS](widgets/rss.md)                       | RSS/Atom feed aggregation      |
+| [Reddit](widgets/reddit.md)                 | Subreddit posts                |
+| [YouTube](widgets/youtube.md)               | YouTube channel videos         |
+| [Twitch Channel](widgets/twitch-channel.md) | Twitch stream status           |
+| [Markets](widgets/markets.md)               | Stock/crypto prices            |
+| [Services](widgets/services.md)             | Links with status checks       |
+| [Custom API](widgets/custom-api.md)         | Generic API widget             |
+| [Tabbed](widgets/tabbed.md)                 | Container for nested widgets   |
+| [Split Column](widgets/split-column.md)     | Side-by-side widget layout     |
+| [Split Row](widgets/split-row.md)           | Stacked vertical widget layout |
 
 ## Container Widgets
 
@@ -23,6 +24,9 @@ Some widgets are **containers** that hold other widgets inside them. These let y
 
 - **Tabbed** - Displays nested widgets as tabs
 - **Split Column** - Displays nested widgets side-by-side
+- **Split Row** - Displays nested widgets stacked vertically
+
+Container widgets can nest any widget type, including other container widgets.
 
 ## Common Parameters
 

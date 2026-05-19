@@ -3,8 +3,15 @@
   import WidgetRenderer from './WidgetRenderer.svelte';
   import PulseLoader from '$lib/components/shared/PulseLoader.svelte';
   import { fetchURL } from '$lib/utils/network';
-  import type { TabbedData, AnyWidgetInfo } from '$lib/types/widget.data';
-  import type { TabbedParams } from '$lib/types/widget.params';
+  import type { WrapperWidgetData, AnyWidgetInfo } from '$lib/types/widget.data';
+  import {
+    type TabbedParams,
+    type WrapperWidgetEntry,
+    type BaseWidgetParams,
+    type WrapperWidgetParams,
+    WrapperWidgetParamsSchema,
+  } from '$lib/types/widget.params';
+  import WrapperWidgetRenderer from './WrapperWidgetRenderer.svelte';
 
   interface Props {
     id: string;
@@ -14,8 +21,9 @@
 
   let loading = $state(true);
   let error = $state<string | null>(null);
-  let tabData = $state<TabbedData | null>(null);
+  let tabData = $state<WrapperWidgetData | null>(null);
   let tabParams = $state<TabbedParams | null>(null);
+  let widgets = $derived(tabParams?.widgets as WrapperWidgetEntry[]);
   let active = $state(0);
   let reloading = $state(false);
 
@@ -28,7 +36,8 @@
       const result = (await fetchURL(`/api/v1/widgets/${id}`, {
         returnText: false,
       })) as AnyWidgetInfo;
-      tabData = result.data as TabbedData;
+      tabData = result.data as WrapperWidgetData;
+      tabParams = result.params as TabbedParams;
     } catch (e) {
       error = e instanceof Error ? e.message : 'Failed to load tabs';
     } finally {
@@ -61,7 +70,7 @@
 {:else if tabParams && tabData}
   <div class="mx-2 flex flex-row items-center justify-between">
     <div class="flex flex-row gap-2 overflow-x-scroll">
-      {#each tabParams.widgets as widget, i (`${widget.type}_${i}`)}
+      {#each widgets as widget, i (`${widget.type}_${i}`)}
         <button
           type="button"
           class="flex shrink-0 text-sm font-medium uppercase {active === i
@@ -69,7 +78,7 @@
             : 'text-text-muted'} hover:text-text"
           onclick={() => (active = i)}
         >
-          {widget.title ?? 'N/A'}
+          {widget.title ?? `Tab ${i + 1}`}
         </button>
       {/each}
     </div>
@@ -84,7 +93,18 @@
   </div>
   {#each tabData.ids as _, i (i)}
     <div class:hidden={active !== i}>
-      <WidgetRenderer id={tabData.ids[i]} type={tabParams.widgets[i].type} showTitle={false} />
+      {#if WrapperWidgetParamsSchema.options.some((o) => o.shape.type.value == widgets[i].type)}
+        <WrapperWidgetRenderer
+          id={tabData.ids[i]}
+          type={widgets[i].type as WrapperWidgetParams['type']}
+        />
+      {:else}
+        <WidgetRenderer
+          id={tabData.ids[i]}
+          type={widgets[i].type as BaseWidgetParams['type']}
+          showTitle={false}
+        />
+      {/if}
     </div>
   {/each}
 {/if}

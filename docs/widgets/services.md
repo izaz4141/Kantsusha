@@ -4,12 +4,13 @@ Display links with status checks for services and Docker containers.
 
 ## Parameters
 
-| Parameter  | Type      | Required | Default  | Description       |
-| ---------- | --------- | -------- | -------- | ----------------- |
-| `type`     | string    | Yes      | -        | `services`        |
-| `services` | Service[] | Yes      | -        | Array of services |
-| `column`   | number    | No       | `3`      | Grid columns      |
-| `target`   | string    | No       | `_blank` | Link target       |
+| Parameter  | Type      | Required | Default    | Description       |
+| ---------- | --------- | -------- | ---------- | ----------------- |
+| `type`     | string    | Yes      | -          | `services`        |
+| `title`    | string    | No       | `Services` | `services`        |
+| `services` | Service[] | Yes      | -          | Array of services |
+| `column`   | number    | No       | `3`        | Grid columns      |
+| `target`   | string    | No       | `_blank`   | Link target       |
 
 ### Service Types
 

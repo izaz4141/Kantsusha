@@ -13,10 +13,11 @@
   import PulseLoader from '$lib/components/shared/PulseLoader.svelte';
   import { fetchURL } from '$lib/utils/network';
   import { timeToMs } from '$lib/utils/time';
+  import type { BaseWidgetParams } from '$lib/types/widget.params';
 
   interface Props {
     id: string;
-    type: string;
+    type: BaseWidgetParams['type'];
     update?: number;
     showTitle?: boolean;
   }

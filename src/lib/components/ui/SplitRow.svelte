@@ -5,10 +5,10 @@
   import { fetchURL } from '$lib/utils/network';
   import type { WrapperWidgetData, AnyWidgetInfo } from '$lib/types/widget.data';
   import {
-    type SplitColumnParams,
+    type SplitRowParams,
     type WrapperWidgetEntry,
-    type BaseWidgetParams,
     type WrapperWidgetParams,
+    type BaseWidgetParams,
     WrapperWidgetParamsSchema,
   } from '$lib/types/widget.params';
   import WrapperWidgetRenderer from './WrapperWidgetRenderer.svelte';
@@ -22,7 +22,7 @@
   let loading = $state(true);
   let error = $state<string | null>(null);
   let splitData = $state<WrapperWidgetData | null>(null);
-  let splitParams = $state<SplitColumnParams | null>(null);
+  let splitParams = $state<SplitRowParams | null>(null);
   let widgets = $derived(splitParams?.widgets as WrapperWidgetEntry[]);
   let reloading = $state(false);
 
@@ -36,9 +36,9 @@
         returnText: false,
       })) as AnyWidgetInfo;
       splitData = result.data as WrapperWidgetData;
-      splitParams = result.params as SplitColumnParams;
+      splitParams = result.params as SplitRowParams;
     } catch (e) {
-      error = e instanceof Error ? e.message : 'Failed to load columns';
+      error = e instanceof Error ? e.message : 'Failed to load rows';
     } finally {
       loading = false;
     }
@@ -50,23 +50,6 @@
     reloading = false;
   }
 
-  function parsePercent(size: string | undefined): number {
-    if (!size) return 0;
-    const match = size.match(/^(\d+(\.\d+)?)%$/);
-    return match ? parseFloat(match[1]) : 0;
-  }
-
-  let normalizedWidths = $derived(() => {
-    if (!splitParams) return [];
-
-    const sizes = widgets.map((w) => parsePercent(w.size));
-    const sumSpecified = sizes.reduce((acc, s) => acc + s, 0);
-    const numUnspecified = sizes.filter((s) => s === 0).length;
-    const defaultWidth = numUnspecified > 0 ? (100 - sumSpecified) / numUnspecified : 0;
-
-    return sizes.map((s) => (s === 0 ? defaultWidth : s));
-  });
-
   onMount(async () => {
     await fetchSplitData(true);
   });
@@ -74,7 +57,7 @@
 
 {#if loading}
   <div class="flex items-center justify-center rounded-lg border border-border bg-surface">
-    <PulseLoader message="Loading columns..." />
+    <PulseLoader message="Loading rows..." />
   </div>
 {:else if error}
   <div
@@ -91,29 +74,26 @@
         onclick={reload}
         class="text-text-muted transition-colors hover:text-text"
         disabled={reloading}
-        aria-label="Reload columns"
+        aria-label="Reload rows"
       >
         <span class:animate-spin={reloading}>↻</span>
       </button>
     </div>
   {/if}
-  <div class="flex flex-row gap-x-4">
+  <div class="flex flex-col gap-y-4">
     {#each splitData.ids as _, i (i)}
-      {@const width = normalizedWidths()[i]}
-      <div style="width: {width}%;">
-        {#if WrapperWidgetParamsSchema.options.some((o) => o.shape.type.value == widgets[i].type)}
-          <WrapperWidgetRenderer
-            id={splitData.ids[i]}
-            type={widgets[i].type as WrapperWidgetParams['type']}
-          />
-        {:else}
-          <WidgetRenderer
-            id={splitData.ids[i]}
-            type={widgets[i].type as BaseWidgetParams['type']}
-            showTitle={splitParams?.title ? false : true}
-          />
-        {/if}
-      </div>
+      {#if WrapperWidgetParamsSchema.options.some((o) => o.shape.type.value == widgets[i].type)}
+        <WrapperWidgetRenderer
+          id={splitData.ids[i]}
+          type={widgets[i].type as WrapperWidgetParams['type']}
+        />
+      {:else}
+        <WidgetRenderer
+          id={splitData.ids[i]}
+          type={widgets[i].type as BaseWidgetParams['type']}
+          showTitle={false}
+        />
+      {/if}
     {/each}
   </div>
 {/if}

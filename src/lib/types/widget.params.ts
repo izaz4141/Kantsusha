@@ -7,6 +7,8 @@ export const REDDIT_TIME_REGEX = /^(hour|day|week|month|year|all)$/;
 
 export const TARGET_REGEX = /^(_blank|_self|_parent|_top)$/;
 
+const CSS_PERCENT_REGEX = /^(\d+(\.\d+)?)%$/;
+
 const CommonWidgetParamsSchema = z.object({
   title: z.string().optional(),
   cache: z.string().regex(TIME_REGEX).default('1h').optional(),
@@ -139,6 +141,7 @@ export type EndpointParams = z.infer<typeof EndpointParamsSchema>;
 export const ServicesParamsSchema = CommonWidgetParamsSchema.merge(
   z.object({
     type: z.literal('services'),
+    title: z.string().default('Services'),
     target: z.string().regex(TARGET_REGEX).default('_blank').optional(),
     column: z.number().int().positive().default(3),
     services: z.discriminatedUnion('type', [ContainerParamsSchema, EndpointParamsSchema]).array(),
@@ -181,30 +184,33 @@ export const TabbedParamsSchema = CommonWidgetParamsSchema.merge(
   z.object({
     type: z.literal('tabbed'),
     id: z.string().default('N/A'),
-    widgets: z.array(BaseWidgetParamsSchema).min(1),
+    widgets: z.lazy((): z.ZodArray => z.array(WrapperWidgetEntrySchema).min(1)),
   }),
 );
 export type TabbedParams = z.infer<typeof TabbedParamsSchema>;
-
-const CSS_PERCENT_REGEX = /^(\d+(\.\d+)?)%$/;
-
-export const SplitColumnWidgetEntrySchema = BaseWidgetParamsSchema.and(
-  z.object({ size: z.string().regex(CSS_PERCENT_REGEX).optional() }),
-);
-export type SplitColumnWidgetEntry = z.infer<typeof SplitColumnWidgetEntrySchema>;
 
 export const SplitColumnParamsSchema = CommonWidgetParamsSchema.merge(
   z.object({
     type: z.literal('split-column'),
     id: z.string().default('N/A'),
-    widgets: z.array(SplitColumnWidgetEntrySchema).min(1),
+    widgets: z.lazy((): z.ZodArray => z.array(WrapperWidgetEntrySchema).min(1)),
   }),
 );
 export type SplitColumnParams = z.infer<typeof SplitColumnParamsSchema>;
 
+export const SplitRowParamsSchema = CommonWidgetParamsSchema.merge(
+  z.object({
+    type: z.literal('split-row'),
+    id: z.string().default('N/A'),
+    widgets: z.lazy((): z.ZodArray => z.array(WrapperWidgetEntrySchema).min(1)),
+  }),
+);
+export type SplitRowParams = z.infer<typeof SplitRowParamsSchema>;
+
 export const WrapperWidgetParamsSchema = z.discriminatedUnion('type', [
   TabbedParamsSchema,
   SplitColumnParamsSchema,
+  SplitRowParamsSchema,
 ]);
 export type WrapperWidgetParams = z.infer<typeof WrapperWidgetParamsSchema>;
 
@@ -213,3 +219,8 @@ export const AnyWidgetParamsSchema = z.discriminatedUnion('type', [
   ...WrapperWidgetParamsSchema.options,
 ]);
 export type AnyWidgetParams = z.infer<typeof AnyWidgetParamsSchema>;
+
+export const WrapperWidgetEntrySchema = AnyWidgetParamsSchema.and(
+  z.object({ size: z.string().regex(CSS_PERCENT_REGEX).optional() }),
+);
+export type WrapperWidgetEntry = z.infer<typeof WrapperWidgetEntrySchema>;

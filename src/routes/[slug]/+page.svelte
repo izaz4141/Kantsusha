@@ -3,11 +3,15 @@
   import ThreePanel from '$lib/components/layout/ThreePanel.svelte';
   import Slim from '$lib/components/layout/Slim.svelte';
   import WidgetRenderer from '$lib/components/ui/WidgetRenderer.svelte';
-  import Tabbed from '$lib/components/ui/Tabbed.svelte';
-  import SplitColumn from '$lib/components/ui/SplitColumn.svelte';
+  import {
+    WrapperWidgetParamsSchema,
+    type WrapperWidgetParams,
+    type BaseWidgetParams,
+  } from '$lib/types/widget.params';
   import type { LayoutProps } from '$lib/types/layout';
   import type { PageData } from './$types';
   import type { Component } from 'svelte';
+  import WrapperWidgetRenderer from '$lib/components/ui/WrapperWidgetRenderer.svelte';
 
   let { data }: { data: PageData } = $props();
 
@@ -30,13 +34,11 @@
   {#if columns[colIndex]}
     {#each columns[colIndex].widgets as widget, wIdx (`${colIndex}:${wIdx}`)}
       {@const wid = getWidgetId(colIndex, wIdx)}
-      {#if wid}
-        {#if widget.type === 'tabbed'}
-          <Tabbed id={wid} />
-        {:else if widget.type === 'split-column'}
-          <SplitColumn id={wid} />
+      {#if wid != ''}
+        {#if WrapperWidgetParamsSchema.options.some((o) => o.shape.type.value == widget.type)}
+          <WrapperWidgetRenderer id={wid} type={widget.type as WrapperWidgetParams['type']} />
         {:else}
-          <WidgetRenderer id={wid} type={widget.type} />
+          <WidgetRenderer id={wid} type={widget.type as BaseWidgetParams['type']} />
         {/if}
       {/if}
     {/each}

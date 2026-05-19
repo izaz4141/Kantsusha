@@ -22,7 +22,7 @@ export function validateWidget(raw: unknown): AnyWidgetParams | null {
     return AnyWidgetParamsSchema.parse(raw);
   } catch (err) {
     if (err instanceof z.ZodError) {
-      console.warn(`Warning: Widget validation failed: ${err.message}`);
+      console.warn(`Warning: Widget ${type} validation failed: ${err.message}`);
     }
     return null;
   }
