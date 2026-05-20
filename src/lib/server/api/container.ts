@@ -30,7 +30,6 @@ interface ContainerStats {
     cpu_usage: { total_usage: number; percpu_usage?: number[] };
     system_cpu_usage: number;
     online_cpus: number;
-    cpu?: number;
   };
   precpu_stats: {
     cpu_usage: { total_usage: number };
@@ -38,49 +37,87 @@ interface ContainerStats {
   };
   memory_stats: {
     usage: number;
-    max_usage: number;
-    stats: Record<string, number>;
-    limit: number;
+    max_usage?: number;
+    stats?: Record<string, number>;
+    limit?: number;
   };
 }
 
 function calculateCpuPercent(stats: ContainerStats): number {
-  if (stats.cpu_stats.cpu !== undefined) {
-    return stats.cpu_stats.cpu;
-  }
   const cpuDelta = stats.cpu_stats.cpu_usage.total_usage - stats.precpu_stats.cpu_usage.total_usage;
   const systemDelta = stats.cpu_stats.system_cpu_usage - stats.precpu_stats.system_cpu_usage;
-  const cpuCount = stats.cpu_stats.online_cpus || 1;
+  const cpuCount =
+    stats.cpu_stats.online_cpus ?? stats.cpu_stats.cpu_usage.percpu_usage?.length ?? 1;
 
   if (systemDelta > 0 && cpuDelta > 0) {
     return (cpuDelta / systemDelta) * cpuCount * 100;
-  }
-
-  if (stats.cpu_stats.cpu_usage.percpu_usage && stats.cpu_stats.cpu_usage.percpu_usage.length > 0) {
-    const totalPerCpu = stats.cpu_stats.cpu_usage.percpu_usage.reduce((sum, val) => sum + val, 0);
-    if (stats.cpu_stats.system_cpu_usage > 0) {
-      return (totalPerCpu / stats.cpu_stats.system_cpu_usage) * cpuCount * 100;
-    }
   }
   return 0;
 }
 
 function calculateMemoryUsage(stats: ContainerStats): number {
   const usage = stats.memory_stats.usage;
-  const cache = stats.memory_stats.stats.cache ?? stats.memory_stats.stats.inactive_file ?? 0;
+  const cache = stats.memory_stats.stats?.inactive_file ?? stats.memory_stats.stats?.cache ?? 0;
   return usage - cache;
 }
 
 function calculateMemoryPercent(stats: ContainerStats): number {
   const usage = calculateMemoryUsage(stats);
-  const limit = stats.memory_stats.limit;
+  const limit = stats.memory_stats.limit ?? stats.memory_stats.max_usage ?? 0;
   if (limit > 0) {
     return (usage / limit) * 100;
   }
-  if (stats.memory_stats.max_usage > 0) {
-    return (usage / stats.memory_stats.max_usage) * 100;
-  }
   return 0;
+}
+
+async function fetchTwoStatsSnapshots(
+  host: string,
+  containerName: string,
+): Promise<[ContainerStats, ContainerStats] | null> {
+  const statsUrl = buildContainerUrl(host, `/v1.54/containers/${containerName}/stats?stream=true`);
+
+  const response = await fetch(statsUrl, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+
+  if (!response.ok || !response.body) {
+    return null;
+  }
+
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  const snapshots: ContainerStats[] = [];
+
+  try {
+    while (snapshots.length < 2) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      const chunk = decoder.decode(value, { stream: true });
+      const lines = chunk.split('\n').filter((line) => line.trim());
+
+      for (const line of lines) {
+        try {
+          const stats = JSON.parse(line) as ContainerStats;
+          snapshots.push(stats);
+          if (snapshots.length >= 2) break;
+        } catch {
+          continue;
+        }
+      }
+    }
+  } finally {
+    reader.cancel();
+  }
+
+  if (snapshots.length < 2) {
+    return null;
+  }
+
+  return [snapshots[0], snapshots[1]];
 }
 
 export async function fetchContainerData(
@@ -88,7 +125,6 @@ export async function fetchContainerData(
   containerName: string,
 ): Promise<ContainerData> {
   const inspectUrl = buildContainerUrl(host, `/v1.54/containers/${containerName}/json`);
-  const statsUrl = buildContainerUrl(host, `/v1.54/containers/${containerName}/stats?stream=false`);
 
   const inspectResponse = await fetch(inspectUrl, {
     method: 'GET',
@@ -136,21 +172,16 @@ export async function fetchContainerData(
 
   if (status === 'running') {
     try {
-      const statsResponse = await fetch(statsUrl, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      const snapshots = await fetchTwoStatsSnapshots(host, containerName);
 
-      if (statsResponse.ok) {
-        const stats: ContainerStats = await statsResponse.json();
+      if (snapshots && snapshots.length >= 1) {
+        const stats = snapshots[1];
         cpuPercent = calculateCpuPercent(stats);
         memoryUsage = calculateMemoryUsage(stats);
         memoryLimit = stats.memory_stats.limit || stats.memory_stats.max_usage || 0;
         memoryPercent = calculateMemoryPercent(stats);
       } else {
-        console.warn(`Failed to fetch stats for ${containerName}: ${statsResponse.status}`);
+        console.warn(`Failed to fetch stats for ${containerName}`);
       }
     } catch (e) {
       console.warn(`Error fetching stats for ${containerName}:`, e);
@@ -175,9 +206,13 @@ export async function fetchContainers(params: ServicesParams): Promise<Container
 
   const results: ContainerData[] = [];
   for (const container of containerServices) {
-    const host = getContainerHost(container);
-    const data = await fetchContainerData(host, container.id);
-    results.push(data);
+    try {
+      const host = getContainerHost(container);
+      const data = await fetchContainerData(host, container.id);
+      results.push(data);
+    } catch (e) {
+      console.error('Failed to get data for container ', container.id, e);
+    }
   }
 
   return results;
