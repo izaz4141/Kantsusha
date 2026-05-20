@@ -12,7 +12,7 @@
   
   <p>
     <a href="#features">Features</a> •
-    <a href="tree/main/docs">Documentation</a> 
+    <a href="docs">Documentation</a> 
   </p>
 </div>
 
