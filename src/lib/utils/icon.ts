@@ -47,11 +47,7 @@ export function resolveIcon(input: string): ResolveResult | null {
     return { url: remaining, invert };
   }
 
-  if (remaining.startsWith('/')) {
-    return { url: `/api/v1/utils/files?path=${encodeURIComponent(remaining)}`, invert };
-  }
-
-  return null;
+  return { url: `/api/v1/utils/files?path=${encodeURIComponent(remaining)}`, invert };
 }
 
 export function shouldInvert(invert: boolean): boolean {
