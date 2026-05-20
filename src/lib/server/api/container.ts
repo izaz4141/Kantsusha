@@ -55,6 +55,13 @@ function calculateCpuPercent(stats: ContainerStats): number {
   if (systemDelta > 0 && cpuDelta > 0) {
     return (cpuDelta / systemDelta) * cpuCount * 100;
   }
+
+  if (stats.cpu_stats.cpu_usage.percpu_usage && stats.cpu_stats.cpu_usage.percpu_usage.length > 0) {
+    const totalPerCpu = stats.cpu_stats.cpu_usage.percpu_usage.reduce((sum, val) => sum + val, 0);
+    if (stats.cpu_stats.system_cpu_usage > 0) {
+      return (totalPerCpu / stats.cpu_stats.system_cpu_usage) * cpuCount * 100;
+    }
+  }
   return 0;
 }
 
@@ -69,6 +76,9 @@ function calculateMemoryPercent(stats: ContainerStats): number {
   const limit = stats.memory_stats.limit;
   if (limit > 0) {
     return (usage / limit) * 100;
+  }
+  if (stats.memory_stats.max_usage > 0) {
+    return (usage / stats.memory_stats.max_usage) * 100;
   }
   return 0;
 }
@@ -137,11 +147,13 @@ export async function fetchContainerData(
         const stats: ContainerStats = await statsResponse.json();
         cpuPercent = calculateCpuPercent(stats);
         memoryUsage = calculateMemoryUsage(stats);
-        memoryLimit = stats.memory_stats.limit;
+        memoryLimit = stats.memory_stats.limit || stats.memory_stats.max_usage || 0;
         memoryPercent = calculateMemoryPercent(stats);
+      } else {
+        console.warn(`Failed to fetch stats for ${containerName}: ${statsResponse.status}`);
       }
-    } catch {
-      // Stats fetch failed, keep defaults
+    } catch (e) {
+      console.warn(`Error fetching stats for ${containerName}:`, e);
     }
   }
 

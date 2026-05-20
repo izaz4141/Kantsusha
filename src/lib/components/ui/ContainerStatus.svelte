@@ -98,7 +98,7 @@
           {#if containerData.time !== null}
             <div class="flex justify-between">
               <span class="text-text-muted">{containerData.time >= 0 ? 'Uptime' : 'Downtime'}</span>
-              <span class="text-text">{dateToNow(new Date(Date.now() + containerData.time))}</span>
+              <span class="text-text">{dateToNow(new Date(Date.now() - containerData.time))}</span>
             </div>
           {/if}
         </div>

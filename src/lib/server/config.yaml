@@ -188,7 +188,7 @@ pages:
               - type: endpoint
                 name: Jellyfin1
                 description: Media Player
-                icon: di:jellyfin
+                icon: https://github.com/av1155/houndarr/raw/main/src/houndarr/static/img/houndarr-logo-dark.png
                 url: https://jf.${SUBHOST}
                 target: _blank
                 statusCheck: true
