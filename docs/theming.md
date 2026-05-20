@@ -8,14 +8,14 @@ Six theme presets available:
 theme: catppuccin-mocha # light, sepia, catppuccin-latte, dark, high-contrast, catppuccin-mocha
 ```
 
-| Preset              | Light Mode | Description             |
-| ------------------- | ---------- | ----------------------- |
-| `light`             | Yes        | Rosé Pine Dawn (default)|
-| `sepia`             | Yes        | Warm paper tone         |
-| `catppuccin-latte`  | Yes        | Catppuccin Latte        |
-| `dark`              | No         | Rosé Pine (default)     |
-| `high-contrast`     | No         | Accessibility-focused   |
-| `catppuccin-mocha`  | No         | Catppuccin Mocha        |
+| Preset             | Light Mode | Description              |
+| ------------------ | ---------- | ------------------------ |
+| `light`            | Yes        | Rosé Pine Dawn (default) |
+| `sepia`            | Yes        | Warm paper tone          |
+| `catppuccin-latte` | Yes        | Catppuccin Latte         |
+| `dark`             | No         | Rosé Pine (default)      |
+| `high-contrast`    | No         | Accessibility-focused    |
+| `catppuccin-mocha` | No         | Catppuccin Mocha         |
 
 ### How Presets Work
 
@@ -31,7 +31,7 @@ Presets with empty `colors: {}` use the CSS defaults:
 dark:
   name: Rosé Pine
   light: false
-  colors: {}  # empty = use CSS defaults
+  colors: {} # empty = use CSS defaults
 ```
 
 Presets with custom colors override the CSS:

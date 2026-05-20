@@ -27,21 +27,27 @@ function buildContainerUrl(host: string, path: string): string {
 
 interface ContainerStats {
   cpu_stats: {
-    cpu_usage: { total_usage: number };
+    cpu_usage: { total_usage: number; percpu_usage?: number[] };
     system_cpu_usage: number;
     online_cpus: number;
+    cpu?: number;
   };
   precpu_stats: {
     cpu_usage: { total_usage: number };
     system_cpu_usage: number;
   };
   memory_stats: {
-    usage: { usage: number; limit: number };
-    stats: { cache: number };
+    usage: number;
+    max_usage: number;
+    stats: Record<string, number>;
+    limit: number;
   };
 }
 
 function calculateCpuPercent(stats: ContainerStats): number {
+  if (stats.cpu_stats.cpu !== undefined) {
+    return stats.cpu_stats.cpu;
+  }
   const cpuDelta = stats.cpu_stats.cpu_usage.total_usage - stats.precpu_stats.cpu_usage.total_usage;
   const systemDelta = stats.cpu_stats.system_cpu_usage - stats.precpu_stats.system_cpu_usage;
   const cpuCount = stats.cpu_stats.online_cpus || 1;
@@ -52,9 +58,15 @@ function calculateCpuPercent(stats: ContainerStats): number {
   return 0;
 }
 
+function calculateMemoryUsage(stats: ContainerStats): number {
+  const usage = stats.memory_stats.usage;
+  const cache = stats.memory_stats.stats.cache ?? stats.memory_stats.stats.inactive_file ?? 0;
+  return usage - cache;
+}
+
 function calculateMemoryPercent(stats: ContainerStats): number {
-  const usage = stats.memory_stats.usage.usage - (stats.memory_stats.stats.cache || 0);
-  const limit = stats.memory_stats.usage.limit;
+  const usage = calculateMemoryUsage(stats);
+  const limit = stats.memory_stats.limit;
   if (limit > 0) {
     return (usage / limit) * 100;
   }
@@ -80,14 +92,13 @@ export async function fetchContainerData(
       return {
         name: containerName,
         image: 'unknown',
-        status: 'exited',
+        status: 'unknown',
         health: null,
-        state: 'Not Found',
-        statusText: 'Not Found',
         cpuPercent: 0,
         memoryUsage: 0,
         memoryLimit: 0,
         memoryPercent: 0,
+        time: null,
       };
     }
     throw new Error(`Docker API error: ${inspectResponse.status}`);
@@ -99,6 +110,14 @@ export async function fetchContainerData(
   const status = (container.State?.Status?.toLowerCase() || 'created') as ContainerData['status'];
   const health = (container.State?.Health?.status?.toLowerCase() ||
     null) as ContainerData['health'];
+
+  const now = Date.now();
+  let time: number | null = null;
+  if (status === 'running' && container.State?.StartedAt) {
+    time = now - new Date(container.State.StartedAt).getTime();
+  } else if (container.State?.FinishedAt) {
+    time = -(now - new Date(container.State.FinishedAt).getTime());
+  }
 
   let cpuPercent = 0;
   let memoryUsage = 0;
@@ -117,8 +136,8 @@ export async function fetchContainerData(
       if (statsResponse.ok) {
         const stats: ContainerStats = await statsResponse.json();
         cpuPercent = calculateCpuPercent(stats);
-        memoryUsage = stats.memory_stats.usage.usage - (stats.memory_stats.stats.cache || 0);
-        memoryLimit = stats.memory_stats.usage.limit;
+        memoryUsage = calculateMemoryUsage(stats);
+        memoryLimit = stats.memory_stats.limit;
         memoryPercent = calculateMemoryPercent(stats);
       }
     } catch {
@@ -131,12 +150,11 @@ export async function fetchContainerData(
     image,
     status,
     health,
-    state: container.State?.Status || 'Unknown',
-    statusText: container.State?.Status || 'Unknown',
     cpuPercent: Number(cpuPercent.toFixed(2)),
     memoryUsage,
     memoryLimit,
     memoryPercent: Number(memoryPercent.toFixed(2)),
+    time,
   };
 }
 

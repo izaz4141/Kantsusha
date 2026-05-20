@@ -3,6 +3,7 @@
   import type { ContainerParams } from '$lib/types/widget.params';
   import RenderIcon from '$lib/components/shared/RenderIcon.svelte';
   import Dropdown from '$lib/components/ui/Dropdown.svelte';
+  import { dateToNow } from '$lib/utils/time';
   import { resolveString } from '$lib/utils/substitution';
 
   interface Props {
@@ -58,6 +59,7 @@
     if (status === 'restarting') return 'text-warning';
     if (status === 'removing') return 'text-warning';
     if (status === 'dead') return 'text-error';
+    if (status === 'unknown') return 'text-error';
     return 'text-text-muted';
   }
 </script>
@@ -93,6 +95,12 @@
               )}</span
             >
           </div>
+          {#if containerData.time !== null}
+            <div class="flex justify-between">
+              <span class="text-text-muted">{containerData.time >= 0 ? 'Uptime' : 'Downtime'}</span>
+              <span class="text-text">{dateToNow(new Date(Date.now() + containerData.time))}</span>
+            </div>
+          {/if}
         </div>
       </Dropdown>
     {/if}
@@ -141,8 +149,13 @@
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
-            stroke-width="2.5"
-            ><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg
+            stroke-width="2"
+            ><path d="M12 2L2 22h20L12 2z" /><line x1="12" y1="9" x2="12" y2="13" /><line
+              x1="12"
+              y1="17"
+              x2="12.01"
+              y2="17"
+            /></svg
           >
         {:else if containerData.status === 'running' && containerData.health === 'starting'}
           <svg
@@ -154,7 +167,7 @@
           >
         {:else if containerData.status === 'running'}
           <svg class="size-full" viewBox="0 0 24 24" fill="currentColor"
-            ><circle cx="12" cy="12" r="10" opacity="0.3" /><circle cx="12" cy="12" r="5" /></svg
+            ><circle cx="12" cy="12" r="6" /></svg
           >
         {:else if containerData.status === 'paused'}
           <svg class="size-full" viewBox="0 0 24 24" fill="currentColor"
@@ -171,7 +184,7 @@
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
-            stroke-width="2"><circle cx="12" cy="12" r="9" /></svg
+            stroke-width="2"><rect x="6" y="6" width="12" height="12" rx="1" /></svg
           >
         {:else if containerData.status === 'restarting'}
           <svg
@@ -203,8 +216,7 @@
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
-            stroke-width="2"
-            ><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg
+            stroke-width="2"><circle cx="12" cy="12" r="9" stroke-dasharray="3 2" /></svg
           >
         {:else}
           <svg
@@ -212,7 +224,13 @@
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
-            stroke-width="2"><circle cx="12" cy="12" r="9" /></svg
+            stroke-width="2"
+            ><circle cx="12" cy="12" r="9" /><line x1="12" y1="8" x2="12" y2="12" /><line
+              x1="12"
+              y1="16"
+              x2="12.01"
+              y2="16"
+            /></svg
           >
         {/if}
       </div>

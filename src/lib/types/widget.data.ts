@@ -54,14 +54,21 @@ export interface TwitchChannel {
 export interface ContainerData {
   name: string;
   image: string;
-  status: 'running' | 'exited' | 'paused' | 'restarting' | 'created' | 'removing' | 'dead';
+  status:
+    | 'running'
+    | 'exited'
+    | 'paused'
+    | 'restarting'
+    | 'created'
+    | 'removing'
+    | 'dead'
+    | 'unknown';
   health: 'healthy' | 'unhealthy' | 'starting' | null;
-  state: string;
-  statusText: string;
   cpuPercent: number;
   memoryUsage: number;
   memoryLimit: number;
   memoryPercent: number;
+  time: number | null;
 }
 
 export interface EndpointData {

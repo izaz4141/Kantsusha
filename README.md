@@ -17,12 +17,14 @@
 </div>
 
 ## Features
+
 - **Widget system**: Defaults, with custom later
 - **Themes**: Customizable through config.yaml
 - **SQLite database**: Using drizzle ORM (not yet used)
 - **Authentication**: better-auth integration (not yet used)
 
 ## Tech Stack
+
 - SvelteKit (Svelte 5)
 - Tailwind CSS
 - Bun runtime
@@ -30,4 +32,5 @@
 - better-auth
 
 ## Notes
+
 Largely inspired by [glanceapp/glance](https://github.com/glanceapp/glance).

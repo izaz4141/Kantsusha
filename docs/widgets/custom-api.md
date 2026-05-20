@@ -66,12 +66,13 @@ Templates use Svelte-like syntax with three blocks:
 
 There are two interpolation modes with different purposes:
 
-| Syntax | Location | Purpose |
-|--------|----------|---------|
-| `${expression}` | URL strings | **Server-side** - used in `fetch.url` to chain requests |
-| `{expression}` | Template | **Client-side** - used in `<script>` and `<template>` to render values |
+| Syntax          | Location    | Purpose                                                                |
+| --------------- | ----------- | ---------------------------------------------------------------------- |
+| `${expression}` | URL strings | **Server-side** - used in `fetch.url` to chain requests                |
+| `{expression}`  | Template    | **Client-side** - used in `<script>` and `<template>` to render values |
 
 **Server-side (URL interpolation):**
+
 ```yaml
 fetch:
   geo:
@@ -81,10 +82,13 @@ fetch:
 ```
 
 **Client-side (template interpolation):**
+
 ```html
 <script>
   const temp = fetched.weather.temp;
-  function formatTemp(t) { return t + '°C'; }
+  function formatTemp(t) {
+    return t + '°C';
+  }
 </script>
 
 <template>
@@ -110,12 +114,14 @@ options:
 ```
 
 Access in script:
+
 ```javascript
 const unit = options.temp_unit;
 const display = options.location + ' (' + unit + ')';
 ```
 
 Access in template:
+
 ```html
 <p>Location: {options.location}</p>
 ```
@@ -125,12 +131,14 @@ Access in template:
 The `<template>` block supports Svelte-style expressions:
 
 ### Basic Expression
+
 ```html
 <p>Temperature: {fetched.weather.temp}°C</p>
 <p>Status: {fetched.weather.status || 'unknown'}</p>
 ```
 
 ### {@const} - Define Local Constants
+
 ```svelte
 {@const temp = fetched.weather.temp}
 {@const isHot = temp > 25}
@@ -138,6 +146,7 @@ The `<template>` block supports Svelte-style expressions:
 ```
 
 ### {#each} - Loop Over Arrays
+
 ```svelte
 {#each fetched.users as user}
   <li>{user.name}</li>
@@ -149,6 +158,7 @@ The `<template>` block supports Svelte-style expressions:
 ```
 
 ### {#if} - Conditional Rendering
+
 ```svelte
 {#if fetched.weather.temp > 30}
   <p>Hot weather!</p>
@@ -160,13 +170,14 @@ The `<template>` block supports Svelte-style expressions:
 ```
 
 ### {#unless} - Negative Conditional
+
 ```svelte
 {#unless options.hideTitle}
   <h1>Weather</h1>
 {/unless}
 ```
 
-## Functions and window.__customApi
+## Functions and window.\_\_customApi
 
 ### Defining Functions
 
@@ -204,11 +215,13 @@ If your function calls another function you defined, you MUST use the `window.__
 
 ```html
 <script>
-  function helper() { return 'help'; }
+  function helper() {
+    return 'help';
+  }
 
   function main() {
-    return helper();  // WRONG - will fail!
-    return window.__customApi.helper();  // CORRECT
+    return helper(); // WRONG - will fail!
+    return window.__customApi.helper(); // CORRECT
   }
 </script>
 
