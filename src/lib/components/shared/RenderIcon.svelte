@@ -22,7 +22,7 @@
     />
   {:else}
     <div class="flex h-full w-full items-center justify-center rounded bg-primary">
-      <span class="text-xs font-bold text-white">
+      <span class="text-xs font-bold text-text-on-primary">
         {name.charAt(0).toUpperCase()}
       </span>
     </div>

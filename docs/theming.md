@@ -2,18 +2,51 @@
 
 ## Presets
 
-Four built-in theme presets:
+Six theme presets available:
 
 ```yaml
-theme: dark # light, sepia, dark, high-contrast
+theme: catppuccin-mocha # light, sepia, catppuccin-latte, dark, high-contrast, catppuccin-mocha
 ```
 
-| Preset          | Light Mode | Description           |
-| --------------- | ---------- | --------------------- |
-| `light`         | Yes        | Clean white           |
-| `sepia`         | Yes        | Warm paper tone       |
-| `dark`          | No         | Dark slate            |
-| `high-contrast` | No         | Accessibility-focused |
+| Preset              | Light Mode | Description             |
+| ------------------- | ---------- | ----------------------- |
+| `light`             | Yes        | Rosé Pine Dawn (default)|
+| `sepia`             | Yes        | Warm paper tone         |
+| `catppuccin-latte`  | Yes        | Catppuccin Latte        |
+| `dark`              | No         | Rosé Pine (default)     |
+| `high-contrast`     | No         | Accessibility-focused   |
+| `catppuccin-mocha`  | No         | Catppuccin Mocha        |
+
+### How Presets Work
+
+The theming system uses a **two-layer approach**:
+
+1. **CSS defaults** (`src/routes/layout.css`) - Provides baseline colors for `light` and `dark` presets (Rosé Pine palette)
+2. **Config overrides** (`src/lib/server/config.yaml`) - Presets can override any colors via the `colors` object
+
+Presets with empty `colors: {}` use the CSS defaults:
+
+```yaml
+# Uses CSS defaults from layout.css
+dark:
+  name: Rosé Pine
+  light: false
+  colors: {}  # empty = use CSS defaults
+```
+
+Presets with custom colors override the CSS:
+
+```yaml
+# Custom colors override CSS defaults
+sepia:
+  name: Sepia
+  light: true
+  colors:
+    background: '#f5f0e6'
+    surface: '#ebe4d4'
+    primary: '#b8860b'
+    # ... other custom colors
+```
 
 ## Theme Tokens
 
@@ -41,26 +74,53 @@ CSS custom properties in `src/routes/layout.css`:
 | `--color-ring`            | rgba(0, 102, 255, 0.2) | #1e40af            |
 | `--color-overlay`         | rgba(15, 23, 42, 0.5)  | rgba(0, 0, 0, 0.7) |
 
-## Semantic Colors
+## Token Usage Guide
 
-| Token       | Purpose           |
-| ----------- | ----------------- |
-| `secondary` | Secondary actions |
-| `success`   | Positive states   |
-| `warning`   | Caution states    |
-| `error`     | Error states      |
-| `info`      | Informational     |
-| `ring`      | Focus rings       |
-| `overlay`   | Modal backdrops   |
+### Surface Colors
 
-## Customizing
+| Token            | Usage                                                  |
+| ---------------- | ------------------------------------------------------ |
+| `background`     | Page background, main container fill                   |
+| `surface`        | Cards, widgets, dropdowns, default content backgrounds |
+| `surface-raised` | Hover states, elevated elements, selected items        |
+| `surface-sunken` | Input fields, pressed/active states, recessed areas    |
 
-Edit `src/routes/layout.css` to modify tokens:
+### Text Colors
 
-```css
-:root {
-  --color-primary: #8b5cf6; /* Purple accent */
-  --color-background: #1a1a2e;
-  --color-surface: #16213e;
-}
-```
+| Token             | Usage                                                       |
+| ----------------- | ----------------------------------------------------------- |
+| `text`            | Primary content, headings, body text                        |
+| `text-muted`      | Secondary content, labels, timestamps, placeholders         |
+| `text-on-primary` | Text on primary/secondary/success/warning/error backgrounds |
+
+### Action Colors
+
+| Token            | Usage                                               |
+| ---------------- | --------------------------------------------------- |
+| `primary`        | Primary buttons, links, active states, main accent  |
+| `primary-hover`  | Hover state for primary elements                    |
+| `primary-active` | Active/pressed state, focus rings on selected items |
+| `secondary`      | Secondary buttons, alternative actions              |
+
+### Semantic Colors
+
+| Token     | Usage                                            |
+| --------- | ------------------------------------------------ |
+| `success` | Positive states, online status, positive changes |
+| `warning` | Caution states, paused, restarting, intermediate |
+| `error`   | Error states, offline, unhealthy, dead           |
+| `info`    | Informational states, neutral highlights         |
+
+### Border Colors
+
+| Token           | Usage                                     |
+| --------------- | ----------------------------------------- |
+| `border`        | Default borders, dividers, separators     |
+| `border-strong` | Major section dividers, prominent borders |
+
+### State Colors
+
+| Token     | Usage                                                           |
+| --------- | --------------------------------------------------------------- |
+| `ring`    | Focus rings, outline states                                     |
+| `overlay` | Modal/dialog backdrops (use `bg-transparent` for click-through) |

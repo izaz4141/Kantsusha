@@ -149,7 +149,7 @@
       <button
         type="button"
         class="relative flex h-8 flex-col items-center justify-center rounded p-1 hover:bg-surface-raised {isSelected
-          ? 'bg-primary/15 ring-2 ring-primary'
+          ? 'bg-primary/15 ring-2 ring-primary-active'
           : ''}"
         aria-label="Select {day.getDate()}"
         onclick={() => selectDate(day)}

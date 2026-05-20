@@ -1,6 +1,6 @@
 presets:
   light:
-    name: Light
+    name: Rosé Pine Dawn
     light: true
     colors: {}
 
@@ -10,15 +10,50 @@ presets:
     colors:
       background: '#f5f0e6'
       surface: '#ebe4d4'
+      surface-raised: '#dcd4c0'
+      surface-sunken: '#ece4d0'
       text: '#3d3426'
       textMuted: '#6b5d4d'
+      textOnPrimary: '#ffffff'
       primary: '#b8860b'
       primaryHover: '#9a7209'
+      primaryActive: '#806008'
       secondary: '#8b7355'
+      success: '#6a994e'
+      warning: '#d4a03a'
+      error: '#c9553d'
+      info: '#5e8a7a'
       border: '#d4c9b5'
+      borderStrong: '#bfb49a'
+      ring: rgba(184, 134, 11, 0.25)
+      overlay: '#e8dfcf'
+
+  catppuccin-latte:
+    name: Catppuccin Latte
+    light: true
+    colors:
+      background: '#eff1f5'
+      surface: '#e6e9ef'
+      surface-raised: '#ccd0da'
+      surface-sunken: '#e8e9ed'
+      text: '#4c4f69'
+      textMuted: '#6c6f85'
+      textOnPrimary: '#ffffff'
+      primary: '#dc8a78'
+      primaryHover: '#d67a5e'
+      primaryActive: '#ce9178'
+      secondary: '#df8e64'
+      success: '#40a02b'
+      warning: '#fe640b'
+      error: '#d20f39'
+      info: '#209fb5'
+      border: '#bcc0cc'
+      borderStrong: '#9ca0b0'
+      ring: rgba(220, 138, 120, 0.3)
+      overlay: '#dce0e8'
 
   dark:
-    name: Dark
+    name: Rosé Pine
     light: false
     colors: {}
 
@@ -28,12 +63,47 @@ presets:
     colors:
       background: '#000000'
       surface: '#1a1a1a'
+      surface-raised: '#333333'
+      surface-sunken: '#0a0a0a'
       text: '#ffffff'
       textMuted: '#e0e0e0'
+      textOnPrimary: '#000000'
       primary: '#ffff00'
       primaryHover: '#e6e600'
+      primaryActive: '#cccc00'
       secondary: '#00ffff'
+      success: '#00ff00'
+      warning: '#ffaa00'
+      error: '#ff3333'
+      info: '#33ffff'
       border: '#ffffff'
+      borderStrong: '#cccccc'
+      ring: rgba(255, 255, 0, 0.3)
+      overlay: '#0d0d0d'
+
+  catppuccin-mocha:
+    name: Catppuccin Mocha
+    light: false
+    colors:
+      background: '#11111b'
+      surface: '#181825'
+      surface-raised: '#313244'
+      surface-sunken: '#1e1e2e'
+      text: '#cdd6f4'
+      textMuted: '#6c7086'
+      textOnPrimary: '#1e1e2e'
+      primary: '#f5c2e7'
+      primaryHover: '#f4b8d8'
+      primaryActive: '#ee9ac8'
+      secondary: '#f9e2af'
+      success: '#a6e3a1'
+      warning: '#f9e2af'
+      error: '#f38ba8'
+      info: '#89dceb'
+      border: '#45475a'
+      borderStrong: '#585b70'
+      ring: rgba(245, 194, 231, 0.3)
+      overlay: '#1e1e2e'
 
 pages:
   - name: Start

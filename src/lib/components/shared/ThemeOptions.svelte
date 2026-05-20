@@ -51,8 +51,11 @@
           {@const preset = themeState.presets[name]}
           <div data-theme={name} data-color-scheme={preset.colorScheme}>
             <button
-              class="flex min-h-6 cursor-pointer items-center justify-center rounded-md border-2 border-transparent p-1 transition-all hover:scale-105 hover:border-border"
-              class:border-primary={themeState.current === name}
+              class="flex min-h-6 cursor-pointer items-center justify-center
+              rounded-md border-2 border-transparent p-1 transition-all hover:scale-105 hover:border-border {themeState.current ===
+              name
+                ? 'ring-1 ring-ring'
+                : ''}"
               style="background-color: var(--color-background)"
               title={preset.name}
               onclick={() => selectTheme(name)}

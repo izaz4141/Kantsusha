@@ -14,7 +14,7 @@
   <button
     type="button"
     bind:this={triggerEl}
-    class="flex cursor-pointer items-center justify-center rounded-full p-2 text-text transition-colors hover:bg-surface active:scale-95"
+    class="flex cursor-pointer items-center justify-center rounded-full p-2 text-text transition-colors hover:bg-surface-raised active:scale-95"
     onclick={toggle}
     aria-label="Theme Settings"
     aria-expanded={isOpen}

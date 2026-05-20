@@ -48,17 +48,17 @@
     health: ContainerData['health'],
   ): string {
     if (status === 'running') {
-      if (health === 'healthy') return 'text-green-500';
-      if (health === 'unhealthy') return 'text-red-500';
-      if (health === 'starting') return 'text-yellow-500';
-      return 'text-green-500';
+      if (health === 'healthy') return 'text-success';
+      if (health === 'unhealthy') return 'text-error';
+      if (health === 'starting') return 'text-warning';
+      return 'text-success';
     }
-    if (status === 'paused') return 'text-yellow-500';
-    if (status === 'exited') return 'text-gray-500';
-    if (status === 'restarting') return 'text-yellow-500';
-    if (status === 'removing') return 'text-orange-500';
-    if (status === 'dead') return 'text-red-500';
-    return 'text-gray-500';
+    if (status === 'paused') return 'text-warning';
+    if (status === 'exited') return 'text-text-muted';
+    if (status === 'restarting') return 'text-warning';
+    if (status === 'removing') return 'text-warning';
+    if (status === 'dead') return 'text-error';
+    return 'text-text-muted';
   }
 </script>
 

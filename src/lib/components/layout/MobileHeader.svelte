@@ -79,7 +79,7 @@
             >
               <div
                 class="h-2.5 rounded-full transition-all duration-300
-              {uiState.currentPanel === i ? 'w-9 bg-primary' : 'w-2.5 bg-gray-400'}"
+              {uiState.currentPanel === i ? 'w-9 bg-primary' : 'w-2.5 bg-border'}"
               ></div>
             </button>
           {/each}

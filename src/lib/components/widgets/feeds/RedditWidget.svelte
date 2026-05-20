@@ -46,7 +46,9 @@
         <span class="text-success">↑ {formatScore(posts[index].score)}</span>
         <span class="text-text">󰻞 {posts[index].numComments}</span>
         <span> {dateToNow(posts[index].pubDate)}</span>
-        <span>by {posts[index].author}</span>
+        {#if params.view != 'card'}
+          <span>by {posts[index].author}</span>
+        {/if}
       </div>
     </div>
   {/if}

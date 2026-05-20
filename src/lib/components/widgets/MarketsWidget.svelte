@@ -67,9 +67,9 @@
         {@const lineColor =
           market.changePercent >= 0 ? 'var(--color-success)' : 'var(--color-error)'}
         {@const segments = getChartSegments(market.prices, 100, 40)}
-        <li class="relative flex h-18 items-center justify-between rounded-lg bg-surface/30 p-3">
+        <li class="relative flex h-18 items-center justify-between rounded-lg bg-surface/40 p-3">
           <svg
-            class="absolute inset-0 h-full w-full opacity-20"
+            class="absolute inset-0 h-full w-full opacity-30"
             preserveAspectRatio="none"
             viewBox="0 0 100 40"
             aria-hidden="true"

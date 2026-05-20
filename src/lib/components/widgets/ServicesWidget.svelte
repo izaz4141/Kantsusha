@@ -36,7 +36,8 @@
       {#each params.services as service, i (i)}
         {@const isContainer = service.type === 'container'}
         <li
-          class="flex h-12 items-center rounded-lg p-2 transition-all duration-200 ease-out hover:scale-[1.02] hover:bg-background/50 hover:shadow-md"
+          class="flex h-12 items-center rounded-lg p-2 transition-all duration-200 ease-out
+          hover:scale-[1.02] hover:shadow-md hover:ring-2 hover:ring-ring"
         >
           {#if isContainer}
             {@const containerData = getContainerData(i)}

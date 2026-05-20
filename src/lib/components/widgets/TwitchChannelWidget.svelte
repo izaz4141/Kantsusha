@@ -68,7 +68,7 @@
 
         {#if channel.isLive}
           <div
-            class="absolute -bottom-1 left-1/2 -translate-x-1/2 rounded bg-primary px-1.5 py-0.5 text-[10px] font-bold text-text uppercase"
+            class="absolute -bottom-1 left-1/2 -translate-x-1/2 rounded bg-primary px-1.5 py-0.5 text-[10px] font-bold text-text-on-primary uppercase"
           >
             Live
           </div>

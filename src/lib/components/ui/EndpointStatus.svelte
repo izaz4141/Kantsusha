@@ -25,9 +25,9 @@
   }
 
   function getStatusColor(status: EndpointData['status']): string {
-    if (status === 'online') return 'text-green-500';
-    if (status === 'offline') return 'text-red-500';
-    return 'text-gray-500';
+    if (status === 'online') return 'text-success';
+    if (status === 'offline') return 'text-error';
+    return 'text-text-muted';
   }
 </script>
 
