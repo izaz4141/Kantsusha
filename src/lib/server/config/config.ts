@@ -13,6 +13,7 @@ import { parsePresets, generateThemeCSS } from './theme';
 import { defaultTheme } from '$lib/theme/store.svelte';
 import { parsePages } from './pages';
 import { clearWidgetCache } from '../widget.store';
+import { substituteEnvRecursive } from '$lib/utils/substitution';
 
 const EXTERNAL_CONFIG_PATH = './config/config.yaml';
 const DEFAULT_CONFIG_PATH = !dev
@@ -230,21 +231,26 @@ async function loadConfig(): Promise<Record<string, unknown>> {
     throw new Error('Failed to load default config.yaml');
   }
 
-  const defaultsResolved = await resolveIncludes(defaults, path.dirname(DEFAULT_CONFIG_PATH));
+  const defaultsResolved = (await resolveIncludes(
+    defaults,
+    path.dirname(DEFAULT_CONFIG_PATH),
+  )) as Record<string, unknown>;
 
   const external = await loadYAML(EXTERNAL_CONFIG_PATH);
   if (!external) {
     console.log('No external config found, using default config');
-    return defaultsResolved as Record<string, unknown>;
+    return substituteEnvRecursive(defaultsResolved) as Record<string, unknown>;
   }
 
-  const externalResolved = await resolveIncludes(external, path.dirname(EXTERNAL_CONFIG_PATH));
+  const externalResolved = (await resolveIncludes(
+    external,
+    path.dirname(EXTERNAL_CONFIG_PATH),
+  )) as Record<string, unknown>;
 
   console.log('Merging external config with defaults');
-  return mergeConfig(
-    defaultsResolved as Record<string, unknown>,
-    externalResolved as Record<string, unknown>,
-  );
+  const merged = mergeConfig(defaultsResolved, externalResolved);
+
+  return substituteEnvRecursive(merged) as Record<string, unknown>;
 }
 
 export async function getCached(): Promise<ParsedConfig> {

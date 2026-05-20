@@ -12,6 +12,37 @@ export function getBaseDomain(host: string): string {
   return host;
 }
 
+export function substituteEnv(str: string): string {
+  return str.replace(/\$\{([^}]+)\}/g, (_, inner) => {
+    if (inner.startsWith('KANTSUSHA_')) {
+      return process.env[inner] ?? `\${${inner}}`;
+    }
+    return `\${${inner}}`;
+  });
+}
+
+export function substituteEnvRecursive(obj: unknown): unknown {
+  if (obj === null || obj === undefined) return obj;
+
+  if (typeof obj === 'string') {
+    return substituteEnv(obj);
+  }
+
+  if (Array.isArray(obj)) {
+    return obj.map((item) => substituteEnvRecursive(item));
+  }
+
+  if (typeof obj === 'object') {
+    const result: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(obj as Record<string, unknown>)) {
+      result[key] = substituteEnvRecursive(value);
+    }
+    return result;
+  }
+
+  return obj;
+}
+
 export function resolveString(str: string): string {
   return str.replace(/\$\{([^}]+)\}/g, (_, inner) => {
     if (inner.startsWith('KANTSUSHA_')) {
