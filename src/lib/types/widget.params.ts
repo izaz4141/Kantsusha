@@ -121,7 +121,7 @@ export const ContainerParamsSchema = z.object({
   description: z.string().optional(),
   url: z.string().optional(),
   icon: z.string().optional(),
-  target: z.string().regex(TARGET_REGEX).default('_blank').optional(),
+  target: z.string().regex(TARGET_REGEX).optional(),
   sockPath: z.string().optional(),
 });
 export type ContainerParams = z.infer<typeof ContainerParamsSchema>;
@@ -132,7 +132,7 @@ export const EndpointParamsSchema = z.object({
   description: z.string().optional(),
   url: z.string(),
   icon: z.string().optional(),
-  target: z.string().regex(TARGET_REGEX).default('_blank').optional(),
+  target: z.string().regex(TARGET_REGEX).optional(),
   statusCheck: z.boolean().optional(),
   statusCheckUrl: z.string().optional(),
 });

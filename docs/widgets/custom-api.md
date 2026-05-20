@@ -131,14 +131,14 @@ The `<template>` block supports Svelte-style expressions:
 ```
 
 ### {@const} - Define Local Constants
-```html
+```svelte
 {@const temp = fetched.weather.temp}
 {@const isHot = temp > 25}
 <p>{isHot ? 'Hot!' : 'Nice'}</p>
 ```
 
 ### {#each} - Loop Over Arrays
-```html
+```svelte
 {#each fetched.users as user}
   <li>{user.name}</li>
 {/each}
@@ -149,7 +149,7 @@ The `<template>` block supports Svelte-style expressions:
 ```
 
 ### {#if} - Conditional Rendering
-```html
+```svelte
 {#if fetched.weather.temp > 30}
   <p>Hot weather!</p>
 {:else if fetched.weather.temp > 20}
@@ -160,7 +160,7 @@ The `<template>` block supports Svelte-style expressions:
 ```
 
 ### {#unless} - Negative Conditional
-```html
+```svelte
 {#unless options.hideTitle}
   <h1>Weather</h1>
 {/unless}
