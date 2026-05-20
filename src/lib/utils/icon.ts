@@ -48,7 +48,7 @@ export function resolveIcon(input: string): ResolveResult | null {
   }
 
   if (remaining.startsWith('/')) {
-    return { url: remaining, invert };
+    return { url: `/api/v1/utils/files?path=${encodeURIComponent(remaining)}`, invert };
   }
 
   return null;
