@@ -188,10 +188,13 @@ function parseCalDAVMultistatus(xml: string): string[] {
 }
 
 export async function fetchCalendar(
-  cals: CalFeed[],
+  cals: CalFeed[] = [],
   range: string = '183d',
   limit: number = 50,
 ): Promise<CalendarEvent[]> {
+  if (cals.length === 0) {
+    return [];
+  }
   const allEvents: CalendarEvent[] = [];
   const colors = [
     '#ef4444',

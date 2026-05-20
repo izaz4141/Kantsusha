@@ -38,7 +38,7 @@ export type CalFeed = z.infer<typeof CalFeedSchema>;
 export const CalendarParamsSchema = CommonWidgetParamsSchema.merge(
   z.object({
     type: z.literal('calendar'),
-    cals: z.array(CalFeedSchema).min(1),
+    cals: z.array(CalFeedSchema).optional(),
     range: z.string().regex(TIME_REGEX).default('183d'),
     limit: z.number().int().positive().default(50),
   }),

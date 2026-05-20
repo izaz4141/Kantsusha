@@ -222,10 +222,6 @@ pages:
         widgets:
           - type: calendar
             frameless: true
-            cals:
-              - type: ics
-                url: 'https://calendar.google.com/calendar/ical/id.indonesian%23holiday%40group.v.calendar.google.com/public/basic.ics'
-
           # - $include: weather-hourly.yaml
           #   title: ''
           #   frameless: true
