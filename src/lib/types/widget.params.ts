@@ -46,6 +46,7 @@ export type CalendarParams = z.infer<typeof CalendarParamsSchema>;
 export const RssFeedSchema = z.object({
   url: z.string(),
   headers: z.record(z.string(), z.string()).optional(),
+  limit: z.number().int().positive().optional(),
 });
 export type RssFeed = z.infer<typeof RssFeedSchema>;
 

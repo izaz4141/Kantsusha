@@ -240,18 +240,11 @@ export async function fetchCalendar(
   );
 
   const now = Date.now();
+  if (allEvents.length <= limit) return allEvents;
 
-  const optimizedEvents = allEvents
-    // 1. Map to a temporary object with the pre-calculated distance
-    .map((event) => ({
-      event,
-      dist: Math.abs(event.start.getTime() - now),
-    }))
-    // 2. Sort based on the pre-calculated distance
-    .sort((a, b) => a.dist - b.dist)
-    // 3. Take the limit and map back to the original event object
-    .slice(0, limit)
-    .map((item) => item.event);
+  const dists = allEvents.map((e) => Math.abs(e.start.getTime() - now));
+  const indices = Array.from({ length: allEvents.length }, (_, i) => i);
+  indices.sort((a, b) => dists[a] - dists[b]);
 
-  return optimizedEvents;
+  return indices.slice(0, limit).map((i) => allEvents[i]);
 }

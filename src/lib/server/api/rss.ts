@@ -61,28 +61,18 @@ export async function fetchRSS(feeds: RssFeed[], limit: number = 10): Promise<Rs
       try {
         const xml = (await fetchURL(feed.url, { customHeaders: feed.headers })) as string;
         const articles = await parseRSS(xml, feed.url);
-        allArticles.push(...articles);
+        allArticles.push(...(feed.limit ? articles.slice(0, feed.limit) : articles));
       } catch (err) {
         console.error(`Error fetching ${feed.url}:`, err);
       }
     }),
   );
 
-  const length = allArticles.length;
-  const temp = new Float64Array(length);
-  const indices = new Int32Array(length);
+  if (allArticles.length <= limit) return allArticles;
 
-  for (let i = 0; i < length; i++) {
-    temp[i] = allArticles[i].pubDate.getTime();
-    indices[i] = i;
-  }
+  const times = allArticles.map((a) => a.pubDate.getTime());
+  const indices = Array.from({ length: allArticles.length }, (_, i) => i);
+  indices.sort((a, b) => times[b] - times[a]);
 
-  indices.sort((a, b) => temp[b] - temp[a]);
-
-  const result: RssArticle[] = new Array(limit);
-  for (let i = 0; i < limit; i++) {
-    result[i] = allArticles[indices[i]];
-  }
-
-  return result;
+  return indices.slice(0, limit).map((i) => allArticles[i]);
 }

@@ -20,6 +20,7 @@ Display articles from RSS/Atom feeds.
 | --------- | ------ | -------- | ------------------- |
 | `url`     | string | Yes      | Feed URL            |
 | `headers` | object | No       | Custom HTTP headers |
+| `limit`   | number | No       | Max items per feed  |
 
 ## Example
 
