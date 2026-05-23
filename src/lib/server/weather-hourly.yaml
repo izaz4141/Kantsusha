@@ -112,10 +112,10 @@
           const code = typeof codes[i] === 'number' ? codes[i] : 0;
           const iconData = icons[code] || { icon: 'nf-weather-na', color: options.color_other, desc: 'Unknown' };
 
-          return `<div class="hour-col ${isCurrent ? 'is-now' : ''}" style="position: relative; z-index: 1; width: 65px; display: flex; flex-direction: column; align-items: center;">
-            <p style="margin: 0 0 10px 0; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; color: ${isCurrent ? options.color_blue : 'var(--color-text-subdue)'}; font-weight: ${isCurrent ? '700' : '400'}; opacity: 0.8;">${timeStr}</p>
-            <i class="nf ${iconData.icon}" title="${iconData.desc}" style="font-size: 20px; color: ${iconData.color}; margin-bottom: 4px; cursor: help; opacity: 0.9;"></i>
-            <div style="flex-grow: 1;"></div>
+          return `<div class="hour-col ${isCurrent ? 'is-now' : ''}" style="z-index: 1;">
+            <p class="time-label" style="color: ${isCurrent ? options.color_blue : 'var(--color-text-subdue)'}; font-weight: ${isCurrent ? '700' : '400'};">${timeStr}</p>
+            <i class="nf ${iconData.icon} weather-icon" title="${iconData.desc}" style="color: ${iconData.color};"></i>
+            <div class="flex-spacer"></div>
           </div>`;
         }).join('');
 
@@ -194,21 +194,22 @@
 
         const scaleY = (val) => chartHeight - ((val - minTemp) / tempRange * (chartHeight * 0.8));
 
-        let pathD = '';
-        let fillD = '';
+        let pathD = 'M0,' + scaleY(slicedTemps[0]) + ' ';
+        let fillD = 'M0,' + scaleY(slicedTemps[0]) + ' ';
         let tempLabels = '';
 
         slicedTemps.forEach((t, i) => {
           const x = i * colWidth + colWidth / 2;
           const y = scaleY(t);
-          pathD += (i === 0 ? 'M' : 'L') + x + ',' + y + ' ';
-          fillD += (i === 0 ? 'M' : 'L') + x + ',' + y + ' ';
+          pathD += 'L' + x + ',' + y + ' ';
+          fillD += 'L' + x + ',' + y + ' ';
 
           const labelY = scaleY(t) - 10;
           tempLabels += '<text class="temp-label" x="' + x + '" y="' + labelY + '">' + Math.round(t) + '°</text>';
         });
 
-        fillD += 'L' + ((slicedTemps.length - 1) * colWidth + colWidth / 2) + ',' + chartHeight + ' L' + (colWidth / 2) + ',' + chartHeight + ' Z';
+        pathD += 'L' + chartWidth + ',' + scaleY(slicedTemps[slicedTemps.length - 1]);
+        fillD += 'L' + chartWidth + ',' + scaleY(slicedTemps[slicedTemps.length - 1]) + ' L' + chartWidth + ',' + chartHeight + ' L0,' + chartHeight + ' Z';
 
         const svgHtml = '<svg width="' + chartWidth + '" height="60%" viewBox="0 0 ' + chartWidth + ' 100" preserveAspectRatio="none" style="position: absolute; bottom: 0; left: 0; overflow: visible; z-index: 0; pointer-events: none;"><path d="' + fillD + '" fill="rgba(70, 240, 240, 0.05)" /><path d="' + pathD + '" stroke="' + options.color_blue + '" stroke-width="1.5" fill="none" opacity="0.6" />' + tempLabels + '</svg>';
 
@@ -224,26 +225,23 @@
         }).join('');
 
         const widgetHtml = `
-          <link rel="stylesheet" href="https://www.nerdfonts.com/assets/css/webfont.css">
-          <div class="widget-container">
-            <div class="location-header">
-              <div id="loc-display" class="location-wrapper" onclick="this.style.display='none'; const el=document.getElementById('loc-edit'); el.style.display='block'; el.focus(); el.setSelectionRange(0, el.value.length);">
-                <i class="nf nf-fa-map_marker search-icon"></i>
-                <span class="location-text">${currentLocation}</span>
-              </div>
-              <input type="text" id="loc-edit" class="location-input" style="display: none;" value="${currentLocation}" onkeydown="if(event.key==='Enter' && this.value.trim()!==''){updateWeather(this.value.trim())}else if(event.key==='Escape'){this.style.display='none';document.getElementById('loc-display').style.display='flex';}" onblur="this.style.display='none';document.getElementById('loc-display').style.display='flex';">
+          <div class="location-header">
+            <div id="loc-display" class="location-wrapper" onclick="this.style.display='none'; const el=document.getElementById('loc-edit'); el.style.display='block'; el.focus(); el.setSelectionRange(0, el.value.length);">
+              <i class="nf nf-fa-map_marker search-icon"></i>
+              <span class="location-text">${currentLocation}</span>
             </div>
-            <button class="scroll-btn-floating" style="left: 0;" onclick="document.getElementById('weather-track').scrollBy({left: -195, behavior: 'smooth'})">
-              <i class="nf nf-fa-chevron_left scroll-icon"></i>
-            </button>
-            <button class="scroll-btn-floating" style="right: 0;" onclick="document.getElementById('weather-track').scrollBy({left: 195, behavior: 'smooth'})">
-              <i class="nf nf-fa-chevron_right scroll-icon"></i>
-            </button>
-            <div id="weather-track" class="hide-scroll" style="display: flex; overflow-x: auto; scroll-behavior: smooth; width: 100%; height: calc(100% - 4.5rem);">
-              <div style="display: flex; position: relative; width: max-content; height: 100%;">
-                ${svgHtml}
-                ${columnsHtml}
-              </div>
+            <input type="text" id="loc-edit" class="location-input" style="display: none;" value="${currentLocation}" onkeydown="if(event.key==='Enter' && this.value.trim()!==''){updateWeather(this.value.trim())}else if(event.key==='Escape'){this.style.display='none';document.getElementById('loc-display').style.display='flex';}" onblur="this.style.display='none';document.getElementById('loc-display').style.display='flex';">
+          </div>
+          <button class="scroll-btn-floating" style="left: 0;" onclick="document.getElementById('weather-track').scrollBy({left: -195, behavior: 'smooth'})">
+            <i class="nf nf-fa-chevron_left scroll-icon"></i>
+          </button>
+          <button class="scroll-btn-floating" style="right: 0;" onclick="document.getElementById('weather-track').scrollBy({left: 195, behavior: 'smooth'})">
+            <i class="nf nf-fa-chevron_right scroll-icon"></i>
+          </button>
+          <div id="weather-track" class="hide-scroll" style="display: flex; overflow-x: auto; scroll-behavior: smooth; width: 100%; height: calc(100% - 4.5rem);">
+            <div style="display: flex; position: relative; width: max-content; height: 100%;">
+              ${svgHtml}
+              ${columnsHtml}
             </div>
           </div>
         `;
@@ -258,9 +256,8 @@
 
       .widget-container {
         position: relative;
-        width: calc(100% + 2rem);
+        width: 100%;
         height: 18.5rem;
-        margin: -1rem;
         overflow: hidden;
         background: var(--color-background-subtle);
       }
@@ -482,7 +479,7 @@
               {@const iconData = {0:'nf-weather-day_sunny',1:'nf-weather-day_cloudy_gusts',2:'nf-weather-day_cloudy',3:'nf-weather-cloudy',45:'nf-weather-fog',48:'nf-weather-fog',51:'nf-weather-sprinkle',53:'nf-weather-rain_mix',55:'nf-weather-rain_mix',61:'nf-weather-rain',63:'nf-weather-showers',65:'nf-weather-rain_wind',66:'nf-weather-sleet',67:'nf-weather-sleet',71:'nf-weather-snow',73:'nf-weather-snow_wind',75:'nf-weather-snow_wind',77:'nf-weather-snowflake_cold',80:'nf-weather-day_showers',81:'nf-weather-day_showers',82:'nf-weather-day_showers',85:'nf-weather-snow',86:'nf-weather-snow_wind',95:'nf-weather-thunderstorm',96:'nf-weather-storm_showers',99:'nf-weather-storm_showers'}[code] || 'nf-weather-na'}
               {@const iconColor = code === 0 ? options.color_clear : code <= 2 ? options.color_partly : code <= 3 ? options.color_cloud : code <= 48 ? options.color_smog : code <= 55 ? options.color_drizzle : code <= 67 ? options.color_rain : code <= 77 ? options.color_snow : code <= 82 ? options.color_rain : code <= 86 ? options.color_snow : options.color_thunderstorm}
               {@const iconDesc = code === 0 ? 'Clear sky' : code === 1 ? 'Mainly clear' : code === 2 ? 'Partly cloudy' : code === 3 ? 'Overcast' : code <= 48 ? 'Foggy' : code <= 55 ? 'Drizzle' : code <= 67 ? 'Rain' : code <= 77 ? 'Snow' : code <= 82 ? 'Rain showers' : code <= 86 ? 'Snow showers' : 'Thunderstorm'}
-              <div class="hour-col {isCurrent ? 'is-now' : ''}" style="position: relative; z-index: 1; width: 65px; display: flex; flex-direction: column; align-items: center;">
+              <div class="hour-col {isCurrent ? 'is-now' : ''}" style="z-index: 1;">
                 <p class="time-label" style="color: {isCurrent ? options.color_blue : 'var(--color-text-subdue)'}; font-weight: {isCurrent ? '700' : '400'};">
                   {timeStr}
                 </p>

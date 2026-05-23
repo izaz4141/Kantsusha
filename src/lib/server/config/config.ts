@@ -289,6 +289,9 @@ export async function getCached(): Promise<FullParsedConfig> {
         data: { ...config, css },
         mtime: updatedMtime,
       };
+
+      const { restartBackgroundRefresh } = await import('../widget.scheduler');
+      restartBackgroundRefresh();
     } catch (err) {
       console.error('Config reload failed, keeping previous cache:', err);
       if (!configCache) {

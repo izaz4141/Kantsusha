@@ -1,4 +1,4 @@
-import type { Handle } from '@sveltejs/kit';
+import type { Handle, ServerInit } from '@sveltejs/kit';
 import { building } from '$app/environment';
 import { auth } from '$lib/server/auth';
 import { svelteKitHandler } from 'better-auth/svelte-kit';
@@ -6,6 +6,13 @@ import type { HandleServerError } from '@sveltejs/kit';
 import { DEFAULT_THEME } from '$lib/utils/constants';
 import { getPreset, getCached } from '$lib/server/config/config';
 import { sequence } from '@sveltejs/kit/hooks';
+
+export const init: ServerInit = async () => {
+  if (building) return;
+  console.log('Initializing Server...');
+  await getCached();
+  console.log('Kantsusha Ready!');
+};
 
 const handleBetterAuth: Handle = async ({ event, resolve }) => {
   const session = await auth.api.getSession({ headers: event.request.headers });
