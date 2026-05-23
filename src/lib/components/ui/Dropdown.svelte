@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { Snippet } from 'svelte';
+  import { portal } from '$lib/actions/portal';
 
   interface Props {
     open?: boolean;
@@ -7,6 +8,7 @@
     children: Snippet;
     class?: string;
     overlay?: boolean;
+    targetPortal?: string;
   }
 
   let {
@@ -15,6 +17,7 @@
     children,
     class: className = '',
     overlay = false,
+    targetPortal,
   }: Props = $props();
 
   function close() {
@@ -38,21 +41,34 @@
     if (!open || !trigger) return;
 
     const triggerRect = trigger.getBoundingClientRect();
-
     const contentWidth = contentEl?.clientWidth || 180;
-
     const triggerCenter = triggerRect.width / 2;
     const spaceLeft = triggerRect.left;
     const spaceRight = window.innerWidth - triggerRect.right;
 
     if (spaceLeft >= contentWidth / 2 && spaceRight >= contentWidth / 2) {
-      horizontalStyle = { left: '50%', transform: 'translateX(-50%)' };
+      if (targetPortal) {
+        horizontalStyle = {
+          left: `${triggerRect.left + triggerCenter}px`,
+          transform: 'translateX(-50%)',
+        };
+      } else {
+        horizontalStyle = { left: '50%', transform: 'translateX(-50%)' };
+      }
       triangleStyle = { left: `calc(50% - 8px)` };
     } else if (spaceLeft < contentWidth / 2) {
-      horizontalStyle = { left: `${-spaceLeft + 16}px`, right: 'auto', transform: 'none' };
+      if (targetPortal) {
+        horizontalStyle = { left: `${16}px`, transform: 'none' };
+      } else {
+        horizontalStyle = { left: `${-spaceLeft + 16}px`, right: 'auto', transform: 'none' };
+      }
       triangleStyle = { left: `${spaceLeft - 8 - 16 + triggerCenter}px` };
-    } else if (spaceRight < contentWidth / 2) {
-      horizontalStyle = { left: 'auto', right: `${-spaceRight + 16}px`, transform: 'none' };
+    } else {
+      if (targetPortal) {
+        horizontalStyle = { left: 'auto', right: `${16}px`, transform: 'none' };
+      } else {
+        horizontalStyle = { left: 'auto', right: `${-spaceRight + 16}px`, transform: 'none' };
+      }
       triangleStyle = { right: `${spaceRight - 8 - 16 + triggerCenter}px` };
     }
 
@@ -60,16 +76,25 @@
     const spaceAbove = triggerRect.top;
 
     if (spaceAbove > spaceBelow) {
-      verticalStyle = { bottom: '100%', marginBottom: '8px' };
+      if (targetPortal) {
+        verticalStyle = { bottom: `${window.innerHeight - triggerRect.top + 8}px` };
+      } else {
+        verticalStyle = { bottom: '100%', marginBottom: '8px' };
+      }
     } else {
-      verticalStyle = { top: '100%', marginTop: '8px' };
+      if (targetPortal) {
+        verticalStyle = { top: `${triggerRect.bottom + 8}px` };
+      } else {
+        verticalStyle = { top: '100%', marginTop: '8px' };
+      }
     }
   });
 </script>
 
 {#if open}
   <div
-    class="absolute z-50 {className}"
+    use:portal={targetPortal}
+    class="{targetPortal ? 'pointer-events-auto fixed' : 'absolute'} z-50 {className}"
     style="left: {horizontalStyle.left};
            right: {horizontalStyle.right};
            transform: {horizontalStyle.transform};
@@ -95,8 +120,8 @@
   {#if overlay}
     <button
       type="button"
-      class="fixed inset-0 z-40 cursor-default border-none bg-transparent"
-      style="transform: translate3d(0,0,0)"
+      use:portal={targetPortal}
+      class="pointer-events-auto fixed inset-0 z-40 cursor-default border-none bg-transparent"
       onclick={close}
       aria-label="Close dropdown"
     ></button>

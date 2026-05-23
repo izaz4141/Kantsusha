@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { Snippet } from 'svelte';
+  import { portal } from '$lib/actions/portal';
 
   interface Props {
     open?: boolean;
@@ -7,6 +8,8 @@
     children: Snippet;
     class?: string;
     direction: 'left' | 'right';
+    overlay?: boolean;
+    targetPortal?: string;
   }
 
   let {
@@ -15,6 +18,8 @@
     children,
     class: className = '',
     direction = 'right',
+    overlay = false,
+    targetPortal,
   }: Props = $props();
 
   function close() {
@@ -44,7 +49,14 @@
     const triggerMiddle = triggerRect.height / 2;
 
     if (spaceAbove >= contentHeight / 2 && spaceBelow >= contentHeight / 2) {
-      verticalStyle = { transform: 'translateY(-50%)', top: '50%' };
+      if (targetPortal) {
+        verticalStyle = {
+          transform: 'translateY(-50%)',
+          top: `${triggerRect.top + triggerMiddle}px`,
+        };
+      } else {
+        verticalStyle = { transform: 'translateY(-50%)', top: '50%' };
+      }
       triangleStyle = { top: `calc(50% - 8px)` };
     } else if (spaceAbove < contentHeight / 2) {
       verticalStyle = { transform: 'none', top: `${-spaceAbove + 16}px` };
@@ -55,16 +67,29 @@
     }
 
     if (direction === 'right') {
-      horizontalStyle = { left: '100%', right: 'auto', marginRight: '16px' };
+      if (targetPortal) {
+        horizontalStyle = { left: `${triggerRect.right + 16}px` };
+      } else {
+        horizontalStyle = { left: '100%', right: 'auto', marginRight: '16px' };
+      }
     } else {
-      horizontalStyle = { left: 'auto', right: '100%', marginLeft: '16px' };
+      if (targetPortal) {
+        horizontalStyle = { right: `${window.innerWidth - triggerRect.left + 16}px` };
+      } else {
+        horizontalStyle = { left: 'auto', right: '100%', marginLeft: '16px' };
+      }
     }
   });
 </script>
 
 {#if open}
   <div
-    class="absolute z-50 {direction == 'left' ? 'mr-2' : 'ml-2'} {className}"
+    use:portal={targetPortal}
+    class="{targetPortal ? 'pointer-events-auto fixed' : 'absolute'} z-50 {!targetPortal
+      ? direction == 'left'
+        ? 'mr-2'
+        : 'ml-2'
+      : ''} {className}"
     style="left: {horizontalStyle?.left};
            right: {horizontalStyle?.right};
            margin-left: {horizontalStyle?.marginLeft};
@@ -86,10 +111,13 @@
     </div>
   </div>
 
-  <button
-    type="button"
-    class="fixed inset-0 z-40 cursor-default border-none bg-transparent"
-    onclick={close}
-    aria-label="Close dropside"
-  ></button>
+  {#if overlay}
+    <button
+      type="button"
+      use:portal={targetPortal}
+      class="pointer-events-auto fixed inset-0 z-40 cursor-default border-none bg-transparent"
+      onclick={close}
+      aria-label="Close dropside"
+    ></button>
+  {/if}
 {/if}

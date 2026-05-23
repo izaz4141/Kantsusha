@@ -43,7 +43,7 @@
     </svg>
   </button>
 
-  <Dropside bind:open={isOpen} trigger={triggerEl} direction="left" class="w-auto min-w-44">
+  <Dropside bind:open={isOpen} trigger={triggerEl} direction="left" overlay={true} class="w-auto min-w-44">
     <div class="p-2">
       <span class="mb-2 block text-xs tracking-wider text-text-muted uppercase">Theme</span>
       <div class="grid grid-cols-3 gap-1">

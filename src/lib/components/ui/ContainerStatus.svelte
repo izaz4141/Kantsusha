@@ -77,7 +77,7 @@
       <RenderIcon icon={service.icon} name={service.name} />
     </div>
     {#if containerData}
-      <Dropdown bind:open={iconDropdownOpen} trigger={iconTriggerEl}>
+      <Dropdown bind:open={iconDropdownOpen} trigger={iconTriggerEl} targetPortal="portal-root">
         <div class="flex min-w-45 flex-col gap-1 p-2 text-xs">
           <div class="flex flex-col gap-0.5">
             <span class="text-text-muted">Image</span>
@@ -241,7 +241,7 @@
           >
         {/if}
       </div>
-      <Dropdown bind:open={statusDropdownOpen} trigger={statusTriggerEl}>
+      <Dropdown bind:open={statusDropdownOpen} trigger={statusTriggerEl} targetPortal="portal-root">
         <div class="flex min-w-30 flex-col gap-1 p-2 text-xs">
           {#if containerData}
             <div class="flex justify-between">

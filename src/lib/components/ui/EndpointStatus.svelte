@@ -90,7 +90,7 @@
           >
         {/if}
       </div>
-      <Dropdown bind:open={dropdownOpen} trigger={triggerEl}>
+      <Dropdown bind:open={dropdownOpen} trigger={triggerEl} targetPortal="portal-root">
         <div class="flex min-w-30 flex-col gap-1 p-2 text-xs">
           {#if endpointData}
             <div class="flex justify-between">

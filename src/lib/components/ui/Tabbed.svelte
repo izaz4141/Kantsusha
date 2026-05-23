@@ -69,7 +69,7 @@
   </div>
 {:else if tabParams && tabData}
   <div class="mx-2 flex flex-row items-center justify-between">
-    <div class="flex flex-row gap-4 overflow-x-scroll">
+    <div class="flex flex-1 flex-row gap-4 overflow-x-scroll">
       {#each widgets as widget, i (`${widget.type}_${i}`)}
         <button
           type="button"
