@@ -30,6 +30,10 @@
   let Layout = $derived(layouts[data.page.layout] ?? Default);
 </script>
 
+<svelte:head>
+  <title>{data.page.name.trim()} - Kantsusha</title>
+</svelte:head>
+
 {#snippet renderColumn(colIndex: number)}
   {#if columns[colIndex]}
     {#each columns[colIndex].widgets as widget, wIdx (`${colIndex}:${wIdx}`)}
