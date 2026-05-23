@@ -3,7 +3,7 @@ import { building } from '$app/environment';
 import { auth } from '$lib/server/auth';
 import { svelteKitHandler } from 'better-auth/svelte-kit';
 import type { HandleServerError } from '@sveltejs/kit';
-import { defaultTheme } from '$lib/theme/store.svelte';
+import { DEFAULT_THEME } from '$lib/utils/constants';
 import { getPreset, getCached } from '$lib/server/config/config';
 import { sequence } from '@sveltejs/kit/hooks';
 
@@ -33,7 +33,7 @@ const handleTheming: Handle = async ({ event, resolve }) => {
     const matchingPreset = Object.entries(cache.presets).find(
       ([_, preset]) => preset.colorScheme === preferredColorScheme,
     );
-    theme = matchingPreset ? matchingPreset[0] : defaultTheme;
+    theme = matchingPreset ? matchingPreset[0] : DEFAULT_THEME;
   }
 
   const preset = await getPreset(theme);

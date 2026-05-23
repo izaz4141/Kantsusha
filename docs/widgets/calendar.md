@@ -4,12 +4,12 @@ Display events from ICS or CalDAV calendars.
 
 ## Parameters
 
-| Parameter | Type      | Required | Default | Description                |
-| --------- | --------- | -------- | ------- | -------------------------- |
-| `type`    | string    | Yes      | -       | `calendar`                 |
-| `cals`    | CalFeed[] | Yes      | -       | Array of calendars (min 1) |
-| `range`   | duration  | No       | `183d`  | Date range to fetch        |
-| `limit`   | number    | No       | `50`    | Max events to display      |
+| Parameter | Type      | Required | Default | Description           |
+| --------- | --------- | -------- | ------- | --------------------- |
+| `type`    | string    | Yes      | -       | `calendar`            |
+| `cals`    | CalFeed[] | No       | []      | Array of calendars    |
+| `range`   | duration  | No       | `183d`  | Date range to fetch   |
+| `limit`   | number    | No       | `50`    | Max events to display |
 
 ### CalFeed Object
 

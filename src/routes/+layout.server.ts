@@ -1,4 +1,4 @@
-import { defaultTheme } from '$lib/theme/store.svelte';
+import { DEFAULT_THEME } from '$lib/utils/constants';
 import { getThemeCSS, getCached, getPages } from '$lib/server/config/config';
 
 export const load = async ({
@@ -11,7 +11,7 @@ export const load = async ({
   const themeCookie = cookies.get('Kantussha-theme');
   const cache = await getCached();
 
-  let theme: string = defaultTheme;
+  let theme: string = DEFAULT_THEME;
 
   if (themeCookie && themeCookie in cache.presets) {
     theme = themeCookie;

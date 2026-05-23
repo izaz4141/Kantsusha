@@ -31,7 +31,7 @@ export async function serveFile(filePath: string): Promise<Response | null> {
 
 export async function handleFileRequest(
   assetsDir: string | undefined,
-  path: string
+  path: string,
 ): Promise<Response> {
   if (!assetsDir) {
     return new Response('KANTSUSHA_ASSETS_DIR not configured', { status: 500 });

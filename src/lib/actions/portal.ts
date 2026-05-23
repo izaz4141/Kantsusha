@@ -3,5 +3,9 @@ export function portal(node: HTMLElement, target?: string) {
   const targetEl = document.getElementById(target);
   if (!targetEl) return;
   targetEl.appendChild(node);
-  return { destroy() { node.remove(); } };
+  return {
+    destroy() {
+      node.remove();
+    },
+  };
 }

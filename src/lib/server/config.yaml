@@ -63,8 +63,8 @@ presets:
     colors:
       background: '#000000'
       surface: '#1a1a1a'
-      surface-raised: '#333333'
-      surface-sunken: '#0a0a0a'
+      surfaceRaised: '#333333'
+      surfaceSunken: '#0a0a0a'
       text: '#ffffff'
       textMuted: '#e0e0e0'
       textOnPrimary: '#000000'
@@ -87,8 +87,8 @@ presets:
     colors:
       background: '#11111b'
       surface: '#181825'
-      surface-raised: '#313244'
-      surface-sunken: '#1e1e2e'
+      surfaceRaised: '#313244'
+      surfaceSunken: '#1e1e2e'
       text: '#cdd6f4'
       textMuted: '#6c7086'
       textOnPrimary: '#1e1e2e'
@@ -132,30 +132,6 @@ pages:
               - esl_dota2
       - size: full
         widgets:
-          - type: tabbed
-            title: Reddit
-            widgets:
-              - type: split-row
-                widgets:
-                  - type: reddit
-                    cache: 2h
-                    update: 30m
-                    view: card
-                    subreddit: selfhosted
-                    sort: top
-                    time: month
-                    limit: 10
-                  - type: rss
-                    view: card
-                    showThumbnail: true
-                    feeds:
-                      - url: 'https://selfh.st/rss'
-              - type: reddit
-                subreddit: privacy
-                sort: top
-                time: month
-                limit: 10
-
           - type: services
             title: Media
             target: _blank
@@ -192,7 +168,7 @@ pages:
                 url: https://jf.${SUBHOST}
                 target: _blank
                 statusCheck: true
-                statusCheckUrl: http://jellyfin:8096
+                statusCheckUrl: https://google.com
               - type: endpoint
                 name: Jellyfin2
                 description: Media Player
@@ -200,7 +176,7 @@ pages:
                 url: https://jf.${SUBHOST}
                 target: _blank
                 statusCheck: true
-                statusCheckUrl: http://jellyfin:8096
+                statusCheckUrl: https://google.com
               - type: endpoint
                 name: Jellyfin3
                 description: Media Player
@@ -208,7 +184,7 @@ pages:
                 url: https://jf.${SUBHOST}
                 target: _blank
                 statusCheck: true
-                statusCheckUrl: http://jellyfin:8096
+                statusCheckUrl: https://google.com
               - type: endpoint
                 name: Jellyfin4
                 description: Media Player
@@ -217,6 +193,23 @@ pages:
                 target: _blank
                 statusCheck: true
                 statusCheckUrl: https://google.com
+
+          - type: tabbed
+            title: Reddit
+            widgets:
+              - type: reddit
+                cache: 2h
+                update: 30m
+                view: card
+                subreddit: selfhosted
+                sort: top
+                time: month
+                limit: 10
+              - type: reddit
+                subreddit: privacy
+                sort: top
+                time: month
+                limit: 10
 
       - size: 25%
         widgets:

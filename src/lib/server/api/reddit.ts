@@ -1,6 +1,6 @@
 import { fetchURL } from '$lib/utils/network';
 import type { RedditPost } from '$lib/types/widget.data';
-import { REDDIT_SORT_REGEX, REDDIT_TIME_REGEX } from '$lib/types/widget.params';
+import { REDDIT_SORT_REGEX, REDDIT_TIME_REGEX } from '$lib/utils/constants';
 
 interface RedditApiPost {
   title: string;

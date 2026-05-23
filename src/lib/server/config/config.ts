@@ -6,16 +6,16 @@ import { dev } from '$app/environment';
 const BASE_DIR = process.cwd();
 const ENTRYDIR = path.dirname(process.argv[1]);
 
-import type { ThemePreset } from '$lib/theme/types';
-import type { PageConfig } from './pages';
+import type { ThemePreset } from '$lib/types/theme';
+import type { PageConfig } from '$lib/types/pages';
 import type { AnyWidgetParams } from '$lib/types/widget.params';
-import { parsePresets, generateThemeCSS } from './theme';
-import { defaultTheme } from '$lib/theme/store.svelte';
-import { parsePages } from './pages';
+import { generateThemeCSS } from './theme';
+import { DEFAULT_THEME } from '$lib/utils/constants';
 import { clearWidgetCache } from '../widget.store';
 import { substituteEnvRecursive } from '$lib/utils/substitution';
-
-const EXTERNAL_CONFIG_PATH = './config/config.yaml';
+import { ConfigSchema, type ParsedConfig } from '$lib/types/config';
+import { EXTERNAL_CONFIG_PATH } from '$lib/utils/constants';
+import z from 'zod';
 const DEFAULT_CONFIG_PATH = !dev
   ? path.resolve(ENTRYDIR, 'config.yaml')
   : path.resolve(BASE_DIR, 'src/lib/server/config.yaml');
@@ -153,13 +153,9 @@ async function resolveIncludes(
   return obj;
 }
 
-export interface ParsedConfig {
-  presets: Record<string, ThemePreset>;
-  css: string;
-  pages: PageConfig[];
-}
+type FullParsedConfig = ParsedConfig & { css: string };
 
-let configCache: { data: ParsedConfig; mtime: number } | null = null;
+let configCache: { data: FullParsedConfig; mtime: number } | null = null;
 
 async function getConfigMtime(): Promise<number> {
   let mtime = 0;
@@ -225,7 +221,14 @@ function mergeConfig(
   return result;
 }
 
-async function loadConfig(): Promise<Record<string, unknown>> {
+function formatZodError(err: unknown): string {
+  if (err instanceof z.ZodError) {
+    return err.issues.map((i) => `  - ${i.path.join('.')}: ${i.message}`).join('\n');
+  }
+  return String(err);
+}
+
+async function loadConfig(): Promise<ParsedConfig> {
   const defaults = await loadYAML(DEFAULT_CONFIG_PATH);
   if (!defaults) {
     throw new Error('Failed to load default config.yaml');
@@ -239,7 +242,12 @@ async function loadConfig(): Promise<Record<string, unknown>> {
   const external = await loadYAML(EXTERNAL_CONFIG_PATH);
   if (!external) {
     console.log('No external config found, using default config');
-    return substituteEnvRecursive(defaultsResolved) as Record<string, unknown>;
+    const substituted = substituteEnvRecursive(defaultsResolved) as Record<string, unknown>;
+    try {
+      return ConfigSchema.parse(substituted);
+    } catch (err) {
+      throw new Error(`Config validation failed:\n${formatZodError(err)}`, { cause: err });
+    }
   }
 
   const externalResolved = (await resolveIncludes(
@@ -249,39 +257,44 @@ async function loadConfig(): Promise<Record<string, unknown>> {
 
   console.log('Merging external config with defaults');
   const merged = mergeConfig(defaultsResolved, externalResolved);
+  const substituted = substituteEnvRecursive(merged) as Record<string, unknown>;
 
-  return substituteEnvRecursive(merged) as Record<string, unknown>;
+  try {
+    return ConfigSchema.parse(substituted);
+  } catch (err) {
+    throw new Error(`Config validation failed:\n${formatZodError(err)}`, { cause: err });
+  }
 }
 
-export async function getCached(): Promise<ParsedConfig> {
+export async function getCached(): Promise<FullParsedConfig> {
   const currentMtime = await getConfigMtime();
 
   if (!configCache || configCache.mtime !== currentMtime) {
-    if (configCache) {
-      clearWidgetCache();
+    try {
+      if (configCache) {
+        clearWidgetCache();
+      }
+      includedFiles.clear();
+
+      const config = await loadConfig();
+      const updatedMtime = await getConfigMtime();
+
+      if (Object.keys(config.presets).length === 0) {
+        throw new Error('No valid presets found in config');
+      }
+
+      const css = generateThemeCSS(config.presets);
+
+      configCache = {
+        data: { ...config, css },
+        mtime: updatedMtime,
+      };
+    } catch (err) {
+      console.error('Config reload failed, keeping previous cache:', err);
+      if (!configCache) {
+        throw err;
+      }
     }
-    includedFiles.clear();
-
-    const rawConfig = await loadConfig();
-    const updatedMtime = await getConfigMtime();
-
-    const rawPresets = rawConfig.presets;
-    const presets =
-      typeof rawPresets === 'object' && rawPresets !== null ? parsePresets(rawPresets) : {};
-
-    if (Object.keys(presets).length === 0) {
-      throw new Error('No valid presets found in config');
-    }
-
-    const css = generateThemeCSS(presets);
-
-    const rawPages = rawConfig.pages;
-    const pages = parsePages(rawPages);
-
-    configCache = {
-      data: { presets, css, pages },
-      mtime: updatedMtime,
-    };
   }
 
   return configCache.data;
@@ -293,7 +306,7 @@ export async function getPresets(): Promise<Record<string, ThemePreset>> {
 
 export async function getPreset(name: string): Promise<ThemePreset> {
   const cache = await getCached();
-  return cache.presets[name] ?? cache.presets[defaultTheme];
+  return cache.presets[name] ?? cache.presets[DEFAULT_THEME];
 }
 
 export async function getThemeCSS(): Promise<string> {

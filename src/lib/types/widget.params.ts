@@ -1,13 +1,11 @@
 import { z } from 'zod';
-
-export const TIME_REGEX = /^(\d+)(s|m|h|d|w|mo|y)$/;
-
-export const REDDIT_SORT_REGEX = /^(top|hot|new|controversial)$/;
-export const REDDIT_TIME_REGEX = /^(hour|day|week|month|year|all)$/;
-
-export const TARGET_REGEX = /^(_blank|_self|_parent|_top)$/;
-
-const CSS_PERCENT_REGEX = /^(\d+(\.\d+)?)%$/;
+import {
+  TIME_REGEX,
+  REDDIT_SORT_REGEX,
+  REDDIT_TIME_REGEX,
+  TARGET_REGEX,
+  CSS_PERCENT_REGEX,
+} from '$lib/utils/constants';
 
 const CommonWidgetParamsSchema = z.object({
   title: z.string().optional(),

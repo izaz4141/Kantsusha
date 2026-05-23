@@ -5,7 +5,7 @@
   import MobileHeader from '$lib/components/layout/MobileHeader.svelte';
   import { setThemeCookie, themeState } from '$lib/theme/store.svelte';
   import type { Snippet } from 'svelte';
-  import type { ThemePreset } from '$lib/theme/types';
+  import type { ThemePreset } from '$lib/types/theme';
 
   interface Props {
     data: {
