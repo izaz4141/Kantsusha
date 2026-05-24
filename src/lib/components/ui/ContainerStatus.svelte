@@ -64,7 +64,7 @@
   }
 </script>
 
-<div class="group flex h-full w-full gap-x-4">
+<div class="group flex h-full w-full gap-x-3">
   <div class="relative flex h-full w-8 items-center justify-center">
     <div
       bind:this={iconTriggerEl}
@@ -141,7 +141,7 @@
         onmouseleave={handleStatusMouseLeave}
         role="status"
         aria-label="Container status"
-        class="h-6 w-6 p-1 text-lg brightness-80 hover:brightness-100 {getStatusColor(
+        class="h-full w-full text-lg brightness-80 hover:brightness-100 {getStatusColor(
           containerData.status,
           containerData.health,
         )}"

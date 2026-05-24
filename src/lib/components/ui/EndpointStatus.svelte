@@ -31,7 +31,7 @@
   }
 </script>
 
-<div class="group flex h-full w-full gap-x-4">
+<div class="group flex h-full w-full gap-x-3">
   <div class="flex h-full w-8 items-center justify-center brightness-80 group-hover:brightness-100">
     <RenderIcon icon={service.icon} name={service.name} />
   </div>
@@ -65,7 +65,7 @@
         onmouseleave={handleMouseLeave}
         role="status"
         aria-label="Endpoint status"
-        class="h-6 w-6 p-1 text-lg brightness-80 hover:brightness-100 {getStatusColor(status)}"
+        class="h-full w-full text-lg brightness-80 hover:brightness-100 {getStatusColor(status)}"
       >
         {#if status === 'online'}
           <svg class="size-full" viewBox="0 0 24 24" fill="currentColor"
