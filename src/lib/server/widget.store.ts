@@ -130,9 +130,13 @@ export async function fetchWidgetInfo(id: string): Promise<AnyWidgetInfo> {
 
   try {
     const data = await handler(widget.params);
-    widget.data = data;
-    widget.cachedAt = Date.now();
-    setWidget(id, widget);
+
+    if (widgetCache.get(id) === widget) {
+      widget.data = data;
+      widget.cachedAt = Date.now();
+      setWidget(id, widget);
+    }
+
     return { data, params: widget.params };
   } catch (error) {
     if (widget.data) {

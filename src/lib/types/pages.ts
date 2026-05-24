@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { CSS_UNIT_REGEX } from '$lib/utils/constants';
-import { AnyWidgetParamsSchema, type AnyWidgetParams } from '$lib/types/widget.params';
+import { AnyWidgetParamsSchema } from '$lib/types/widget.params';
 
 export const PageColumnSchema = z.object({
   size: z
