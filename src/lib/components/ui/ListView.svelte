@@ -34,9 +34,9 @@
   {:else}
     <ul class="space-y-3" transition:slide={{ duration: 300 }}>
       {#each thumbnails.slice(0, visibleCount) as _, i (`feed_${i}`)}
-        <li class="group flex h-14 items-center gap-2 rounded" transition:slide={{ duration: 300 }}>
+        <li class="group flex items-center gap-2 rounded" transition:slide={{ duration: 300 }}>
           {#if showThumbnail && !uiState.isMobile}
-            <div class=" flex h-full w-1/10 rounded">
+            <div class="flex h-full min-h-14 w-1/10 rounded">
               {#if thumbnails[i] !== ''}
                 <img
                   src={thumbnails[i]}
@@ -46,7 +46,7 @@
               {/if}
             </div>
           {/if}
-          <div class="w-9/10 flex-1">
+          <div class="flex-1">
             {@render details(i)}
           </div>
         </li>

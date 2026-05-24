@@ -62,7 +62,7 @@ export type RssParams = z.infer<typeof RssParamsSchema>;
 export const RedditParamsSchema = FeedWidgetParamsSchema.merge(
   z.object({
     type: z.literal('reddit'),
-    subreddit: z.string().min(1),
+    subreddit: z.string(),
     sort: z.string().regex(REDDIT_SORT_REGEX).default('top'),
     time: z.string().regex(REDDIT_TIME_REGEX).default('month'),
   }),
