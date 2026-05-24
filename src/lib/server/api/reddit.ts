@@ -60,9 +60,17 @@ export async function fetchRedditPosts(
     url += `&t=${safeTime}`;
   }
 
-  const response = (await fetchURL(url, { returnText: false })) as {
+  let response: {
     data?: { children: Array<{ kind: string; data: RedditApiPost }> };
   };
+  try {
+    response = (await fetchURL(url, { returnText: false })) as {
+      data?: { children: Array<{ kind: string; data: RedditApiPost }> };
+    };
+  } catch (err) {
+    console.error(`Error fetching Reddit r/${subreddit}:`, err);
+    return [];
+  }
 
   const posts: RedditPost[] = [];
   const children = response.data?.children || [];

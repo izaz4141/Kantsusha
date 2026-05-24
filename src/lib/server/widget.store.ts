@@ -200,13 +200,20 @@ registerWidget('services', async (params) => {
   const results: (ContainerData | EndpointData)[] = [];
 
   for (const service of params.services) {
-    if (service.type === 'container') {
-      const host = getContainerHost(service);
-      const data = await fetchContainerData(host, service.id);
-      results.push(data);
-    } else if (service.type === 'endpoint') {
-      const data = await checkEndpoint(service.name, service.statusCheckUrl);
-      results.push(data);
+    try {
+      if (service.type === 'container') {
+        const host = getContainerHost(service);
+        const data = await fetchContainerData(host, service.id);
+        results.push(data);
+      } else if (service.type === 'endpoint') {
+        const data = await checkEndpoint(service.name, service.statusCheckUrl);
+        results.push(data);
+      }
+    } catch (err) {
+      console.error(
+        `Failed to fetch service ${(service as { name?: string }).name ?? 'unknown'}:`,
+        err,
+      );
     }
   }
 

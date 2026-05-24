@@ -53,26 +53,30 @@ export async function fetchChain(
   const context: FetchContext = {};
 
   for (const [id, request] of Object.entries(fetches ?? {})) {
-    const url = interpolateUrl(request.url, context, options);
+    try {
+      const url = interpolateUrl(request.url, context, options);
 
-    let data: unknown;
-    if (request.type === 'text') {
-      data = await fetchURL(url, {
-        method: request.method,
-        customHeaders: request.headers,
-        body: request.body,
-        returnText: true,
-      });
-    } else {
-      data = await fetchURL(url, {
-        method: request.method,
-        customHeaders: request.headers,
-        body: request.body,
-        returnText: false,
-      });
+      let data: unknown;
+      if (request.type === 'text') {
+        data = await fetchURL(url, {
+          method: request.method,
+          customHeaders: request.headers,
+          body: request.body,
+          returnText: true,
+        });
+      } else {
+        data = await fetchURL(url, {
+          method: request.method,
+          customHeaders: request.headers,
+          body: request.body,
+          returnText: false,
+        });
+      }
+
+      context[id] = data;
+    } catch (err) {
+      console.error(`Error in custom-api fetch "${id}":`, err);
     }
-
-    context[id] = data;
   }
 
   return context;
