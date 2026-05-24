@@ -10,14 +10,15 @@ export const PageColumnSchema = z.object({
   widgets: z
     .array(z.any())
     .transform((items) =>
-      items.filter((item): item is AnyWidgetParams => {
-        const result = AnyWidgetParamsSchema.safeParse(item);
-        if (!result.success) {
+      items.flatMap((item) => {
+        try {
+          return AnyWidgetParamsSchema.parse(item);
+        } catch {
           const type =
             item && typeof item === 'object' ? (item as Record<string, unknown>).type : typeof item;
           console.warn(`Widget "${type}" validation failed, skipping`);
+          return [];
         }
-        return result.success;
       }),
     )
     .optional()
