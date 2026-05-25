@@ -15,9 +15,10 @@
 
   interface Props {
     id: string;
+    refreshSignal?: number;
   }
 
-  let { id }: Props = $props();
+  let { id, refreshSignal = 0 }: Props = $props();
 
   let loading = $state(true);
   let error = $state<string | null>(null);
@@ -26,6 +27,12 @@
   let widgets = $derived(tabParams?.widgets as WrapperWidgetEntry[]);
   let active = $state(0);
   let reloading = $state(false);
+  let childRefreshSignal = $state(0);
+
+  $effect(() => {
+    if (refreshSignal === 0) return;
+    childRefreshSignal = Date.now();
+  });
 
   async function fetchTabbedData(isInitial = false) {
     if (isInitial) {
@@ -49,6 +56,7 @@
     reloading = true;
     await fetchTabbedData();
     reloading = false;
+    childRefreshSignal = Date.now();
   }
 
   onMount(async () => {
@@ -97,12 +105,14 @@
         <WrapperWidgetRenderer
           id={tabData.ids[i]}
           type={widgets[i].type as WrapperWidgetParams['type']}
+          refreshSignal={childRefreshSignal}
         />
       {:else}
         <WidgetRenderer
           id={tabData.ids[i]}
           type={widgets[i].type as BaseWidgetParams['type']}
           showTitle={false}
+          refreshSignal={childRefreshSignal}
         />
       {/if}
     </div>

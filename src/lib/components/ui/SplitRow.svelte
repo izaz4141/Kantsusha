@@ -15,9 +15,10 @@
 
   interface Props {
     id: string;
+    refreshSignal?: number;
   }
 
-  let { id }: Props = $props();
+  let { id, refreshSignal = 0 }: Props = $props();
 
   let loading = $state(true);
   let error = $state<string | null>(null);
@@ -25,6 +26,12 @@
   let splitParams = $state<SplitRowParams | null>(null);
   let widgets = $derived(splitParams?.widgets as WrapperWidgetEntry[]);
   let reloading = $state(false);
+  let childRefreshSignal = $state(0);
+
+  $effect(() => {
+    if (refreshSignal === 0) return;
+    childRefreshSignal = Date.now();
+  });
 
   async function fetchSplitData(isInitial = false) {
     if (isInitial) {
@@ -48,6 +55,7 @@
     reloading = true;
     await fetchSplitData();
     reloading = false;
+    childRefreshSignal = Date.now();
   }
 
   onMount(async () => {
@@ -86,12 +94,14 @@
         <WrapperWidgetRenderer
           id={splitData.ids[i]}
           type={widgets[i].type as WrapperWidgetParams['type']}
+          refreshSignal={childRefreshSignal}
         />
       {:else}
         <WidgetRenderer
           id={splitData.ids[i]}
           type={widgets[i].type as BaseWidgetParams['type']}
           showTitle={false}
+          refreshSignal={childRefreshSignal}
         />
       {/if}
     {/each}

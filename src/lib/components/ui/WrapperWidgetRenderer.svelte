@@ -7,14 +7,15 @@
   interface Props {
     id: string;
     type: WrapperWidgetParams['type'];
+    refreshSignal?: number;
   }
-  let { id, type }: Props = $props();
+  let { id, type, refreshSignal = 0 }: Props = $props();
 </script>
 
 {#if type == 'tabbed'}
-  <Tabbed {id} />
+  <Tabbed {id} {refreshSignal} />
 {:else if type == 'split-column'}
-  <SplitColumn {id} />
+  <SplitColumn {id} {refreshSignal} />
 {:else if type == 'split-row'}
-  <SplitRow {id} />
+  <SplitRow {id} {refreshSignal} />
 {/if}

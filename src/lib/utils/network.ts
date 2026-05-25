@@ -13,6 +13,7 @@ export async function fetchURL(
   const timeoutMs = 15000;
 
   for (let attempt = 0; attempt < maxRetries; attempt++) {
+    const controller = new AbortController();
     let timeoutId: ReturnType<typeof setTimeout> | undefined;
 
     try {
@@ -23,19 +24,14 @@ export async function fetchURL(
         ...options.customHeaders,
       };
 
-      const response = await Promise.race([
-        fetch(url, {
-          method: options.method,
-          headers,
-          body: options.body,
-        }),
-        new Promise<Response>((_, reject) => {
-          timeoutId = setTimeout(
-            () => reject(new Error(`Request to ${url} timed out after ${timeoutMs}ms`)),
-            timeoutMs,
-          );
-        }),
-      ]);
+      timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+      const response = await fetch(url, {
+        method: options.method,
+        headers,
+        body: options.body,
+        signal: controller.signal,
+      });
 
       clearTimeout(timeoutId);
 
@@ -47,7 +43,7 @@ export async function fetchURL(
             errorMessage = errorBody.error;
           }
         } catch {
-          // Ignore JSON parse errors, use generic message
+          await response.body?.cancel();
         }
         throw new Error(errorMessage);
       }

@@ -20,9 +20,16 @@
     type: BaseWidgetParams['type'];
     update?: number;
     showTitle?: boolean;
+    refreshSignal?: number;
   }
 
-  let { id, type, update = 2 * 60 * 60 * 1000, showTitle = true }: Props = $props();
+  let {
+    id,
+    type,
+    update = 2 * 60 * 60 * 1000,
+    showTitle = true,
+    refreshSignal = 0,
+  }: Props = $props();
 
   let loading = $state(true);
   let error = $state<string | null>(null);
@@ -30,6 +37,11 @@
   let widgetTitle = $state<string | null>(null);
   let intervalId: ReturnType<typeof setInterval> | null = null;
   let reloading = $state(false);
+
+  $effect(() => {
+    if (refreshSignal === 0) return;
+    fetchWidgetInfo(false);
+  });
 
   async function fetchWidgetInfo(isInitial = false) {
     if (isInitial) {
