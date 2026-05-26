@@ -1,5 +1,6 @@
 <script lang="ts">
   import { searchState, closeSearch, detectEngineFromQuery } from '$lib/stores/search.svelte';
+  import { resolveString } from '$lib/utils/substitution';
 
   let inputEl = $state<HTMLInputElement>();
   let suggestions = $state<string[]>([]);
@@ -67,7 +68,7 @@
     if (!engine) return;
     const q = query || searchState.query;
     if (!q.trim()) return;
-    const url = engine.queryUrl.replace('${QUERY}', encodeURIComponent(q));
+    const url = resolveString(engine.queryUrl.replace('${QUERY}', encodeURIComponent(q)));
     closeSearch();
     window.open(url, searchState.target, 'noopener,noreferrer');
   }
