@@ -1,3 +1,21 @@
+search:
+  enabled: true
+  target: _blank
+  default: duckduckgo
+  engines:
+    duckduckgo:
+      queryUrl: https://duckduckgo.com/?q=${QUERY}
+      autoCompleteUrl: https://duckduckgo.com/ac/?q=${QUERY}
+      bang: '!ddg'
+    google:
+      queryUrl: https://www.google.com/search?q=${QUERY}
+      autoCompleteUrl: https://suggestqueries.google.com/complete/search?client=firefox&q=${QUERY}
+      bang: '!g'
+    brave:
+      queryUrl: https://search.brave.com/search?q=${QUERY}
+      autoCompleteUrl: https://search.brave.com/api/suggest?q=${QUERY}
+      bang: '!br'
+
 presets:
   light:
     name: Rosé Pine Dawn
@@ -120,7 +138,6 @@ pages:
 
               - type: rss
                 title: SELFTHOST RSS
-                view: card
                 showThumbnail: true
                 feeds:
                   - url: 'https://selfh.st/rss'
@@ -135,7 +152,7 @@ pages:
           - type: services
             title: Media
             target: _blank
-            column: 3
+            column: 2
             services:
               # - type: container
               #   id: jellyfin
@@ -200,13 +217,14 @@ pages:
               - type: reddit
                 cache: 2h
                 update: 30m
-                view: card
+                showThumbnail: true
                 subreddit: selfhosted
                 sort: top
                 time: month
                 limit: 10
               - type: reddit
                 subreddit: privacy
+                showThumbnail: true
                 sort: top
                 time: month
                 limit: 10

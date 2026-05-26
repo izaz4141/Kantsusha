@@ -9,6 +9,7 @@ const ENTRYDIR = path.dirname(process.argv[1]);
 import type { ThemePreset } from '$lib/types/theme';
 import type { PageConfig } from '$lib/types/pages';
 import type { AnyWidgetParams } from '$lib/types/widget.params';
+import type { SearchConfig } from '$lib/types/search';
 import { generateThemeCSS } from './theme';
 import { DEFAULT_THEME } from '$lib/utils/constants';
 import { clearWidgetCache } from '../widget.store';
@@ -329,6 +330,10 @@ export async function getPageBySlug(slug: string): Promise<PageConfig | null> {
 export async function getFirstPage(): Promise<PageConfig | null> {
   const pages = (await getCached()).pages;
   return pages[0] ?? null;
+}
+
+export async function getSearchConfig(): Promise<SearchConfig> {
+  return (await getCached()).search;
 }
 
 export async function getWidgets(): Promise<AnyWidgetParams[]> {

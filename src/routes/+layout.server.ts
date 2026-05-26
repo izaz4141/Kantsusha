@@ -1,5 +1,5 @@
 import { DEFAULT_THEME } from '$lib/utils/constants';
-import { getThemeCSS, getCached, getPages } from '$lib/server/config/config';
+import { getThemeCSS, getCached, getPages, getSearchConfig } from '$lib/server/config/config';
 
 export const load = async ({
   cookies,
@@ -34,6 +34,7 @@ export const load = async ({
   }));
 
   const css = await getThemeCSS();
+  const search = await getSearchConfig();
 
   return {
     theme: {
@@ -42,5 +43,6 @@ export const load = async ({
       presets: cache.presets,
     },
     routes,
+    search,
   };
 };

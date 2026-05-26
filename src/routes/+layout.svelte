@@ -3,14 +3,18 @@
   import Header from '$lib/components/layout/Header.svelte';
   import Footer from '$lib/components/layout/Footer.svelte';
   import MobileHeader from '$lib/components/layout/MobileHeader.svelte';
+  import SearchModal from '$lib/components/shared/SearchModal.svelte';
   import { setThemeCookie, themeState } from '$lib/theme/store.svelte';
+  import { searchState, openSearch, closeSearch } from '$lib/stores/search.svelte';
   import type { Snippet } from 'svelte';
   import type { ThemePreset } from '$lib/types/theme';
+  import type { SearchConfig } from '$lib/types/search';
 
   interface Props {
     data: {
       theme: { name: string; css: string; presets: Record<string, ThemePreset> };
       routes: { name: string; slug: string }[];
+      search: SearchConfig;
     };
     children: Snippet;
   }
@@ -27,7 +31,35 @@
     document.documentElement.setAttribute('data-theme', themeState.current);
     setThemeCookie(themeState.current);
   });
+
+  $effect(() => {
+    const search = data.search;
+    if (search.enabled) {
+      searchState.enabled = true;
+      searchState.triggerKey = search.triggerKey;
+      searchState.target = search.target;
+      searchState.engines = search.engines;
+      searchState.selectedEngine = search.default || Object.keys(search.engines)[0];
+    }
+  });
+
+  function onKeydown(e: KeyboardEvent) {
+    if (!searchState.enabled) return;
+    if (e.key === searchState.triggerKey && !e.ctrlKey && !e.metaKey) {
+      const tag = (e.target as HTMLElement)?.tagName;
+      if (tag !== 'INPUT' && tag !== 'TEXTAREA' && !(e.target as HTMLElement)?.isContentEditable) {
+        e.preventDefault();
+        openSearch();
+      }
+    }
+    if (e.key === 'Escape' && searchState.open) {
+      closeSearch();
+    }
+  }
 </script>
+
+<svelte:window onkeydown={onKeydown} />
+<SearchModal />
 
 <svelte:head>
   <!-- eslint-disable-next-line svelte/no-at-html-tags -->

@@ -1,8 +1,10 @@
 import { z } from 'zod';
 import { RawPresetSchema, ThemePresetSchema, type ThemePreset } from '$lib/types/theme';
 import { PageConfigSchema } from '$lib/types/pages';
+import { SearchConfigSchema } from '$lib/types/search';
 
 export const ConfigSchema = z.object({
+  search: SearchConfigSchema,
   presets: z
     .record(z.string(), RawPresetSchema)
     .optional()
