@@ -84,6 +84,7 @@ async function fetchTwoStatsSnapshots(
   });
 
   if (!response.ok || !response.body) {
+    response.body?.cancel();
     return null;
   }
 
@@ -110,7 +111,7 @@ async function fetchTwoStatsSnapshots(
       }
     }
   } finally {
-    reader.cancel();
+    await reader.cancel();
   }
 
   if (snapshots.length < 2) {
@@ -134,6 +135,7 @@ export async function fetchContainerData(
   });
 
   if (!inspectResponse.ok) {
+    await inspectResponse.body?.cancel();
     if (inspectResponse.status === 404) {
       return {
         name: containerName,

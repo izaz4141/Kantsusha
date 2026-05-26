@@ -1,6 +1,7 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { getSearchConfig } from '$lib/server/config/config';
+import { fetchURL } from '$lib/utils/network';
 
 export const GET: RequestHandler = async ({ url }) => {
   const q = url.searchParams.get('q');
@@ -24,27 +25,13 @@ export const GET: RequestHandler = async ({ url }) => {
   const targetUrl = engineConfig.autoCompleteUrl.replace('${QUERY}', encodeURIComponent(q));
 
   try {
-    const response = await fetch(targetUrl, {
-      headers: {
-        'User-Agent':
-          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36',
+    const data = await fetchURL(targetUrl, {
+      retry: 0,
+      returnText: false,
+      customHeaders: {
         Accept: 'application/json',
       },
-      signal: AbortSignal.timeout(10000),
     });
-
-    if (!response.ok) {
-      return json({ suggestions: [] });
-    }
-
-    const text = await response.text();
-
-    let data: unknown;
-    try {
-      data = JSON.parse(text);
-    } catch {
-      return json({ suggestions: [] });
-    }
 
     let suggestions: string[] = [];
 
