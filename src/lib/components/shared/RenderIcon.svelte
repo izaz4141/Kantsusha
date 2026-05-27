@@ -18,7 +18,7 @@
       src={resolved.url}
       alt={name}
       class="h-full w-full object-contain"
-      class:dark-invert={shouldInvertDark}
+      style={shouldInvertDark ? 'filter: invert(1)' : ''}
     />
   {:else}
     <div class="flex h-full w-full items-center justify-center rounded bg-primary">
