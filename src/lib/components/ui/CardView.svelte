@@ -27,16 +27,14 @@
           class="group transition-slide flex max-w-36 shrink-0 flex-col overflow-hidden rounded border border-border bg-surface md:max-w-44"
           transition:slide={{ duration: 300 }}
         >
-          {#if thumbnails[i] !== ''}
-            <div class="aspect-video w-full overflow-hidden">
-              <img
-                src={thumbnails[i]}
-                alt=""
-                class="h-full w-full object-cover brightness-80 transition-all group-hover:brightness-100"
-                onerror={(e) => ((e.currentTarget as HTMLImageElement).src = brokenIcon)}
-              />
-            </div>
-          {/if}
+          <div class="aspect-video w-full overflow-hidden">
+            <img
+              src={thumbnails[i]}
+              alt=""
+              class="h-full w-full object-cover brightness-80 transition-all group-hover:brightness-100"
+              onerror={(e) => ((e.currentTarget as HTMLImageElement).src = brokenIcon)}
+            />
+          </div>
           <div class="p-2">
             {@render details(i)}
           </div>

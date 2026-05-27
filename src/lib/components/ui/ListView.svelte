@@ -38,14 +38,12 @@
         <li class="group flex items-center gap-2 rounded" transition:slide={{ duration: 300 }}>
           {#if showThumbnail && !uiState.isMobile}
             <div class="flex h-full min-h-14 w-1/10 rounded">
-              {#if thumbnails[i] !== ''}
-                <img
-                  src={thumbnails[i]}
-                  alt=""
-                  class="object-cover brightness-80 transition-all group-hover:brightness-100"
-                  onerror={(e) => ((e.currentTarget as HTMLImageElement).src = brokenIcon)}
-                />
-              {/if}
+              <img
+                src={thumbnails[i]}
+                alt=""
+                class="object-cover brightness-80 transition-all group-hover:brightness-100"
+                onerror={(e) => ((e.currentTarget as HTMLImageElement).src = brokenIcon)}
+              />
             </div>
           {/if}
           <div class="flex-1">
