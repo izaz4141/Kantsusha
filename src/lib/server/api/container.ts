@@ -84,7 +84,7 @@ async function fetchTwoStatsSnapshots(
   });
 
   if (!response.ok || !response.body) {
-    response.body?.cancel();
+    await response.body?.cancel().catch(() => {});
     return null;
   }
 
@@ -111,7 +111,7 @@ async function fetchTwoStatsSnapshots(
       }
     }
   } finally {
-    await reader.cancel();
+    await reader.cancel().catch(() => {});
   }
 
   if (snapshots.length < 2) {
@@ -135,7 +135,7 @@ export async function fetchContainerData(
   });
 
   if (!inspectResponse.ok) {
-    await inspectResponse.body?.cancel();
+    await inspectResponse.body?.cancel().catch(() => {});
     if (inspectResponse.status === 404) {
       return {
         name: containerName,

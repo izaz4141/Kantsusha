@@ -74,13 +74,13 @@ export async function fetchURL(
             errorMessage = errorBody.error;
           }
         } catch {
-          await response.body?.cancel();
+          await response.body?.cancel().catch(() => {});
         }
         throw new Error(errorMessage);
       }
 
       if (options?.skipBody) {
-        response.body?.cancel();
+        await response.body?.cancel().catch(() => {});
         return response;
       }
 
