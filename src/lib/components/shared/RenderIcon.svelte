@@ -1,5 +1,6 @@
 <script lang="ts">
   import { resolveIcon, shouldInvert } from '$lib/utils/icon';
+  import brokenIcon from '$lib/assets/broken-icon.svg';
 
   interface Props {
     icon?: string;
@@ -10,23 +11,15 @@
 
   let resolved = $derived(icon ? resolveIcon(icon) : null);
   let shouldInvertDark = $derived(resolved ? shouldInvert(resolved.invert) : false);
+
+  let imgError = $state(false);
+  let src = $derived(!icon || !resolved || imgError ? brokenIcon : resolved.url);
 </script>
 
-{#if icon}
-  {#if resolved}
-    <img
-      src={resolved.url}
-      alt={name}
-      class="h-full w-full object-contain"
-      style={shouldInvertDark ? 'filter: invert(1)' : ''}
-    />
-  {:else}
-    <div class="flex h-full w-full items-center justify-center rounded bg-primary">
-      <span class="text-xs font-bold text-text-on-primary">
-        {name.charAt(0).toUpperCase()}
-      </span>
-    </div>
-  {/if}
-{:else}
-  <div class="h-full w-full rounded bg-border"></div>
-{/if}
+<img
+  {src}
+  alt={name}
+  class="h-full w-full object-contain"
+  style={shouldInvertDark ? 'filter: invert(1)' : ''}
+  onerror={() => (imgError = true)}
+/>

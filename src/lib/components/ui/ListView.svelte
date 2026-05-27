@@ -2,6 +2,7 @@
   import { slide } from 'svelte/transition';
   import type { Snippet } from 'svelte';
   import { uiState } from '$lib/stores/global.svelte';
+  import brokenIcon from '$lib/assets/broken-icon.svg';
 
   interface Props {
     showThumbnail?: boolean;
@@ -42,6 +43,7 @@
                   src={thumbnails[i]}
                   alt=""
                   class="object-cover brightness-80 transition-all group-hover:brightness-100"
+                  onerror={(e) => ((e.currentTarget as HTMLImageElement).src = brokenIcon)}
                 />
               {/if}
             </div>
