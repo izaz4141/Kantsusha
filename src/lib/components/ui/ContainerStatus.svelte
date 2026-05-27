@@ -147,98 +147,127 @@
         )}"
       >
         {#if containerData.status === 'running' && containerData.health === 'healthy'}
-          <svg class="size-full" viewBox="0 0 24 24" fill="currentColor"
-            ><circle cx="12" cy="12" r="10" opacity="0.3" /><circle cx="12" cy="12" r="5" /></svg
-          >
+          <!-- Elegant solid check with subtle ring -->
+          <svg class="size-full" viewBox="0 0 24 24" fill="currentColor">
+            <circle cx="12" cy="12" r="10" opacity="0.15" />
+            <path
+              d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm-1.5 14.5L7 13l1.5-1.5L10.5 13l5-5L17 9.5z"
+            />
+          </svg>
         {:else if containerData.status === 'running' && containerData.health === 'unhealthy'}
+          <!-- Warning triangle with exclamation -->
           <svg
             class="size-full"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
-            stroke-width="2"
-            ><path d="M12 2L2 22h20L12 2z" /><line x1="12" y1="9" x2="12" y2="13" /><line
-              x1="12"
-              y1="17"
-              x2="12.01"
-              y2="17"
-            /></svg
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
           >
+            <path d="M12 3L2 21h20L12 3z" />
+            <circle cx="12" cy="16" r="0.8" fill="currentColor" stroke="none" />
+            <line x1="12" y1="9" x2="12" y2="13" />
+          </svg>
         {:else if containerData.status === 'running' && containerData.health === 'starting'}
+          <!-- Thin spinner -->
           <svg
             class="size-full animate-spin"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
-            stroke-width="2"><path d="M21 12a9 9 0 1 1-6.219-8.56" /></svg
+            stroke-width="1.8"
+            stroke-linecap="round"
           >
+            <path d="M12 3a9 9 0 0 1 9 9" />
+            <circle cx="12" cy="12" r="10" stroke-dasharray="40 10" stroke-opacity="0.2" />
+          </svg>
         {:else if containerData.status === 'running'}
-          <svg class="size-full" viewBox="0 0 24 24" fill="currentColor"
-            ><circle cx="12" cy="12" r="6" /></svg
-          >
+          <!-- Minimalist pulsing dot -->
+          <svg class="size-full" fill="currentColor" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="8" opacity="0.12" />
+            <circle cx="12" cy="12" r="4" />
+          </svg>
         {:else if containerData.status === 'paused'}
-          <svg class="size-full" viewBox="0 0 24 24" fill="currentColor"
-            ><rect x="6" y="4" width="4" height="16" /><rect
-              x="14"
-              y="4"
-              width="4"
-              height="16"
-            /></svg
-          >
+          <!-- Two thin rounded pause bars -->
+          <svg class="size-full" viewBox="0 0 24 24" fill="currentColor">
+            <rect x="7" y="5" width="2.5" height="14" rx="1" />
+            <rect x="14.5" y="5" width="2.5" height="14" rx="1" />
+          </svg>
         {:else if containerData.status === 'exited'}
+          <!-- Subtle squared outline -->
           <svg
             class="size-full"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
-            stroke-width="2"><rect x="6" y="6" width="12" height="12" rx="1" /></svg
+            stroke-width="1.8"
+            stroke-linecap="round"
           >
+            <rect x="7" y="7" width="10" height="10" rx="1.5" />
+          </svg>
         {:else if containerData.status === 'restarting'}
+          <!-- Elegant circular arrow with minimal stroke -->
           <svg
             class="size-full"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
-            stroke-width="2"
-            ><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path
-              d="M3 3v5h5"
-            /><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16" /><path
-              d="M16 21h5v-5"
-            /></svg
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
           >
+            <path d="M21 12a9 9 0 0 0-9-9 8.5 8.5 0 0 0-6.5 3" />
+            <path d="M3 5v4h4" />
+            <path d="M3 12a9 9 0 0 0 9 9 8.5 8.5 0 0 0 6.5-3" />
+            <path d="M21 19v-4h-4" />
+          </svg>
         {:else if containerData.status === 'removing'}
+          <!-- Trash icon -->
           <svg
             class="size-full"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
-            stroke-width="2"
-            ><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path
-              d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"
-            /></svg
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
           >
+            <path d="M4 7h16" />
+            <path d="M10 11v5" />
+            <path d="M14 11v5" />
+            <path d="M6 7v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7" />
+            <path d="M9 5V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1" />
+          </svg>
         {:else if containerData.status === 'dead'}
+          <!-- Dashed circle with X -->
           <svg
             class="size-full"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
-            stroke-width="2"><circle cx="12" cy="12" r="9" stroke-dasharray="3 2" /></svg
+            stroke-width="1.8"
+            stroke-linecap="round"
           >
+            <circle cx="12" cy="12" r="9" stroke-dasharray="3 3" />
+            <line x1="8.5" y1="8.5" x2="15.5" y2="15.5" stroke-dasharray="none" />
+            <line x1="15.5" y1="8.5" x2="8.5" y2="15.5" stroke-dasharray="none" />
+          </svg>
         {:else}
+          <!-- Question mark -->
           <svg
             class="size-full"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
-            stroke-width="2"
-            ><circle cx="12" cy="12" r="9" /><line x1="12" y1="8" x2="12" y2="12" /><line
-              x1="12"
-              y1="16"
-              x2="12.01"
-              y2="16"
-            /></svg
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
           >
+            <circle cx="12" cy="12" r="10" stroke-opacity="0.2" />
+            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+            <circle cx="12" cy="17" r="0.8" fill="currentColor" stroke="none" />
+          </svg>
         {/if}
       </div>
       <Dropdown bind:open={statusDropdownOpen} trigger={statusTriggerEl} targetPortal="portal-root">
