@@ -43,7 +43,7 @@ src/
 │   │   └── shared/         # Shared components
 │   ├── server/
 │   │   ├── api/           # Widget fetch logic
-│   │   ├── config/        # Config loaders (pages.ts, theme.ts, widget.ts)
+│   │   ├── config/        # Config loaders (config.ts, theme.ts)
 │   │   ├── db/            # Database (schema.ts, auth.schema.ts)
 │   │   └── auth.ts        # Better-Auth configuration
 │   ├── stores/             # Svelte stores
@@ -89,36 +89,26 @@ pages:
 
 Available layouts in `src/lib/components/layout/`:
 
-- `Default.svelte` - Standard dashboard layout
-- `Slim.svelte` - Minimal layout
-- `ThreePanel.svelte` - Three-column layout
-- `Header.svelte` / `Footer.svelte` - Header/footer components
+- `Default.svelte` — Standard dashboard layout
+- `Slim.svelte` — Minimal layout
+- `ThreePanel.svelte` — Three-column layout
+- `Header.svelte` / `Footer.svelte` — Header/footer components
 
 ## Data Flow
 
-1. **Page Loading**: `config.yaml` → `src/lib/server/config/pages.ts` → `parsePages()` → page config objects
-2. **Widget Rendering**: `src/routes/[slug]/+page.server.ts` loads page config → passes to Svelte component
-3. **Widget Data Fetch**: WidgetRenderer.svelte → `/api/v1/widgets/[id]` → `fetchWidgetInfo()` → widget API files
-4. **Theme**: `config.yaml` presets → `src/lib/server/config/theme.ts` → client-side theme store
+1. **Config**: `config.yaml` → `config.ts` (`getCached`, `getPageBySlug`) → parsed page objects
+2. **Page loading**: `[slug]/+page.server.ts` loads page config, assigns widget IDs
+3. **Widget data**: `WidgetRenderer.svelte` → `/api/v1/widgets/[id]` → `fetchWidgetInfo()` → widget handler
+4. **Theme**: `config.yaml` presets → `theme.ts` → CSS vars injected in layout
 
-## Adding a New Widget
+## Adding a Widget
 
-See AGENTS.md for the 8-step widget creation workflow.
+See `AGENTS.md`.
 
 ## Database
 
 ```sh
-bun --bun run db:push      # Push schema to DB
-bun --bun run db:generate # Generate migrations
-bun --bun run db:studio   # Open Drizzle Studio
-```
-
-## Commands
-
-```sh
-bun --bun run dev      # Dev server
-bun --bun run build  # Production build
-bun --bun run check   # Typecheck
-bun --bun run lint   # Prettier + ESLint
-bun --bun run test   # Run tests (vitest)
+bunx drizzle-kit push      # Push schema to DB
+bunx drizzle-kit generate  # Generate migrations
+bunx drizzle-kit studio    # Open Drizzle Studio
 ```

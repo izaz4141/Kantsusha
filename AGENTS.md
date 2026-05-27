@@ -2,75 +2,54 @@
 
 ## Commands
 
-- `bun --bun run dev` - Start dev server
-- `bun --bun run build` - Production build
-- `bun --bun run check` - Typecheck
-- `bun --bun run lint` - Prettier + ESLint
-- `bun --bun run format` - Prettier Format
-- `bun --bun run test` - Run unit tests (vitest)
+Use `bun --bun` prefix:
+- `bun --bun run dev` — Dev server
+- `bun --bun run build` — `vite build` then copies `src/lib/server/config.yaml` → `build/config.yaml`
+- `bun --bun run check` — `svelte-kit sync && svelte-check`
+- `bun --bun run lint` — Prettier check + ESLint
+- `bun --bun run format` — Prettier write
+- `bun --bun run test` / `test:unit -- --run` — Vitest
+- `bunx drizzle-kit push|generate|studio` — DB schema
+- `bun --bun run preview` — Vite preview
 
-## Key Architecture
+## Config
 
-- Pages defined in `config.yaml` under `pages`, loaded via dynamic route `[slug]`
-- Widget API: `/api/v1/widgets/[id]` (server: `src/routes/api/v1/widgets/[id]/+server.ts`)
-- Widget types: `calendar`, `rss`, `reddit`, `tabbed`
-- Widget validation uses Zod 4.x with discriminated unions in `src/lib/types/widget.params.ts`
+Pages/themes in `src/lib/server/config.yaml`. Quirks:
+- **External override**: `./config/config.yaml` merges on top (presets merge, pages replace)
+- **`$include`** directive includes other YAML files, supports `{overrides}`
+- **`${VAR}` substitution** via `substituteEnvRecursive`
+- **Dev path**: `src/lib/server/config.yaml`; **Prod path**: `build/config.yaml`
+- Env prefix: `KANTSUSHA_*` (DB, ORIGINS, AUTH_SECRET, ASSETS_DIR)
+
+## Architecture
+
+- **SvelteKit 2 + Svelte 5 (runes)**: `$state`, `$derived`, `$effect`, `$props`
+- **Adapter**: `svelte-adapter-bun`
+- **Pages**: `config.yaml` → `[slug]` dynamic route via `getPageBySlug()`
+- **Widgets**: LRU cache (`widget.store.ts`), background refresh (`widget.scheduler.ts`), handlers via `registerWidget(type, fn)`
+- **Validation**: Zod 4.x discriminated unions in `src/lib/types/widget.params.ts`
+- **Theme cookie**: `Kantussha-theme` (double `s`)
+
+## Tests
+
+Two Vitest projects in `vite.config.ts`:
+- **client**: Playwright browser — `src/**/*.svelte.{test,spec}.{ts,js}`, excludes `src/lib/server/**`
+- **server**: node env — `src/**/*.{test,spec}.{ts,js}`, excludes svelte tests
+
+Run focused: `bun --bun run test:unit -- --project server`
 
 ## Styling
 
-- Use Tailwind CSS with theme tokens from `src/lib/server/config.yaml`
-- Never use pure CSS classes - use Tailwind utilities + theme tokens
-- Theme tokens: `background`, `surface`, `text`, `primary`, `border` (see src/routes/layout.css)
-- **Dynamic styling**: Never use string interpolation for Tailwind classes (e.g., `class="{dynamicVar}"`). Unused classes are removed at compile time. Instead use `style=` attribute for dynamic values.
+- Tailwind 4.x via `@tailwindcss/vite` (no config file)
+- Theme tokens as CSS vars in `src/routes/layout.css`, referenced via `@theme`
+- **Never** string-interpolate classes (`class="{var}"`) — use `style=` for dynamic values
+- Prettier sorts Tailwind classes via `prettier-plugin-tailwindcss`
 
-## Database
+## Adding a Widget
 
-- SQLite via libSQL (`DATABASE_URL` in `.env`)
-- Schema: `src/lib/server/db/schema.ts`
-
-## Widget Validation (Zod Refactor)
-
-Validation now uses Zod schemas in `src/lib/types/widget.params.ts`:
-
-- `AnyWidgetParamsSchema` - Root discriminated union for all widget types
-- `CalendarParamsSchema`, `RssParamsSchema`, `RedditParamsSchema` - Individual widget schemas
-- `TabbedParamsSchema` - Container widget holding nested widgets
-
-Key Zod features used:
-
-- `z.discriminatedUnion('type', ...)` for type-safe switch on widget type
-- `.default()` for optional defaults
-- `.overwrite()` for computed defaults
-- `z.infer` to extract TypeScript types
-
-Validation logic in `src/lib/server/config/widget.ts`:
-
-- `validateWidget(raw)` - Parse and validate single widget, returns null on failure
-- `parseWidgets(rawWidgets)` - Parse array of widgets, filters invalid ones
-
-## Adding a New Widget
-
-1. **Define Zod schema** in `src/lib/types/widget.params.ts`:
-
-   ```ts
-   export const MyWidgetParamsSchema = z.object({
-     type: z.literal('mywidget'),
-     title: z.string().optional(),
-     param1: z.string(),
-     param2: z.number().optional(),
-     cache: z.string().optional(),
-   });
-   export type MyWidgetParams = z.infer<typeof MyWidgetParamsSchema>;
-   ```
-
-2. **Add to discriminated unions**: Update `BaseWidgetParamsSchema` or `ContainerWidgetParams`
-
-3. **Add data types** in `src/lib/types/widget.data.ts` if needed
-
-4. **Implement API logic** in `src/lib/server/api/mywidget.ts`
-
-5. **Register handler** in `src/routes/api/v1/widgets/[id]/+server.ts`
-
-6. **Create UI component** in `src/lib/components/widgets/MyWidget.svelte`
-
-7. **Add to WidgetRenderer** in `src/lib/components/ui/WidgetRenderer.svelte`
+1. Define Zod schema in `src/lib/types/widget.params.ts` (add to `BaseWidgetParamsSchema`)
+2. Add types in `src/lib/types/widget.data.ts` if needed
+3. Implement API logic in `src/lib/server/api/<name>.ts`
+4. Register handler in `src/lib/server/widget.store.ts` via `registerWidget('type', handler)`
+5. Create component in `src/lib/components/widgets/<Name>Widget.svelte`
+6. Add to `WidgetRenderer.svelte` conditional chain

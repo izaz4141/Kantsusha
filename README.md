@@ -18,10 +18,10 @@
 
 ## Features
 
-- **Widget system**: Defaults, with custom later
+- **Widget system**: Config-driven widgets with LRU cache and background refresh
 - **Themes**: Customizable through config.yaml
-- **SQLite database**: Using drizzle ORM (not yet used)
-- **Authentication**: better-auth integration (not yet used)
+- **SQLite database**: Drizzle ORM with better-auth integration
+- **Authentication**: better-auth integration
 
 ## Tech Stack
 
