@@ -68,7 +68,7 @@ export async function fetchRedditPosts(
       data?: { children: Array<{ kind: string; data: RedditApiPost }> };
     };
   } catch (err) {
-    console.error(`Error fetching Reddit r/${subreddit}:`, err);
+    console.error(`Reddit r/${subreddit}:`, err);
     return [];
   }
 

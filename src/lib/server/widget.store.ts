@@ -214,10 +214,7 @@ registerWidget('services', async (params) => {
         results.push(data);
       }
     } catch (err) {
-      console.error(
-        `Failed to fetch service ${(service as { name?: string }).name ?? 'unknown'}:`,
-        err,
-      );
+      console.error(`Service ${(service as { name?: string }).name ?? 'unknown'}:`, err);
     }
   }
 

@@ -75,7 +75,7 @@ export async function fetchChain(
 
       context[id] = data;
     } catch (err) {
-      console.error(`Error in custom-api fetch "${id}":`, err);
+      console.error(`custom-api ${id}:`, err);
     }
   }
 

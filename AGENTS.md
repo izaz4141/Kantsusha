@@ -3,6 +3,7 @@
 ## Commands
 
 Use `bun --bun` prefix:
+
 - `bun --bun run dev` — Dev server
 - `bun --bun run build` — `vite build` then copies `src/lib/server/config.yaml` → `build/config.yaml`
 - `bun --bun run check` — `svelte-kit sync && svelte-check`
@@ -15,6 +16,7 @@ Use `bun --bun` prefix:
 ## Config
 
 Pages/themes in `src/lib/server/config.yaml`. Quirks:
+
 - **External override**: `./config/config.yaml` merges on top (presets merge, pages replace)
 - **`$include`** directive includes other YAML files, supports `{overrides}`
 - **`${VAR}` substitution** via `substituteEnvRecursive`
@@ -33,6 +35,7 @@ Pages/themes in `src/lib/server/config.yaml`. Quirks:
 ## Tests
 
 Two Vitest projects in `vite.config.ts`:
+
 - **client**: Playwright browser — `src/**/*.svelte.{test,spec}.{ts,js}`, excludes `src/lib/server/**`
 - **server**: node env — `src/**/*.{test,spec}.{ts,js}`, excludes svelte tests
 

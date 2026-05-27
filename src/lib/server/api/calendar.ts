@@ -105,7 +105,7 @@ async function fetchCalDAVCalendarColor(feed: CalFeed): Promise<string | null> {
     const colorMatch = xml.match(/<cd:calendar-color[^>]*>([^<]+)<\/cd:calendar-color>/i);
     return colorMatch ? colorMatch[1].trim() : null;
   } catch (err) {
-    console.error(`Error fetching calendar color for ${feed.url}:`, err);
+    console.error(`Calendar color ${feed.url}:`, err);
     return null;
   }
 }
@@ -158,7 +158,7 @@ async function fetchCalDAVCalendar(
 
   const icsRaw = eventsResponse as string;
   if (icsRaw.includes('<d:error') || icsRaw.includes('<D:error')) {
-    console.error(`CalDAV error response from ${feed.url}:`, icsRaw);
+    console.error(`CalDAV error ${feed.url}:`, icsRaw);
     return { ics: '', color: null };
   }
 
@@ -234,7 +234,7 @@ export async function fetchCalendar(
           }
         }
       } catch (err) {
-        console.error(`Error fetching ${cal.url}:`, err);
+        console.error(`Calendar ${cal.url}:`, err);
       }
     }),
   );

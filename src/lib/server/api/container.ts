@@ -186,7 +186,7 @@ export async function fetchContainerData(
         console.warn(`Failed to fetch stats for ${containerName}`);
       }
     } catch (e) {
-      console.warn(`Error fetching stats for ${containerName}:`, e);
+      console.warn(`Stats failed: ${containerName}`);
     }
   }
 
@@ -213,7 +213,7 @@ export async function fetchContainers(params: ServicesParams): Promise<Container
       const data = await fetchContainerData(host, container.id);
       results.push(data);
     } catch (e) {
-      console.error('Failed to get data for container ', container.id, e);
+      console.error('Container data failed: ', container.id, e);
     }
   }
 

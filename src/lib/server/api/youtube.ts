@@ -51,7 +51,7 @@ async function resolveHandleToChannelId(handle: string): Promise<string | null> 
     );
     return match ? match[1] : null;
   } catch (err) {
-    console.error(`Error resolving Youtube handle ${handle}:`, err);
+    console.error(`Youtube handle ${handle}:`, err);
     return null;
   }
 }
@@ -93,7 +93,7 @@ export async function fetchYouTube(
         const videos = parseYouTubeFeed(xml);
         allVideos.push(...videos);
       } catch (err) {
-        console.error(`Error fetching YouTube feed for ${channel}:`, err);
+        console.error(`YouTube feed ${channel}:`, err);
       }
     }),
   );

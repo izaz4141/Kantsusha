@@ -53,7 +53,7 @@ async function resolveIncludes(
         if ('$include' in itemObj) {
           const includePath = itemObj.$include;
           if (typeof includePath !== 'string') {
-            console.warn(`Warning: $include must be a string, skipping`);
+            console.warn(`$include must be a string`);
             resolved.push(item);
             continue;
           }
@@ -69,7 +69,7 @@ async function resolveIncludes(
           const included = await loadYAML(resolvedPath);
           if (included === null) {
             visited.delete(resolvedPath);
-            console.warn(`Warning: Failed to load included file: ${includePath}`);
+            console.warn(`Could not load ${includePath}`);
             resolved.push(item);
             continue;
           }
@@ -112,7 +112,7 @@ async function resolveIncludes(
     if ('$include' in objRecord) {
       const includePath = objRecord.$include;
       if (typeof includePath !== 'string') {
-        console.warn(`Warning: $include must be a string, skipping`);
+        console.warn(`$include must be a string`);
         return obj;
       }
 
@@ -127,7 +127,7 @@ async function resolveIncludes(
       const included = await loadYAML(resolvedPath);
       if (included === null) {
         visited.delete(resolvedPath);
-        console.warn(`Warning: Failed to load included file: ${includePath}`);
+        console.warn(`Could not load ${includePath}`);
         return obj;
       }
 
@@ -184,12 +184,12 @@ async function loadYAML(filePath: string): Promise<Record<string, unknown> | nul
   try {
     parsed = YAML.parse(content);
   } catch {
-    console.warn(`Warning: Failed to parse YAML from ${filePath}`);
+    console.warn(`Bad YAML: ${filePath}`);
     return null;
   }
 
   if (!parsed || typeof parsed !== 'object') {
-    console.warn(`Warning: Invalid YAML format in ${filePath}`);
+    console.warn(`Invalid YAML: ${filePath}`);
     return null;
   }
 

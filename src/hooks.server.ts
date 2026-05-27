@@ -60,9 +60,7 @@ interface AppError {
 }
 export const handleError: HandleServerError = ({ error, event }) => {
   const err = error as AppError;
-  console.error('--- SERVER ERROR ---');
-  console.error(error);
-  console.error('At path:', event.url.pathname);
+  console.error('SERVER:', event.url.pathname, err?.message ?? error);
 
   return {
     message: 'A server-side error occurred.',

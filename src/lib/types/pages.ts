@@ -16,7 +16,7 @@ export const PageColumnSchema = z.object({
         } catch {
           const type =
             item && typeof item === 'object' ? (item as Record<string, unknown>).type : typeof item;
-          console.warn(`Widget "${type}" validation failed, skipping`);
+          console.warn(`Widget "${type}" invalid`);
           return [];
         }
       }),

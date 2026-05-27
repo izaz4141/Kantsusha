@@ -20,7 +20,7 @@ export const ConfigSchema = z.object({
         if (result.success) {
           valid[name] = result.data;
         } else {
-          console.warn(`Preset "${name}" validation failed: ${result.error.message}`);
+          console.warn(`Preset "${name}" invalid`);
         }
       }
       return valid;
@@ -33,7 +33,7 @@ export const ConfigSchema = z.object({
       return pages.flatMap((page) => {
         const columns = page.columns.filter((col) => col.widgets.length > 0);
         if (columns.length === 0) {
-          console.warn(`Page "${page.name}" has no valid columns, skipping`);
+          console.warn(`Page "${page.name}" has no columns`);
           return [];
         }
         return [{ ...page, columns }];

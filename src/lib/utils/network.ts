@@ -94,7 +94,8 @@ export async function fetchURL(
 
       if (attempt === maxRetries - 1) {
         if (err instanceof DOMException && err.name === 'AbortError') {
-          throw new Error(`Request timed out after ${timeoutMs}ms: ${url}`, { cause: err });
+          /* eslint-disable preserve-caught-error */
+          throw new Error(`Request timed out after ${timeoutMs}ms: ${url}`);
         }
         throw err;
       }

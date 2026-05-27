@@ -75,7 +75,7 @@ async function fetchYahooData(
         validTimestamps.length > 0 ? validTimestamps[validTimestamps.length - 1] : Date.now(),
     };
   } catch (err) {
-    console.error(`Error fetching ${code}:`, err);
+    console.error(`Markets ${code}:`, err);
     return null;
   }
 }

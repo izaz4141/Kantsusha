@@ -131,7 +131,7 @@ async function fetchChannelInfo(username: string): Promise<TwitchChannel | null>
       thumbnailUrl,
     };
   } catch (err) {
-    console.error(`Error fetching Twitch channel ${username}:`, err);
+    console.error(`Twitch ${username}:`, err);
     return {
       username,
       nickname: username,

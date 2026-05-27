@@ -63,7 +63,7 @@ export function evaluateValue(expr: string, context: Record<string, unknown>): u
     const result = func(...values);
     return result;
   } catch (e) {
-    console.error('[evaluateValue] expr:', expr, 'ERROR:', e);
+    console.error('[expr]', expr, e);
     return undefined;
   }
 }
@@ -172,7 +172,7 @@ export function evaluateScript(
   try {
     result = func(...Object.values(safeContext));
   } catch (e) {
-    console.error('[evaluateScript] Error executing script:', e);
+    console.error('[script]', e);
     return {};
   }
 
@@ -387,7 +387,7 @@ function processBlocks(
         const value = evaluateValue(block.constExpr!, context);
         context[block.constName!] = value;
       } catch (e) {
-        console.error('[@const ERROR]', block.constName, e);
+        console.error('[@const]', block.constName, e);
       }
       i++;
       continue;
@@ -440,7 +440,7 @@ function processBlocks(
           selectedBlocks = ifBlocks;
         }
       } catch (e) {
-        console.error('[If block ERROR]', e);
+        console.error('[if]', e);
       }
 
       if (!selectedBlocks) {
@@ -452,7 +452,7 @@ function processBlocks(
               break;
             }
           } catch (e) {
-            console.error('[If block ERROR]', e);
+            console.error('[if]', e);
           }
         }
       }

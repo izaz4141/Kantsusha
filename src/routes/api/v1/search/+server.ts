@@ -58,7 +58,7 @@ export const GET: RequestHandler = async ({ url }) => {
 
     return json({ suggestions: suggestions.slice(0, 8) });
   } catch (err) {
-    console.error('Search autocomplete error:', err);
+    console.error('Search autocomplete:', err);
     return json({ suggestions: [] });
   }
 };
