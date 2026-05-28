@@ -313,7 +313,7 @@ export async function getCached(): Promise<FullParsedConfig> {
     const css = generateThemeCSS(config.presets);
 
     const { restartBackgroundRefresh } = await import('../widget.scheduler');
-    await restartBackgroundRefresh();
+    await restartBackgroundRefresh(config.pages);
 
     configCache = {
       data: { ...config, css },

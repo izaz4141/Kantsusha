@@ -1,6 +1,6 @@
-import { getPages } from './config/config';
 import { getOrCreateWidget, fetchWidgetInfo, getAllWidgets } from './widget.store';
 import { timeToMs } from '$lib/utils/time';
+import type { PageConfig } from '$lib/types/pages';
 
 interface RefreshEntry {
   id: string;
@@ -10,8 +10,7 @@ interface RefreshEntry {
 const refreshEntries: RefreshEntry[] = [];
 let initPromise: Promise<void> | null = null;
 
-async function createAllWidgets(): Promise<void> {
-  const pages = await getPages();
+async function createAllWidgets(pages: PageConfig[]): Promise<void> {
   for (const page of pages) {
     const slug = page.name.toLowerCase().replace(/\s+/g, '-');
     for (let colIdx = 0; colIdx < page.columns.length; colIdx++) {
@@ -46,17 +45,17 @@ function stopAllRefreshCycles(): void {
   refreshEntries.length = 0;
 }
 
-export async function startBackgroundRefresh(): Promise<void> {
+export async function startBackgroundRefresh(pages: PageConfig[]): Promise<void> {
   if (initPromise) return initPromise;
   initPromise = (async () => {
-    await createAllWidgets();
+    await createAllWidgets(pages);
     startRefreshCycles();
   })();
   return initPromise;
 }
 
-export async function restartBackgroundRefresh(): Promise<void> {
+export async function restartBackgroundRefresh(pages: PageConfig[]): Promise<void> {
   stopAllRefreshCycles();
   initPromise = null;
-  await startBackgroundRefresh();
+  await startBackgroundRefresh(pages);
 }
