@@ -107,7 +107,11 @@ export async function fetchYouTube(
     indices[i] = i;
   }
 
-  indices.sort((a, b) => temp[b] - temp[a]);
+  indices.sort((a, b) => {
+    const diff = temp[b] - temp[a];
+    if (diff) return diff;
+    return allVideos[a].channelTitle.localeCompare(allVideos[b].channelTitle);
+  });
 
   const result: YouTubeVideo[] = new Array(limit);
   for (let i = 0; i < limit; i++) {

@@ -68,11 +68,13 @@ export async function fetchRSS(feeds: RssFeed[], limit: number = 10): Promise<Rs
     }),
   );
 
-  if (allArticles.length <= limit) return allArticles;
-
   const times = allArticles.map((a) => a.pubDate.getTime());
   const indices = Array.from({ length: allArticles.length }, (_, i) => i);
-  indices.sort((a, b) => times[b] - times[a]);
+  indices.sort((a, b) => {
+    const diff = times[b] - times[a];
+    if (diff) return diff;
+    return allArticles[a].source.localeCompare(allArticles[b].source);
+  });
 
   return indices.slice(0, limit).map((i) => allArticles[i]);
 }

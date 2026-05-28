@@ -240,11 +240,13 @@ export async function fetchCalendar(
   );
 
   const now = Date.now();
-  if (allEvents.length <= limit) return allEvents;
-
   const dists = allEvents.map((e) => Math.abs(e.start.getTime() - now));
   const indices = Array.from({ length: allEvents.length }, (_, i) => i);
-  indices.sort((a, b) => dists[a] - dists[b]);
+  indices.sort((a, b) => {
+    const diff = dists[a] - dists[b];
+    if (diff) return diff;
+    return allEvents[a].title.localeCompare(allEvents[b].title);
+  });
 
   return indices.slice(0, limit).map((i) => allEvents[i]);
 }
