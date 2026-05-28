@@ -94,6 +94,13 @@ export async function fetchYouTube(
         allVideos.push(...videos);
       } catch (err) {
         console.error(`YouTube feed ${channel}:`, err);
+        try {
+          const { fetchYouTubeFallback } = await import('./youtube-fb');
+          const fallback = await fetchYouTubeFallback([channel], limit, includeShorts);
+          allVideos.push(...fallback);
+        } catch (fbErr) {
+          console.error(`YouTube scraper also failed for ${channel}:`, fbErr);
+        }
       }
     }),
   );
