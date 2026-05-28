@@ -24,11 +24,15 @@ async function createAllWidgets(pages: PageConfig[]): Promise<void> {
 }
 
 function startRefreshCycles(): void {
-  for (const widget of getAllWidgets()) {
+  const widgets = getAllWidgets();
+  for (let i = 0; i < widgets.length; i++) {
+    const widget = widgets[i];
     const cacheTTL = timeToMs(widget.params.cache);
     if (!cacheTTL || cacheTTL <= 0) continue;
 
-    fetchWidgetInfo(widget.id).catch(() => {});
+    setTimeout(() => {
+      fetchWidgetInfo(widget.id).catch(() => {});
+    }, i * 250);
 
     const timerId = setInterval(() => {
       fetchWidgetInfo(widget.id).catch(() => {});
