@@ -157,6 +157,27 @@ async function resolveIncludes(
 type FullParsedConfig = ParsedConfig & { css: string };
 
 let configCache: { data: FullParsedConfig; mtime: number } | null = null;
+let reloadActive = false;
+const reloadQueue: Array<() => void> = [];
+
+async function acquireReloadSlot(): Promise<void> {
+  if (!reloadActive) {
+    reloadActive = true;
+    return;
+  }
+  return new Promise<void>((resolve) => {
+    reloadQueue.push(resolve);
+  });
+}
+
+function releaseReloadSlot(): void {
+  const next = reloadQueue.shift();
+  if (next) {
+    next();
+  } else {
+    reloadActive = false;
+  }
+}
 
 async function getConfigMtime(): Promise<number> {
   let mtime = 0;
@@ -270,38 +291,45 @@ async function loadConfig(): Promise<ParsedConfig> {
 export async function getCached(): Promise<FullParsedConfig> {
   const currentMtime = await getConfigMtime();
 
-  if (!configCache || configCache.mtime !== currentMtime) {
-    try {
-      if (configCache) {
-        clearWidgetCache();
-      }
-      includedFiles.clear();
-
-      const config = await loadConfig();
-      const updatedMtime = await getConfigMtime();
-
-      if (Object.keys(config.presets).length === 0) {
-        throw new Error('No valid presets found in config');
-      }
-
-      const css = generateThemeCSS(config.presets);
-
-      configCache = {
-        data: { ...config, css },
-        mtime: updatedMtime,
-      };
-
-      const { restartBackgroundRefresh } = await import('../widget.scheduler');
-      await restartBackgroundRefresh();
-    } catch (err) {
-      console.error('Config reload failed, keeping previous cache:', err);
-      if (!configCache) {
-        throw err;
-      }
-    }
+  if (configCache && configCache.mtime === currentMtime) {
+    return configCache.data;
   }
 
-  return configCache.data;
+  await acquireReloadSlot();
+
+  try {
+    if (configCache) {
+      clearWidgetCache();
+    }
+    includedFiles.clear();
+
+    const config = await loadConfig();
+    const updatedMtime = await getConfigMtime();
+
+    if (Object.keys(config.presets).length === 0) {
+      throw new Error('No valid presets found in config');
+    }
+
+    const css = generateThemeCSS(config.presets);
+
+    const { restartBackgroundRefresh } = await import('../widget.scheduler');
+    await restartBackgroundRefresh();
+
+    configCache = {
+      data: { ...config, css },
+      mtime: updatedMtime,
+    };
+
+    return configCache.data;
+  } catch (err) {
+    console.error('Config reload failed:', err);
+    if (!configCache) {
+      throw err;
+    }
+    return configCache.data;
+  } finally {
+    releaseReloadSlot();
+  }
 }
 
 export async function getPresets(): Promise<Record<string, ThemePreset>> {

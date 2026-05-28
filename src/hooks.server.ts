@@ -9,6 +9,12 @@ import { sequence } from '@sveltejs/kit/hooks';
 
 export const init: ServerInit = async () => {
   if (building) return;
+  process.on('uncaughtException', (err) => {
+    console.error('FATAL uncaughtException:', err);
+  });
+  process.on('unhandledRejection', (reason) => {
+    console.error('FATAL unhandledRejection:', reason);
+  });
   console.log('Initializing Server...');
   await getCached();
   console.log('Kantsusha Ready!');

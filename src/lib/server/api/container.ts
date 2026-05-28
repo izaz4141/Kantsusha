@@ -185,7 +185,7 @@ export async function fetchContainerData(
       } else {
         console.warn(`Failed to fetch stats for ${containerName}`);
       }
-    } catch (e) {
+    } catch {
       console.warn(`Stats failed: ${containerName}`);
     }
   }
