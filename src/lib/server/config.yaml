@@ -185,7 +185,7 @@ pages:
                 url: https://jf.${SUBHOST}
                 target: _blank
                 statusCheck: true
-                statusCheckUrl: https://google.com
+                statusCheckUrl: https://aaaaaaaaaa.com
               - type: endpoint
                 name: Jellyfin2
                 description: Media Player
@@ -210,6 +210,29 @@ pages:
                 target: _blank
                 statusCheck: true
                 statusCheckUrl: https://google.com
+
+          - type: tabbed
+            widgets:
+              - type: youtube
+                title: Gaming
+                cache: 3h
+                channels:
+                  - channel: UCzXwjTI6c6mVn6oui_p6oiw # SMii7Y
+                    limit: 5
+                  - channel: UC-gW4TeZAlKm7UATp24JsWQ # SMii7Y+
+                  - channel: '@AstralSpiff'
+                  - channel: '@Insym'
+                  - channel: '@LetsGameItOut'
+                  - channel: '@YahiamiceLIVE'
+              - type: youtube
+                frameless: true
+                title: Anime
+                cache: 3h
+                channels:
+                  - channel: '@gigguk'
+                  - channel: '@DIMSK340'
+                  - channel: '@ScamboliReviews'
+                  - channel: '@TakuGacha'
 
           - type: tabbed
             title: Reddit

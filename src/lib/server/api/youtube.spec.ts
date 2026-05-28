@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { fetchURL } from '$lib/utils/network';
+import type { YouTubeChannel } from '$lib/types/widget.params';
 import {
   parseYtInitialData,
   parseRelativeDate,
@@ -7,6 +8,8 @@ import {
   fetchYouTubeFallback,
   extractChannelName,
 } from './youtube-fb';
+
+const toChannels = (ids: string[]): YouTubeChannel[] => ids.map((c) => ({ channel: c }));
 
 describe('parseRelativeDate', () => {
   it('parses "X day(s) ago"', () => {
@@ -117,7 +120,7 @@ const TEST_CHANNELS = [
 describe('fetchYouTubeFallback integration', () => {
   for (const channel of TEST_CHANNELS) {
     it(`scrapes videos from ${channel}`, async () => {
-      const videos = await fetchYouTubeFallback([channel], 5, false);
+      const videos = await fetchYouTubeFallback([{ channel }], 5, false);
       expect(Array.isArray(videos)).toBe(true);
       expect(videos.length).toBeGreaterThan(0);
       expect(videos.length).toBeLessThanOrEqual(5);
@@ -141,14 +144,14 @@ describe('fetchYouTubeFallback integration', () => {
 
   for (const channel of TEST_CHANNELS.slice(0, 3)) {
     it(`scrapes videos + shorts from ${channel}`, async () => {
-      const videos = await fetchYouTubeFallback([channel], 10, true);
+      const videos = await fetchYouTubeFallback([{ channel }], 10, true);
       expect(videos.length).toBeGreaterThan(0);
       expect(videos.length).toBeLessThanOrEqual(10);
     }, 30000);
   }
 
   it('scrapes multiple channels at once', async () => {
-    const videos = await fetchYouTubeFallback(TEST_CHANNELS.slice(0, 3), 15, false);
+    const videos = await fetchYouTubeFallback(toChannels(TEST_CHANNELS.slice(0, 3)), 15, false);
     expect(videos.length).toBeGreaterThan(0);
     expect(videos.length).toBeLessThanOrEqual(15);
   }, 60000);

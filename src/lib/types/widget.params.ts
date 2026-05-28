@@ -74,12 +74,18 @@ export const RedditParamsSchema = FeedWidgetParamsSchema.merge(
 });
 export type RedditParams = z.infer<typeof RedditParamsSchema>;
 
+export const YouTubeChannelSchema = z.object({
+  channel: z.string(),
+  limit: z.number().int().positive().optional(),
+});
+export type YouTubeChannel = z.infer<typeof YouTubeChannelSchema>;
+
 export const YouTubeParamsSchema = FeedWidgetParamsSchema.merge(
   z.object({
     type: z.literal('youtube'),
     title: z.string().default('YouTube'),
     frameless: z.boolean().default(true),
-    channels: z.array(z.string()).min(1),
+    channels: z.array(YouTubeChannelSchema).min(1),
     view: z.enum(['list', 'card']).default('card'),
     includeShorts: z.boolean().default(false),
   }),

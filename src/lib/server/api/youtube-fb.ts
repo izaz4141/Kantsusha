@@ -1,9 +1,11 @@
 import { fetchURL } from '$lib/utils/network';
 import type { YouTubeVideo } from '$lib/types/widget.data';
+import type { YouTubeChannel } from '$lib/types/widget.params';
 
 const LOCALE_HEADERS = { 'Accept-Language': 'en-US,en;q=0.9' };
 
 export function extractChannelName(data: unknown): string | null {
+  if (!data || typeof data !== 'object') return null;
   const d = data as Record<string, unknown>;
   const metadata = d.metadata as Record<string, unknown> | undefined;
   const renderer = metadata?.channelMetadataRenderer as Record<string, unknown> | undefined;
@@ -89,22 +91,28 @@ export function extractVideosFromTab(data: unknown, channelTitle: string): YouTu
   }
 
   for (const item of items) {
-    const renderer = item?.richItemRenderer;
+    const renderer = item?.richItemRenderer as Record<string, unknown> | undefined;
     if (!renderer) continue;
 
-    const content = renderer.content || {};
+    const content = (renderer.content || {}) as Record<string, unknown>;
 
-    const lvm = content.lockupViewModel;
+    const lvm = content.lockupViewModel as Record<string, unknown> | undefined;
     if (lvm) {
-      const videoId = lvm.contentId || '';
-      const meta = lvm.metadata?.lockupMetadataViewModel || {};
-      const title = meta.title?.content || '';
-      const mdRows = meta.metadata?.contentMetadataViewModel?.metadataRows || [];
+      const videoId = (lvm.contentId as string) || '';
+      const meta = (lvm.metadata as Record<string, unknown> | undefined)
+        ?.lockupMetadataViewModel as Record<string, unknown> | undefined;
+      const title = ((meta?.title as Record<string, unknown> | undefined)?.content as string) || '';
+      const mdRows =
+        ((
+          (meta?.metadata as Record<string, unknown> | undefined)?.contentMetadataViewModel as
+            | Record<string, unknown>
+            | undefined
+        )?.metadataRows as Record<string, unknown>[] | undefined) || [];
 
       let dateText = '';
       for (const row of mdRows) {
-        for (const part of row.metadataParts || []) {
-          const t = part.text?.content || '';
+        for (const part of (row.metadataParts as Record<string, unknown>[] | undefined) || []) {
+          const t = ((part?.text as Record<string, unknown> | undefined)?.content as string) || '';
           if (
             t &&
             /\d+\s*(year|years|yr|y|month|months|mo|week|weeks|w|day|days|d|hour|hours|minute|minutes|m|second|seconds|s|tahun|bulan|minggu|hari|jam|menit|detik|thn|bln|mgg|h|mnt|dtk)\b/i.test(
@@ -128,13 +136,25 @@ export function extractVideosFromTab(data: unknown, channelTitle: string): YouTu
       continue;
     }
 
-    const slvm = content.shortsLockupViewModel;
+    const slvm = content.shortsLockupViewModel as Record<string, unknown> | undefined;
     if (slvm) {
       const videoId =
-        slvm.onTap?.videoId || slvm.onTap?.innertubeCommand?.reelWatchEndpoint?.videoId || '';
+        ((slvm.onTap as Record<string, unknown> | undefined)?.videoId as string) ||
+        ((
+          (
+            (slvm.onTap as Record<string, unknown> | undefined)?.innertubeCommand as
+              | Record<string, unknown>
+              | undefined
+          )?.reelWatchEndpoint as Record<string, unknown> | undefined
+        )?.videoId as string) ||
+        '';
       const title =
-        slvm.overlayMetadata?.primaryText?.content ||
-        slvm.accessibilityText?.replace(/ - play Short$/, '') ||
+        ((
+          (slvm.overlayMetadata as Record<string, unknown> | undefined)?.primaryText as
+            | Record<string, unknown>
+            | undefined
+        )?.content as string) ||
+        (slvm.accessibilityText as string)?.replace(/ - play Short$/, '') ||
         '';
       if (title && videoId) {
         videos.push({
@@ -163,37 +183,37 @@ function channelLabel(channel: string): string {
 }
 
 export async function fetchYouTubeFallback(
-  channels: string[],
+  channels: YouTubeChannel[],
   limit: number = 10,
   includeShorts: boolean = false,
 ): Promise<YouTubeVideo[]> {
   const allVideos: YouTubeVideo[] = [];
 
   await Promise.all(
-    channels.map(async (channel) => {
+    channels.map(async (ch) => {
       try {
-        const html = (await fetchURL(buildChannelUrl(channel, 'videos'), {
+        const html = (await fetchURL(buildChannelUrl(ch.channel, 'videos'), {
           customHeaders: LOCALE_HEADERS,
         })) as string;
         const data = parseYtInitialData(html);
-        const name = extractChannelName(data) || channelLabel(channel);
+        const name = extractChannelName(data) || channelLabel(ch.channel);
         const videos = extractVideosFromTab(data, name);
-        allVideos.push(...videos);
+        allVideos.push(...(ch.limit ? videos.slice(0, ch.limit) : videos));
 
         if (includeShorts) {
           try {
-            const shortsHtml = (await fetchURL(buildChannelUrl(channel, 'shorts'), {
+            const shortsHtml = (await fetchURL(buildChannelUrl(ch.channel, 'shorts'), {
               customHeaders: LOCALE_HEADERS,
             })) as string;
             const shortsData = parseYtInitialData(shortsHtml);
             const shorts = extractVideosFromTab(shortsData, name);
-            allVideos.push(...shorts);
+            allVideos.push(...(ch.limit ? shorts.slice(0, ch.limit) : shorts));
           } catch (err) {
-            console.error(`YouTube shorts fallback ${channel}:`, err);
+            console.error(`YouTube shorts fallback ${ch.channel}:`, err);
           }
         }
       } catch (err) {
-        console.error(`YouTube fallback ${channel}:`, err);
+        console.error(`YouTube fallback ${ch.channel}:`, err);
       }
     }),
   );

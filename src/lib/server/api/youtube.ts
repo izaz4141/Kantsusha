@@ -1,5 +1,6 @@
 import { fetchURL } from '$lib/utils/network';
 import type { YouTubeVideo } from '$lib/types/widget.data';
+import type { YouTubeChannel } from '$lib/types/widget.params';
 
 function parseYouTubeFeed(xml: string): YouTubeVideo[] {
   const videos: YouTubeVideo[] = [];
@@ -79,27 +80,27 @@ async function getFeedUrl(channel: string, includeShorts: boolean): Promise<stri
 }
 
 export async function fetchYouTube(
-  channels: string[],
+  channels: YouTubeChannel[],
   limit: number = 10,
   includeShorts: boolean = false,
 ): Promise<YouTubeVideo[]> {
   const allVideos: YouTubeVideo[] = [];
 
   await Promise.all(
-    channels.map(async (channel) => {
+    channels.map(async (ch) => {
       try {
-        const feedUrl = await getFeedUrl(channel, includeShorts);
+        const feedUrl = await getFeedUrl(ch.channel, includeShorts);
         const xml = (await fetchURL(feedUrl)) as string;
         const videos = parseYouTubeFeed(xml);
-        allVideos.push(...videos);
+        allVideos.push(...(ch.limit ? videos.slice(0, ch.limit) : videos));
       } catch (err) {
-        console.error(`YouTube feed ${channel}:`, err);
+        console.error(`YouTube feed ${ch.channel}:`, err);
         try {
           const { fetchYouTubeFallback } = await import('./youtube-fb');
-          const fallback = await fetchYouTubeFallback([channel], limit, includeShorts);
+          const fallback = await fetchYouTubeFallback([ch], limit, includeShorts);
           allVideos.push(...fallback);
         } catch (fbErr) {
-          console.error(`YouTube scraper also failed for ${channel}:`, fbErr);
+          console.error(`YouTube scraper also failed for ${ch.channel}:`, fbErr);
         }
       }
     }),
