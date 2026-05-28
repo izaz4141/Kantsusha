@@ -1,31 +1,3 @@
-class ConcurrencyLimiter {
-  private active = 0;
-  private queue: Array<() => void> = [];
-
-  constructor(private limit: number) {}
-
-  async acquire(): Promise<void> {
-    if (this.active < this.limit) {
-      this.active++;
-      return;
-    }
-    return new Promise<void>((resolve) => {
-      this.queue.push(resolve);
-    });
-  }
-
-  release(): void {
-    const next = this.queue.shift();
-    if (next) {
-      next();
-    } else {
-      this.active--;
-    }
-  }
-}
-
-const requestLimiter = new ConcurrencyLimiter(15);
-
 export async function fetchURL(
   url: string,
   options: {
@@ -42,8 +14,6 @@ export async function fetchURL(
   const timeoutMs = 15000;
 
   for (let attempt = 0; attempt < maxRetries; attempt++) {
-    await requestLimiter.acquire();
-
     const controller = new AbortController();
     let timeoutId: ReturnType<typeof setTimeout> | undefined;
 
@@ -102,8 +72,6 @@ export async function fetchURL(
 
       const delay = Math.pow(2, attempt) * 1000;
       await new Promise((resolve) => setTimeout(resolve, delay));
-    } finally {
-      requestLimiter.release();
     }
   }
 
