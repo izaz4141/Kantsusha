@@ -32,13 +32,13 @@ function startRefreshCycles(): void {
 
     setTimeout(() => {
       fetchWidgetInfo(widget.id).catch(() => {});
+
+      const timerId = setInterval(() => {
+        fetchWidgetInfo(widget.id).catch(() => {});
+      }, cacheTTL);
+
+      refreshEntries.push({ id: widget.id, timerId });
     }, i * 250);
-
-    const timerId = setInterval(() => {
-      fetchWidgetInfo(widget.id).catch(() => {});
-    }, cacheTTL);
-
-    refreshEntries.push({ id: widget.id, timerId });
   }
 }
 
