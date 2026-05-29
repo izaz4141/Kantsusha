@@ -1,5 +1,6 @@
 import type { ContainerData } from '$lib/types/widget.data';
 import type { ContainerParams, ServicesParams } from '$lib/types/widget.params';
+import { fetchURL, fetchURLStream, ReaderStream } from '$lib/utils/network';
 
 export function getContainerHost(params: ContainerParams): string {
   if (params['sockPath']) {
@@ -76,29 +77,23 @@ async function fetchTwoStatsSnapshots(
 ): Promise<[ContainerStats, ContainerStats] | null> {
   const statsUrl = buildContainerUrl(host, `/v1.54/containers/${containerName}/stats?stream=true`);
 
-  const response = await fetch(statsUrl, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  });
-
-  if (!response.ok || !response.body) {
-    await response.body?.cancel().catch(() => {});
+  let stream: ReaderStream;
+  try {
+    stream = await fetchURLStream(statsUrl, {
+      customHeaders: { 'Content-Type': 'application/json' },
+    });
+  } catch {
     return null;
   }
 
-  const reader = response.body.getReader();
-  const decoder = new TextDecoder();
   const snapshots: ContainerStats[] = [];
 
   try {
     while (snapshots.length < 2) {
-      const { done, value } = await reader.read();
+      const { done, value } = await stream.readChunk();
       if (done) break;
 
-      const chunk = decoder.decode(value, { stream: true });
-      const lines = chunk.split('\n').filter((line) => line.trim());
+      const lines = value.split('\n').filter((line) => line.trim());
 
       for (const line of lines) {
         try {
@@ -111,7 +106,7 @@ async function fetchTwoStatsSnapshots(
       }
     }
   } finally {
-    await reader.cancel().catch(() => {});
+    await stream.cancel();
   }
 
   if (snapshots.length < 2) {
@@ -121,38 +116,42 @@ async function fetchTwoStatsSnapshots(
   return [snapshots[0], snapshots[1]];
 }
 
+interface DockerInspectResponse {
+  Config?: { Image?: string };
+  State?: {
+    Status?: string;
+    Health?: { status?: string };
+    StartedAt?: string;
+    FinishedAt?: string;
+  };
+}
+
 export async function fetchContainerData(
   host: string,
   containerName: string,
 ): Promise<ContainerData> {
   const inspectUrl = buildContainerUrl(host, `/v1.54/containers/${containerName}/json`);
 
-  const inspectResponse = await fetch(inspectUrl, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  });
-
-  if (!inspectResponse.ok) {
-    await inspectResponse.body?.cancel().catch(() => {});
-    if (inspectResponse.status === 404) {
-      return {
-        name: containerName,
-        image: 'unknown',
-        status: 'unknown',
-        health: null,
-        cpuPercent: 0,
-        memoryUsage: 0,
-        memoryLimit: 0,
-        memoryPercent: 0,
-        time: null,
-      };
-    }
-    throw new Error(`Docker API error: ${inspectResponse.status}`);
+  let container: DockerInspectResponse;
+  try {
+    container = (await fetchURL(inspectUrl, {
+      method: 'GET',
+      customHeaders: { 'Content-Type': 'application/json' },
+      returnText: false,
+    })) as DockerInspectResponse;
+  } catch {
+    return {
+      name: containerName,
+      image: 'unknown',
+      status: 'unknown',
+      health: null,
+      cpuPercent: 0,
+      memoryUsage: 0,
+      memoryLimit: 0,
+      memoryPercent: 0,
+      time: null,
+    };
   }
-
-  const container = await inspectResponse.json();
   const image = container.Config?.Image || 'unknown';
 
   const status = (container.State?.Status?.toLowerCase() || 'created') as ContainerData['status'];

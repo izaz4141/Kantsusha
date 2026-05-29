@@ -193,7 +193,7 @@ pages:
                 url: https://jf.${SUBHOST}
                 target: _blank
                 statusCheck: true
-                statusCheckUrl: https://google.com
+                statusCheckUrl: https://example.com
               - type: endpoint
                 name: Jellyfin3
                 description: Media Player

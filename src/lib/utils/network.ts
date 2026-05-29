@@ -1,3 +1,4 @@
+/* eslint-disable preserve-caught-error */
 export async function fetchURL(
   url: string,
   options: {
@@ -14,9 +15,6 @@ export async function fetchURL(
   const timeoutMs = 15000;
 
   for (let attempt = 0; attempt < maxRetries; attempt++) {
-    const controller = new AbortController();
-    let timeoutId: ReturnType<typeof setTimeout> | undefined;
-
     try {
       const headers: Record<string, string> = {
         'User-Agent':
@@ -25,28 +23,17 @@ export async function fetchURL(
         ...options.customHeaders,
       };
 
-      timeoutId = setTimeout(() => controller.abort(), timeoutMs);
-
       const response = await fetch(url, {
         method: options.method,
         headers,
         body: options.body,
-        signal: controller.signal,
+        signal: AbortSignal.timeout(timeoutMs),
+        keepalive: false,
       });
 
-      clearTimeout(timeoutId);
-
       if (!response.ok) {
-        let errorMessage = `Failed to fetch ${url}: ${response.status}`;
-        try {
-          const errorBody = await response.json();
-          if (errorBody.error) {
-            errorMessage = errorBody.error;
-          }
-        } catch {
-          await response.body?.cancel().catch(() => {});
-        }
-        throw new Error(errorMessage);
+        await response.body?.cancel().catch(() => {});
+        throw new Error(`Failed to fetchURL ${url}: ${response.status}`);
       }
 
       if (options?.skipBody) {
@@ -60,11 +47,85 @@ export async function fetchURL(
 
       return response.text();
     } catch (err) {
-      clearTimeout(timeoutId);
-
       if (attempt === maxRetries - 1) {
         if (err instanceof DOMException && err.name === 'AbortError') {
-          /* eslint-disable preserve-caught-error */
+          throw new Error(`Request timed out after ${timeoutMs}ms: ${url}`);
+        }
+        throw err;
+      }
+
+      const delay = Math.pow(2, attempt) * 1000;
+      await new Promise((resolve) => setTimeout(resolve, delay));
+    }
+  }
+
+  throw new Error(`Failed to fetch ${url} after ${maxRetries} attempts`);
+}
+
+export class ReaderStream {
+  private reader: ReadableStreamDefaultReader<Uint8Array>;
+  private decoder = new TextDecoder();
+
+  constructor(reader: ReadableStreamDefaultReader<Uint8Array>) {
+    this.reader = reader;
+  }
+
+  async readChunk(): Promise<{ done: boolean; value: string }> {
+    const result = await this.reader.read();
+    if (result.done) {
+      const remaining = this.decoder.decode();
+      return { done: true, value: remaining };
+    }
+    return { done: false, value: this.decoder.decode(result.value, { stream: true }) };
+  }
+
+  async cancel(): Promise<void> {
+    await this.reader.cancel().catch(() => {});
+  }
+}
+
+export async function fetchURLStream(
+  url: string,
+  options: {
+    customHeaders?: Record<string, string>;
+    userAgent?: string;
+    method?: string;
+    body?: string;
+    retry?: number;
+  } = { method: 'GET', retry: 0 },
+): Promise<ReaderStream> {
+  const maxRetries = (options.retry ?? 0) + 1;
+  const timeoutMs = 15000;
+
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      const headers: Record<string, string> = {
+        'User-Agent':
+          options.userAgent ||
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36',
+        ...options.customHeaders,
+      };
+
+      const response = await fetch(url, {
+        method: options.method,
+        headers,
+        body: options.body,
+        signal: AbortSignal.timeout(timeoutMs),
+      });
+
+      if (!response.ok) {
+        await response.body?.cancel().catch(() => {});
+        throw new Error(`Failed to fetchStream ${url}: ${response.status}`);
+      }
+
+      if (!response.body) {
+        throw new Error(`No response body for ${url}`);
+      }
+
+      return new ReaderStream(response.body.getReader());
+    } catch (err) {
+      if (attempt === maxRetries - 1) {
+        if (err instanceof DOMException && err.name === 'AbortError') {
           throw new Error(`Request timed out after ${timeoutMs}ms: ${url}`);
         }
         throw err;

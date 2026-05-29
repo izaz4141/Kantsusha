@@ -1,6 +1,7 @@
 <script lang="ts">
   import { searchState, closeSearch, detectEngineFromQuery } from '$lib/stores/search.svelte';
   import { resolveString } from '$lib/utils/substitution';
+  import { fetchURL } from '$lib/utils/network';
 
   let inputEl = $state<HTMLInputElement>();
   let suggestions = $state<string[]>([]);
@@ -35,14 +36,10 @@
       return;
     }
     try {
-      const res = await fetch(
+      const data = (await fetchURL(
         `/api/v1/search?q=${encodeURIComponent(q)}&engine=${encodeURIComponent(activeEngine)}`,
-      );
-      if (!res.ok) {
-        suggestions = [];
-        return;
-      }
-      const data = (await res.json()) as { suggestions?: string[] };
+        { method: 'GET', returnText: false, retry: 0 },
+      )) as { suggestions?: string[] };
       suggestions = data?.suggestions ?? [];
     } catch {
       suggestions = [];
