@@ -149,9 +149,9 @@
         {#if containerData.status === 'running' && containerData.health === 'healthy'}
           <!-- Elegant solid check with subtle ring -->
           <svg class="size-full" viewBox="0 0 24 24" fill="currentColor">
-            <circle cx="12" cy="12" r="10" opacity="0.15" />
+            <circle cx="12" cy="12" r="9" opacity="0.15" />
             <path
-              d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm-1.5 14.5L7 13l1.5-1.5L10.5 13l5-5L17 9.5z"
+              d="M12 3a9 9 0 1 0 9 9A9 9 0 0 0 12 3zm-1.5 14.5L7 13l1.5-1.5L10.5 13l5-5L17 9.5z"
             />
           </svg>
         {:else if containerData.status === 'running' && containerData.health === 'unhealthy'}
@@ -165,7 +165,7 @@
             stroke-linecap="round"
             stroke-linejoin="round"
           >
-            <path d="M12 3L2 21h20L12 3z" />
+            <path d="M12 3L3 21h18L12 3z" />
             <circle cx="12" cy="16" r="0.8" fill="currentColor" stroke="none" />
             <line x1="12" y1="9" x2="12" y2="13" />
           </svg>
@@ -180,19 +180,19 @@
             stroke-linecap="round"
           >
             <path d="M12 3a9 9 0 0 1 9 9" />
-            <circle cx="12" cy="12" r="10" stroke-dasharray="40 10" stroke-opacity="0.2" />
+            <circle cx="12" cy="12" r="9" stroke-dasharray="40 10" stroke-opacity="0.2" />
           </svg>
         {:else if containerData.status === 'running'}
           <!-- Minimalist pulsing dot -->
           <svg class="size-full" fill="currentColor" viewBox="0 0 24 24">
-            <circle cx="12" cy="12" r="8" opacity="0.12" />
+            <circle cx="12" cy="12" r="9" opacity="0.12" />
             <circle cx="12" cy="12" r="4" />
           </svg>
         {:else if containerData.status === 'paused'}
           <!-- Two thin rounded pause bars -->
           <svg class="size-full" viewBox="0 0 24 24" fill="currentColor">
-            <rect x="7" y="5" width="2.5" height="14" rx="1" />
-            <rect x="14.5" y="5" width="2.5" height="14" rx="1" />
+            <rect x="6.5" y="3" width="3.5" height="18" rx="1.5" />
+            <rect x="14" y="3" width="3.5" height="18" rx="1.5" />
           </svg>
         {:else if containerData.status === 'exited'}
           <!-- Subtle squared outline -->
@@ -204,7 +204,7 @@
             stroke-width="1.8"
             stroke-linecap="round"
           >
-            <rect x="7" y="7" width="10" height="10" rx="1.5" />
+            <rect x="4" y="4" width="16" height="16" rx="2" />
           </svg>
         {:else if containerData.status === 'restarting'}
           <!-- Elegant circular arrow with minimal stroke -->
@@ -233,11 +233,11 @@
             stroke-linecap="round"
             stroke-linejoin="round"
           >
-            <path d="M4 7h16" />
-            <path d="M10 11v5" />
-            <path d="M14 11v5" />
-            <path d="M6 7v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7" />
-            <path d="M9 5V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1" />
+            <path d="M3 7h18" />
+            <path d="M9 11v5" />
+            <path d="M15 11v5" />
+            <path d="M5 7v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7" />
+            <path d="M8 5V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v1" />
           </svg>
         {:else if containerData.status === 'dead'}
           <!-- Dashed circle with X -->
@@ -264,7 +264,7 @@
             stroke-linecap="round"
             stroke-linejoin="round"
           >
-            <circle cx="12" cy="12" r="10" stroke-opacity="0.2" />
+            <circle cx="12" cy="12" r="9" stroke-opacity="0.2" />
             <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
             <circle cx="12" cy="17" r="0.8" fill="currentColor" stroke="none" />
           </svg>

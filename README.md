@@ -31,6 +31,10 @@
 - drizzle + libSQL
 - better-auth
 
+## Bugs
+
+- Annoying bug where after a while any fetch wouldn't work (could be Bun's bug)
+
 ## Notes
 
 Largely inspired by [glanceapp/glance](https://github.com/glanceapp/glance).
