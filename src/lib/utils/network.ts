@@ -1,4 +1,6 @@
-import { fetch } from 'undici';
+const fetchImpl: typeof globalThis.fetch = (
+  import.meta.env.SSR ? (await import('undici')).fetch : globalThis.fetch
+) as typeof globalThis.fetch;
 
 /* eslint-disable preserve-caught-error */
 export async function fetchURL(
@@ -25,7 +27,7 @@ export async function fetchURL(
         ...options.customHeaders,
       };
 
-      const response = await fetch(url, {
+      const response = await fetchImpl(url, {
         method: options.method,
         headers,
         body: options.body,
@@ -107,7 +109,7 @@ export async function fetchURLStream(
         ...options.customHeaders,
       };
 
-      const response = await fetch(url, {
+      const response = await fetchImpl(url, {
         method: options.method,
         headers,
         body: options.body,
