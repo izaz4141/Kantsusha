@@ -1,3 +1,4 @@
+import logger from '$lib/utils/logger';
 export const DANGEROUS_GLOBALS = [
   'XMLHttpRequest',
   'WebSocket',
@@ -63,7 +64,7 @@ export function evaluateValue(expr: string, context: Record<string, unknown>): u
     const result = func(...values);
     return result;
   } catch (e) {
-    console.error('[expr]', expr, e);
+    logger.error(e, '[expr] %s', expr);
     return undefined;
   }
 }
@@ -172,7 +173,7 @@ export function evaluateScript(
   try {
     result = func(...Object.values(safeContext));
   } catch (e) {
-    console.error('[script]', e);
+    logger.error(e, '[script]');
     return {};
   }
 
@@ -387,7 +388,7 @@ function processBlocks(
         const value = evaluateValue(block.constExpr!, context);
         context[block.constName!] = value;
       } catch (e) {
-        console.error('[@const]', block.constName, e);
+        logger.error(e, '[@const] %s', block.constName);
       }
       i++;
       continue;
@@ -400,7 +401,7 @@ function processBlocks(
       try {
         items = evaluateValue(block.eachExpr!, context);
       } catch (e) {
-        console.error(e);
+        logger.error(e);
         items = [];
       }
 
@@ -440,7 +441,7 @@ function processBlocks(
           selectedBlocks = ifBlocks;
         }
       } catch (e) {
-        console.error('[if]', e);
+        logger.error(e, '[if]');
       }
 
       if (!selectedBlocks) {
@@ -452,7 +453,7 @@ function processBlocks(
               break;
             }
           } catch (e) {
-            console.error('[if]', e);
+            logger.error(e, '[if]');
           }
         }
       }

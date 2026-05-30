@@ -1,6 +1,7 @@
 import type { ContainerData } from '$lib/types/widget.data';
 import type { ContainerParams, ServicesParams } from '$lib/types/widget.params';
 import { fetchURL, fetchURLStream, ReaderStream } from '$lib/utils/network';
+import logger from '$lib/utils/logger';
 
 export function getContainerHost(params: ContainerParams): string {
   if (params['sockPath']) {
@@ -182,10 +183,10 @@ export async function fetchContainerData(
         memoryLimit = stats.memory_stats.limit || stats.memory_stats.max_usage || 0;
         memoryPercent = calculateMemoryPercent(stats);
       } else {
-        console.warn(`Failed to fetch stats for ${containerName}`);
+        logger.warn(`Failed to fetch stats for ${containerName}`);
       }
     } catch {
-      console.warn(`Stats failed: ${containerName}`);
+      logger.warn(`Stats failed: ${containerName}`);
     }
   }
 
@@ -212,7 +213,7 @@ export async function fetchContainers(params: ServicesParams): Promise<Container
       const data = await fetchContainerData(host, container.id);
       results.push(data);
     } catch (e) {
-      console.error('Container data failed: ', container.id, e);
+      logger.error(e, 'Container data failed: %s', container.id);
     }
   }
 

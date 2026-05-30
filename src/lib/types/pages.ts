@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import logger from '$lib/utils/logger';
 import { CSS_UNIT_REGEX } from '$lib/utils/constants';
 import { AnyWidgetParamsSchema } from '$lib/types/widget.params';
 
@@ -16,7 +17,7 @@ export const PageColumnSchema = z.object({
         } catch {
           const type =
             item && typeof item === 'object' ? (item as Record<string, unknown>).type : typeof item;
-          console.warn(`Widget "${type}" invalid`);
+          logger.warn(`Widget "${type}" invalid`);
           return [];
         }
       }),

@@ -1,4 +1,5 @@
 import { json } from '@sveltejs/kit';
+import logger from '$lib/utils/logger';
 import type { RequestHandler } from './$types';
 import { getSearchConfig } from '$lib/server/config/config';
 import { fetchURL } from '$lib/utils/network';
@@ -58,7 +59,7 @@ export const GET: RequestHandler = async ({ url }) => {
 
     return json({ suggestions: suggestions.slice(0, 8) });
   } catch (err) {
-    console.error('Search autocomplete:', err);
+    logger.error(err, 'Search autocomplete');
     return json({ suggestions: [] });
   }
 };

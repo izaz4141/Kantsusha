@@ -1,4 +1,5 @@
 import { fetchURL } from '$lib/utils/network';
+import logger from '$lib/utils/logger';
 import type { YouTubeVideo } from '$lib/types/widget.data';
 import type { YouTubeChannel } from '$lib/types/widget.params';
 
@@ -209,11 +210,11 @@ export async function fetchYouTubeFallback(
             const shorts = extractVideosFromTab(shortsData, name);
             allVideos.push(...(ch.limit ? shorts.slice(0, ch.limit) : shorts));
           } catch (err) {
-            console.error(`YouTube shorts fallback ${ch.channel}:`, err);
+            logger.error(err, `YouTube shorts fallback ${ch.channel}`);
           }
         }
       } catch (err) {
-        console.error(`YouTube fallback ${ch.channel}:`, err);
+        logger.error(err, `YouTube fallback ${ch.channel}`);
       }
     }),
   );

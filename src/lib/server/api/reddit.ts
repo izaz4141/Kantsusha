@@ -1,4 +1,5 @@
 import { fetchURL } from '$lib/utils/network';
+import logger from '$lib/utils/logger';
 import type { RedditPost } from '$lib/types/widget.data';
 import { REDDIT_SORT_REGEX, REDDIT_TIME_REGEX } from '$lib/utils/constants';
 
@@ -68,7 +69,7 @@ export async function fetchRedditPosts(
       data?: { children: Array<{ kind: string; data: RedditApiPost }> };
     };
   } catch (err) {
-    console.error(`Reddit r/${subreddit}:`, err);
+    logger.error(err, `Reddit r/${subreddit}`);
     return [];
   }
 

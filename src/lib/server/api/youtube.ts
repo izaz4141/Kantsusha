@@ -1,4 +1,5 @@
 import { fetchURL } from '$lib/utils/network';
+import logger from '$lib/utils/logger';
 import type { YouTubeVideo } from '$lib/types/widget.data';
 import type { YouTubeChannel } from '$lib/types/widget.params';
 
@@ -52,7 +53,7 @@ async function resolveHandleToChannelId(handle: string): Promise<string | null> 
     );
     return match ? match[1] : null;
   } catch (err) {
-    console.error(`Youtube handle ${handle}:`, err);
+    logger.error(err, `Youtube handle ${handle}`);
     return null;
   }
 }
@@ -94,13 +95,13 @@ export async function fetchYouTube(
         const videos = parseYouTubeFeed(xml);
         allVideos.push(...(ch.limit ? videos.slice(0, ch.limit) : videos));
       } catch (err) {
-        console.error(`YouTube feed ${ch.channel}:`, err);
+        logger.error(err, `YouTube feed ${ch.channel}`);
         try {
           const { fetchYouTubeFallback } = await import('./youtube-fb');
           const fallback = await fetchYouTubeFallback([ch], limit, includeShorts);
           allVideos.push(...fallback);
         } catch (fbErr) {
-          console.error(`YouTube scraper also failed for ${ch.channel}:`, fbErr);
+          logger.error(fbErr, `YouTube scraper also failed for ${ch.channel}`);
         }
       }
     }),

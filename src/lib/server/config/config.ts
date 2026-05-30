@@ -17,6 +17,7 @@ import { substituteEnvRecursive } from '$lib/utils/substitution';
 import { ConfigSchema, type ParsedConfig } from '$lib/types/config';
 import { EXTERNAL_CONFIG_PATH } from '$lib/utils/constants';
 import z from 'zod';
+import logger from '$lib/utils/logger';
 const DEFAULT_CONFIG_PATH = !dev
   ? path.resolve(ENTRYDIR, 'config.yaml')
   : path.resolve(BASE_DIR, 'src/lib/server/config.yaml');
@@ -53,7 +54,7 @@ async function resolveIncludes(
         if ('$include' in itemObj) {
           const includePath = itemObj.$include;
           if (typeof includePath !== 'string') {
-            console.warn(`$include must be a string`);
+            logger.warn(`$include must be a string`);
             resolved.push(item);
             continue;
           }
@@ -69,7 +70,7 @@ async function resolveIncludes(
           const included = await loadYAML(resolvedPath);
           if (included === null) {
             visited.delete(resolvedPath);
-            console.warn(`Could not load ${includePath}`);
+            logger.warn(`Could not load ${includePath}`);
             resolved.push(item);
             continue;
           }
@@ -112,7 +113,7 @@ async function resolveIncludes(
     if ('$include' in objRecord) {
       const includePath = objRecord.$include;
       if (typeof includePath !== 'string') {
-        console.warn(`$include must be a string`);
+        logger.warn(`$include must be a string`);
         return obj;
       }
 
@@ -127,7 +128,7 @@ async function resolveIncludes(
       const included = await loadYAML(resolvedPath);
       if (included === null) {
         visited.delete(resolvedPath);
-        console.warn(`Could not load ${includePath}`);
+        logger.warn(`Could not load ${includePath}`);
         return obj;
       }
 
@@ -205,12 +206,12 @@ async function loadYAML(filePath: string): Promise<Record<string, unknown> | nul
   try {
     parsed = YAML.parse(content);
   } catch {
-    console.warn(`Bad YAML: ${filePath}`);
+    logger.warn(`Bad YAML: ${filePath}`);
     return null;
   }
 
   if (!parsed || typeof parsed !== 'object') {
-    console.warn(`Invalid YAML: ${filePath}`);
+    logger.warn(`Invalid YAML: ${filePath}`);
     return null;
   }
 
@@ -263,7 +264,7 @@ async function loadConfig(): Promise<ParsedConfig> {
 
   const external = await loadYAML(EXTERNAL_CONFIG_PATH);
   if (!external) {
-    console.log('No external config found, using default config');
+    logger.info('No external config found, using default config');
     const substituted = substituteEnvRecursive(defaultsResolved) as Record<string, unknown>;
     try {
       return ConfigSchema.parse(substituted);
@@ -277,7 +278,7 @@ async function loadConfig(): Promise<ParsedConfig> {
     path.dirname(EXTERNAL_CONFIG_PATH),
   )) as Record<string, unknown>;
 
-  console.log('Merging external config with defaults');
+  logger.info('Merging external config with defaults');
   const merged = mergeConfig(defaultsResolved, externalResolved);
   const substituted = substituteEnvRecursive(merged) as Record<string, unknown>;
 
@@ -322,7 +323,7 @@ export async function getCached(): Promise<FullParsedConfig> {
 
     return configCache.data;
   } catch (err) {
-    console.error('Config reload failed:', err);
+    logger.error(err, 'Config reload failed');
     if (!configCache) {
       throw err;
     }

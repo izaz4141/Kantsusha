@@ -1,4 +1,5 @@
 import { fetchURL } from '$lib/utils/network';
+import logger from '$lib/utils/logger';
 import type { MarketEntry } from '$lib/types/widget.params';
 import type { MarketData } from '$lib/types/widget.data';
 
@@ -35,7 +36,7 @@ async function fetchYahooData(
     const result = response.chart.result?.[0];
 
     if (!result) {
-      console.error(`[Markets] No data for ${code}`);
+      logger.error(`[Markets] No data for ${code}`);
       return null;
     }
 
@@ -75,7 +76,7 @@ async function fetchYahooData(
         validTimestamps.length > 0 ? validTimestamps[validTimestamps.length - 1] : Date.now(),
     };
   } catch (err) {
-    console.error(`Markets ${code}:`, err);
+    logger.error(err, `Markets ${code}`);
     return null;
   }
 }

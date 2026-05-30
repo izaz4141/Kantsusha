@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { fetchURL } from '$lib/utils/network';
+import logger from '$lib/utils/logger';
 import type { YouTubeChannel } from '$lib/types/widget.params';
 import {
   parseYtInitialData,
@@ -125,7 +126,7 @@ describe('fetchYouTubeFallback integration', () => {
       expect(videos.length).toBeGreaterThan(0);
       expect(videos.length).toBeLessThanOrEqual(5);
       for (const v of videos) {
-        console.log(
+        logger.info(
           `  ${v.title.slice(0, 50).padEnd(50)} pubDate=${v.pubDate.toISOString()} channelTitle=${v.channelTitle}`,
         );
         expect(v.title.length).toBeGreaterThan(0);

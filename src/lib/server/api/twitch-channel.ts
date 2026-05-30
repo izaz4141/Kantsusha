@@ -1,4 +1,5 @@
 import { fetchURL } from '$lib/utils/network';
+import logger from '$lib/utils/logger';
 import type { TwitchChannel } from '$lib/types/widget.data';
 
 const TWITCH_GQL_ENDPOINT = 'https://gql.twitch.tv/gql';
@@ -105,7 +106,7 @@ async function fetchChannelInfo(username: string): Promise<TwitchChannel | null>
 
     const userOrError = channelShell?.data?.userOrError;
     if (!userOrError || userOrError.__typename !== 'User') {
-      console.warn('[twitch-channel]: No user for', username);
+      logger.warn({ username }, '[twitch-channel]: No user for');
       return null;
     }
 
@@ -131,7 +132,7 @@ async function fetchChannelInfo(username: string): Promise<TwitchChannel | null>
       thumbnailUrl,
     };
   } catch (err) {
-    console.error(`Twitch ${username}:`, err);
+    logger.error(err, `Twitch ${username}`);
     return {
       username,
       nickname: username,

@@ -1,5 +1,6 @@
 import { fetchURL } from '$lib/utils/network';
 import { timeToMs } from '$lib/utils/time';
+import logger from '$lib/utils/logger';
 import type { CalendarEvent } from '$lib/types/widget.data';
 import type { CalFeed } from '$lib/types/widget.params';
 
@@ -105,7 +106,7 @@ async function fetchCalDAVCalendarColor(feed: CalFeed): Promise<string | null> {
     const colorMatch = xml.match(/<cd:calendar-color[^>]*>([^<]+)<\/cd:calendar-color>/i);
     return colorMatch ? colorMatch[1].trim() : null;
   } catch (err) {
-    console.error(`Calendar color ${feed.url}:`, err);
+    logger.error(err, `Calendar color ${feed.url}`);
     return null;
   }
 }
@@ -116,7 +117,7 @@ async function fetchCalDAVCalendar(
 ): Promise<{ ics: string; color: string | null }> {
   const rangeMs = timeToMs(range) ?? 0;
   if (rangeMs <= 0) {
-    console.error('Caldav range request cant have range <= 0');
+    logger.error('Caldav range request cant have range <= 0');
     return { ics: '', color: null };
   }
 
@@ -158,7 +159,7 @@ async function fetchCalDAVCalendar(
 
   const icsRaw = eventsResponse as string;
   if (icsRaw.includes('<d:error') || icsRaw.includes('<D:error')) {
-    console.error(`CalDAV error ${feed.url}:`, icsRaw);
+    logger.error(`CalDAV error ${feed.url}: %s`, icsRaw);
     return { ics: '', color: null };
   }
 
@@ -234,7 +235,7 @@ export async function fetchCalendar(
           }
         }
       } catch (err) {
-        console.error(`Calendar ${cal.url}:`, err);
+        logger.error(err, `Calendar ${cal.url}`);
       }
     }),
   );

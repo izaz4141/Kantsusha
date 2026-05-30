@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import logger from '$lib/utils/logger';
 import { RawPresetSchema, ThemePresetSchema, type ThemePreset } from '$lib/types/theme';
 import { PageConfigSchema } from '$lib/types/pages';
 import { SearchConfigSchema } from '$lib/types/search';
@@ -20,7 +21,7 @@ export const ConfigSchema = z.object({
         if (result.success) {
           valid[name] = result.data;
         } else {
-          console.warn(`Preset "${name}" invalid`);
+          logger.warn(`Preset "${name}" invalid`);
         }
       }
       return valid;
@@ -33,7 +34,7 @@ export const ConfigSchema = z.object({
       return pages.flatMap((page) => {
         const columns = page.columns.filter((col) => col.widgets.length > 0);
         if (columns.length === 0) {
-          console.warn(`Page "${page.name}" has no columns`);
+          logger.warn(`Page "${page.name}" has no columns`);
           return [];
         }
         return [{ ...page, columns }];

@@ -1,4 +1,5 @@
 import { LRUCache } from 'lru-cache';
+import logger from '$lib/utils/logger';
 
 import type {
   AnyWidgetParams,
@@ -214,7 +215,7 @@ registerWidget('services', async (params) => {
         results.push(data);
       }
     } catch (err) {
-      console.error(`Service ${(service as { name?: string }).name ?? 'unknown'}:`, err);
+      logger.error(err, `Service ${(service as { name?: string }).name ?? 'unknown'}`);
     }
   }
 

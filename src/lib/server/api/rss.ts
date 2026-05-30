@@ -1,4 +1,5 @@
 import { fetchURL } from '$lib/utils/network';
+import logger from '$lib/utils/logger';
 import type { RssArticle } from '$lib/types/widget.data';
 import type { RssFeed } from '$lib/types/widget.params';
 
@@ -63,7 +64,7 @@ export async function fetchRSS(feeds: RssFeed[], limit: number = 10): Promise<Rs
         const articles = await parseRSS(xml, feed.url);
         allArticles.push(...(feed.limit ? articles.slice(0, feed.limit) : articles));
       } catch (err) {
-        console.error(`RSS ${feed.url}:`, err);
+        logger.error(err, `RSS ${feed.url}`);
       }
     }),
   );

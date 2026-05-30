@@ -6,18 +6,19 @@ import type { HandleServerError } from '@sveltejs/kit';
 import { DEFAULT_THEME } from '$lib/utils/constants';
 import { getPreset, getCached } from '$lib/server/config/config';
 import { sequence } from '@sveltejs/kit/hooks';
+import logger from '$lib/utils/logger';
 
 export const init: ServerInit = async () => {
   if (building) return;
   process.on('uncaughtException', (err) => {
-    console.error('FATAL uncaughtException:', err);
+    logger.error(err, 'FATAL uncaughtException');
   });
   process.on('unhandledRejection', (reason) => {
-    console.error('FATAL unhandledRejection:', reason);
+    logger.error(reason as Error, 'FATAL unhandledRejection');
   });
-  console.log('Initializing Server...');
+  logger.info('Initializing Server...');
   await getCached();
-  console.log('Kantsusha Ready!');
+  logger.info('Kantsusha Ready!');
 };
 
 const handleBetterAuth: Handle = async ({ event, resolve }) => {
@@ -66,7 +67,7 @@ interface AppError {
 }
 export const handleError: HandleServerError = ({ error, event }) => {
   const err = error as AppError;
-  console.error('SERVER:', event.url.pathname, err?.message ?? error);
+  logger.error(err, `SERVER: ${event.url.pathname}`);
 
   return {
     message: 'A server-side error occurred.',
