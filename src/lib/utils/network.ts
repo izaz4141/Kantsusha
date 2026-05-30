@@ -123,7 +123,7 @@ export async function fetchURLStream(
         throw new Error(`No response body for ${url}`);
       }
 
-      return new ReaderStream(response.body.getReader());
+      return new ReaderStream(response.body.getReader() as ReadableStreamDefaultReader<Uint8Array>);
     } catch (err) {
       if (attempt === maxRetries - 1) {
         if (err instanceof DOMException && err.name === 'AbortError') {
