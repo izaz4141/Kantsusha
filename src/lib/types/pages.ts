@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import logger from '$lib/utils/logger';
+import logger from '$lib/server/logger';
 import { CSS_UNIT_REGEX } from '$lib/utils/constants';
 import { AnyWidgetParamsSchema } from '$lib/types/widget.params';
 

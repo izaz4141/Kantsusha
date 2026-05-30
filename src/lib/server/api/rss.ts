@@ -1,5 +1,5 @@
 import { fetchURL } from '$lib/utils/network';
-import logger from '$lib/utils/logger';
+import logger from '$lib/server/logger';
 import type { RssArticle } from '$lib/types/widget.data';
 import type { RssFeed } from '$lib/types/widget.params';
 

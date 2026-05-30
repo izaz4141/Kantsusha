@@ -1,5 +1,5 @@
 import { fetchURL } from '$lib/utils/network';
-import logger from '$lib/utils/logger';
+import logger from '$lib/server/logger';
 import type { RedditPost } from '$lib/types/widget.data';
 import { REDDIT_SORT_REGEX, REDDIT_TIME_REGEX } from '$lib/utils/constants';
 

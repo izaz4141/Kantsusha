@@ -1,4 +1,5 @@
 import logger from '$lib/utils/logger';
+
 export const DANGEROUS_GLOBALS = [
   'XMLHttpRequest',
   'WebSocket',

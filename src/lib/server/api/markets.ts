@@ -1,5 +1,5 @@
 import { fetchURL } from '$lib/utils/network';
-import logger from '$lib/utils/logger';
+import logger from '$lib/server/logger';
 import type { MarketEntry } from '$lib/types/widget.params';
 import type { MarketData } from '$lib/types/widget.data';
 

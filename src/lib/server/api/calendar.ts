@@ -1,6 +1,6 @@
 import { fetchURL } from '$lib/utils/network';
 import { timeToMs } from '$lib/utils/time';
-import logger from '$lib/utils/logger';
+import logger from '$lib/server/logger';
 import type { CalendarEvent } from '$lib/types/widget.data';
 import type { CalFeed } from '$lib/types/widget.params';
 

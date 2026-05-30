@@ -1,5 +1,5 @@
 import { json } from '@sveltejs/kit';
-import logger from '$lib/utils/logger';
+import logger from '$lib/server/logger';
 import type { RequestHandler } from './$types';
 import { fetchWidgetInfo } from '$lib/server/widget.store';
 

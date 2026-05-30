@@ -6,7 +6,7 @@ import type { HandleServerError } from '@sveltejs/kit';
 import { DEFAULT_THEME } from '$lib/utils/constants';
 import { getPreset, getCached } from '$lib/server/config/config';
 import { sequence } from '@sveltejs/kit/hooks';
-import logger from '$lib/utils/logger';
+import logger from '$lib/server/logger';
 
 export const init: ServerInit = async () => {
   if (building) return;

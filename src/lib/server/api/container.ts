@@ -1,7 +1,7 @@
 import type { ContainerData } from '$lib/types/widget.data';
 import type { ContainerParams, ServicesParams } from '$lib/types/widget.params';
 import { fetchURL, fetchURLStream, ReaderStream } from '$lib/utils/network';
-import logger from '$lib/utils/logger';
+import logger from '$lib/server/logger';
 
 export function getContainerHost(params: ContainerParams): string {
   if (params['sockPath']) {

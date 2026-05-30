@@ -1,5 +1,5 @@
 import { fetchURL } from '$lib/utils/network';
-import logger from '$lib/utils/logger';
+import logger from '$lib/server/logger';
 import type { TwitchChannel } from '$lib/types/widget.data';
 
 const TWITCH_GQL_ENDPOINT = 'https://gql.twitch.tv/gql';

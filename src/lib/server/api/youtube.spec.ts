@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { fetchURL } from '$lib/utils/network';
-import logger from '$lib/utils/logger';
+import logger from '$lib/server/logger';
 import type { YouTubeChannel } from '$lib/types/widget.params';
 import {
   parseYtInitialData,

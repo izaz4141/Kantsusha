@@ -2,7 +2,7 @@ import type { CustomApiParams } from '$lib/types/widget.params';
 import type { CustomApiData } from '$lib/types/widget.data';
 import { fetchURL } from '$lib/utils/network';
 import { SAFE_GLOBALS, parseTemplate } from '$lib/utils/extension';
-import logger from '$lib/utils/logger';
+import logger from '$lib/server/logger';
 
 interface FetchContext {
   [fetchId: string]: unknown;

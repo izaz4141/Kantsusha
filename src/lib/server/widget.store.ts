@@ -1,5 +1,5 @@
 import { LRUCache } from 'lru-cache';
-import logger from '$lib/utils/logger';
+import logger from '$lib/server/logger';
 
 import type {
   AnyWidgetParams,

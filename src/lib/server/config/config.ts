@@ -17,7 +17,7 @@ import { substituteEnvRecursive } from '$lib/utils/substitution';
 import { ConfigSchema, type ParsedConfig } from '$lib/types/config';
 import { EXTERNAL_CONFIG_PATH } from '$lib/utils/constants';
 import z from 'zod';
-import logger from '$lib/utils/logger';
+import logger from '$lib/server/logger';
 const DEFAULT_CONFIG_PATH = !dev
   ? path.resolve(ENTRYDIR, 'config.yaml')
   : path.resolve(BASE_DIR, 'src/lib/server/config.yaml');

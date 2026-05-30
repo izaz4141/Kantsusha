@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import logger from '$lib/utils/logger';
+import logger from '$lib/server/logger';
 import { RawPresetSchema, ThemePresetSchema, type ThemePreset } from '$lib/types/theme';
 import { PageConfigSchema } from '$lib/types/pages';
 import { SearchConfigSchema } from '$lib/types/search';
