@@ -36,8 +36,8 @@
       {#each params.services as service, i (i)}
         {@const isContainer = service.type === 'container'}
         <li
-          class="flex h-12 items-center rounded-lg p-2 transition-all duration-200 ease-out
-          hover:scale-[1.02] hover:shadow-md hover:ring-2 hover:ring-ring"
+          class="relative flex h-12 items-center rounded-lg p-2 transition-all duration-200 ease-out
+          hover:scale-[1.02]"
         >
           {#if isContainer}
             {@const containerData = getContainerData(i)}
@@ -51,3 +51,22 @@
     </ul>
   {/if}
 </div>
+
+<style>
+  li::before {
+    content: '';
+    position: absolute;
+    left: -4px;
+    top: 50%;
+    translate: 0 -50%;
+    width: 3px;
+    height: 80%;
+    border-radius: calc(infinity * 1px) 0 0 calc(infinity * 1px);
+    background-color: var(--color-primary);
+    transform: scaleY(0);
+    transition: transform 0.2s ease-out;
+  }
+  li:hover::before {
+    transform: scaleY(1);
+  }
+</style>

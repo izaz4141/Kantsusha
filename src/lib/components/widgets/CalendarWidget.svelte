@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { slide } from 'svelte/transition';
+  import { fly, slide } from 'svelte/transition';
   import type { CalendarEvent } from '$lib/types/widget.data';
   import type { BaseWidgetInfo } from '$lib/types/widget.data';
 
@@ -19,6 +19,7 @@
   );
   let currentDate = $state(new Date());
   let selectedDate = $state<Date | null>(null);
+  let slideDirection = $state<'left' | 'right'>('left');
 
   function getMonthData(date: Date) {
     const year = date.getFullYear();
@@ -75,16 +76,21 @@
   }
 
   function prevMonth() {
+    slideDirection = 'right';
     currentDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1);
   }
 
   function nextMonth() {
+    slideDirection = 'left';
     currentDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1);
   }
 
   function selectDate(date: Date | null) {
     if (date) {
       if (date.getMonth() !== currentDate.getMonth()) {
+        const dateMonth = date.getFullYear() * 12 + date.getMonth();
+        const curMonth = currentDate.getFullYear() * 12 + currentDate.getMonth();
+        slideDirection = dateMonth > curMonth ? 'left' : 'right';
         currentDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
       }
       if (selectedDate && selectedDate.getTime() === date.getTime()) {
@@ -140,34 +146,50 @@
     <div>Sat</div>
   </div>
 
-  <div class="mb-2 grid grid-cols-7 gap-1">
-    {#each monthDays as day (day)}
-      {@const dayEvents = getEventsForDate(day)}
-      {@const isCurrentMonth = day.getMonth() === currentDate.getMonth()}
-      {@const isToday = isCurrentMonth && day.getDate() === today}
-      {@const isSelected = selectedDate && selectedDate.getTime() === day.getTime()}
-      <button
-        type="button"
-        class="relative flex h-8 flex-col items-center justify-center rounded p-1 hover:bg-surface-raised {isSelected
-          ? 'bg-primary/15 ring-2 ring-primary-active'
-          : ''}"
-        aria-label="Select {day.getDate()}"
-        onclick={() => selectDate(day)}
+  <div class="overflow-hidden" style="display: grid;">
+    {#key currentDate.toISOString().slice(0, 7)}
+      <div
+        style="grid-area: 1 / 1;"
+        in:fly={{
+          x: slideDirection === 'right' ? -100 : 100,
+          duration: 300,
+        }}
+        out:fly={{
+          x: slideDirection === 'right' ? 100 : -100,
+          duration: 300,
+        }}
       >
-        <span
-          class="text-sm {isCurrentMonth ? '' : 'text-text-muted'} {isToday
-            ? 'font-bold text-primary'
-            : ''}">{day.getDate()}</span
-        >
-        {#if dayEvents.length > 0}
-          <div class="absolute bottom-0.5 flex justify-center gap-0.5">
-            {#each dayEvents.slice(0, 3) as event (event)}
-              <span class="h-1 w-1 rounded-full" style="background-color: {event.color}"></span>
-            {/each}
-          </div>
-        {/if}
-      </button>
-    {/each}
+        <div class="mb-2 grid grid-cols-7 gap-1">
+          {#each monthDays as day (day)}
+            {@const dayEvents = getEventsForDate(day)}
+            {@const isCurrentMonth = day.getMonth() === currentDate.getMonth()}
+            {@const isToday = isCurrentMonth && day.getDate() === today}
+            {@const isSelected = selectedDate && selectedDate.getTime() === day.getTime()}
+            <button
+              type="button"
+              class="relative flex h-8 flex-col items-center justify-center rounded p-1 hover:bg-surface-raised
+              {isSelected ? 'border-2 border-primary-active bg-primary/15' : ''}"
+              aria-label="Select {day.getDate()}"
+              onclick={() => selectDate(day)}
+            >
+              <span
+                class="text-sm {isCurrentMonth ? '' : 'text-text-muted'} {isToday
+                  ? 'font-bold text-primary'
+                  : ''}">{day.getDate()}</span
+              >
+              {#if dayEvents.length > 0}
+                <div class="absolute bottom-0.5 flex justify-center gap-0.5">
+                  {#each dayEvents.slice(0, 3) as event (event)}
+                    <span class="h-1 w-1 rounded-full" style="background-color: {event.color}"
+                    ></span>
+                  {/each}
+                </div>
+              {/if}
+            </button>
+          {/each}
+        </div>
+      </div>
+    {/key}
   </div>
 
   {#if selectedDate}

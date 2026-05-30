@@ -105,7 +105,7 @@
         {#if channel.isLive}
           {#if channel.category}
             <a
-              href={'https://twitch.tx/directory/category/' + channel.categorySlug}
+              href={'https://twitch.tv/directory/category/' + channel.categorySlug}
               target="_blank"
               rel="external noopener noreferrer"
               class="truncate text-xs text-text-muted"

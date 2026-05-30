@@ -21,6 +21,7 @@
   let showThumbnail = $derived(params.showThumbnail ?? false);
   let collapseAfter = $derived(params.collapseAfter ?? 5);
   let view = $derived(params.view ?? 'list');
+  let dests = $derived(articles.map((a) => a.link));
 </script>
 
 {#snippet renderDetails(index: number)}
@@ -50,6 +51,7 @@
   {showThumbnail}
   {collapseAfter}
   thumbnails={articles.map((a: RssArticle) => a.thumbnail ?? '')}
+  {dests}
   details={renderDetails}
   class={className}
 />

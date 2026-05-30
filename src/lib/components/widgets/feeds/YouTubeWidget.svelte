@@ -21,6 +21,7 @@
   let showThumbnail = $derived(params.showThumbnail ?? false);
   let collapseAfter = $derived(params.collapseAfter ?? 5);
   let view = $derived(params.view ?? 'card');
+  let dests = $derived(videos.map((v) => 'https://youtube.com/watch?v=' + v.videoId));
 </script>
 
 {#snippet renderDetails(index: number)}
@@ -50,6 +51,7 @@
   {showThumbnail}
   {collapseAfter}
   thumbnails={videos.map((v: YouTubeVideo) => v.thumbnail ?? '')}
+  {dests}
   details={renderDetails}
   class={className}
 />

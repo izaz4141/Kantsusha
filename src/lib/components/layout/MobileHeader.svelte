@@ -135,8 +135,10 @@
             <a
               href={resolve(`/${route.slug}`)}
               class="text-no-underline
-            text-sm font-medium text-text transition-colors hover:text-text-muted
-            {page.url.pathname.startsWith(`/${route.slug}`) ? 'border-b border-primary' : ''}"
+            text-sm font-medium transition-colors hover:text-text
+            {page.url.pathname.startsWith(`/${route.slug}`)
+                ? 'border-b border-primary text-text'
+                : 'text-text-muted hover:border-b hover:border-text-muted'}"
               onclick={closeMenu}
             >
               {route.name}

@@ -8,6 +8,7 @@
     showThumbnail?: boolean;
     collapseAfter?: number;
     thumbnails: string[];
+    dests?: string[];
     details: Snippet<[index: number]>;
     class?: string;
   }
@@ -17,13 +18,14 @@
     showThumbnail = false,
     collapseAfter = 5,
     thumbnails,
+    dests = [],
     details,
     class: className = '',
   }: Props = $props();
 </script>
 
 {#if view === 'card'}
-  <CardView {thumbnails} {details} class={className} />
+  <CardView {thumbnails} {dests} {details} class={className} />
 {:else if view === 'list'}
   <ListView {showThumbnail} {collapseAfter} {thumbnails} {details} class={className} />
 {/if}

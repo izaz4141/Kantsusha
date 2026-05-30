@@ -25,15 +25,17 @@
           <div class="relative flex h-full items-center">
             <a
               href={resolve(`/${route.slug}`)}
-              class="peer flex text-sm text-text no-underline
-            transition-opacity hover:opacity-70">{route.name}</a
+              class="peer flex text-sm no-underline transition-all hover:text-text
+              {page.url.pathname.startsWith('/' + route.slug) ? 'text-text' : 'text-text-muted'}"
+              >{route.name}</a
             >
             <div
-              class="absolute bottom-0 left-1/2 h-0.5 w-8/10 -translate-x-1/2 {page.url.pathname.startsWith(
+              class="absolute bottom-0 left-1/2 h-0.75 w-8/10 -translate-x-1/2 {page.url.pathname.startsWith(
                 '/' + route.slug,
               )
                 ? 'bg-primary'
                 : 'peer-hover:bg-text-muted'}"
+              style="border-radius: calc(infinity * 1px) calc(infinity * 1px) 0 0"
             ></div>
           </div>
         {/each}

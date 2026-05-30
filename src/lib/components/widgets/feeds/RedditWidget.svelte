@@ -21,6 +21,7 @@
   let showThumbnail = $derived(params.showThumbnail ?? false);
   let collapseAfter = $derived(params.collapseAfter ?? 5);
   let view = $derived(params.view ?? 'list');
+  let dests = $derived(posts.map((p) => p.permalink));
 
   function formatScore(score: number): string {
     if (score >= 1000000) return `${(score / 1000000).toFixed(1)}m`;
@@ -59,6 +60,7 @@
   {showThumbnail}
   {collapseAfter}
   thumbnails={posts.map((p) => p.thumbnail ?? '')}
+  {dests}
   details={renderDetails}
   class={className}
 />
