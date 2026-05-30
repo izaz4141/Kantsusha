@@ -3,7 +3,6 @@ import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { Writable } from 'node:stream';
 import { dirname } from 'node:path';
 import { PRETTY_OPTS } from '$lib/utils/logger';
-import { env } from '$env/dynamic/private';
 
 const MAX_LINES = 1000;
 
@@ -37,7 +36,7 @@ function createFileStream(filePath: string) {
   });
 }
 
-const logfilePath = env.KANTSUSHA_LOGFILE_PATH;
+const logfilePath = process.env.KANTSUSHA_LOGFILE_PATH;
 const streams: pino.StreamEntry[] = [
   { stream: pino.transport({ target: 'pino-pretty', options: PRETTY_OPTS }) },
 ];
@@ -46,6 +45,9 @@ if (logfilePath) {
   streams.push({ stream: createFileStream(logfilePath) });
 }
 
-const logger = pino({ level: env.KANTSUSHA_LOG_LEVEL ?? 'info' }, pino.multistream(streams));
+const logger = pino(
+  { level: process.env.KANTSUSHA_LOG_LEVEL ?? 'info' },
+  pino.multistream(streams),
+);
 
 export default logger;

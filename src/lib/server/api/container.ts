@@ -2,13 +2,12 @@ import type { ContainerData } from '$lib/types/widget.data';
 import type { ContainerParams } from '$lib/types/widget.params';
 import { fetchURL, fetchURLStream, ReaderStream } from '$lib/utils/network';
 import logger from '$lib/server/logger';
-import { env } from '$env/dynamic/private';
 
 export function getContainerHost(params: ContainerParams): string {
   if (params['sockPath']) {
     return params['sockPath'];
   }
-  const envHost = env.DOCKER_HOST;
+  const envHost = process.env.DOCKER_HOST;
   if (envHost) {
     return envHost;
   }

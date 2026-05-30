@@ -121,3 +121,9 @@
     ></button>
   {/if}
 {/if}
+
+<style>
+  button {
+    cursor: default;
+  }
+</style>

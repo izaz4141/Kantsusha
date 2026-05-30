@@ -1,5 +1,4 @@
 import { page } from '$app/state';
-import { env } from '$env/dynamic/private';
 
 export function getCurrencySymbol(currency: string): string {
   return CURRENCY_SYMBOLS[currency.toUpperCase()] ?? currency;
@@ -16,7 +15,7 @@ export function getBaseDomain(host: string): string {
 export function substituteEnv(str: string): string {
   return str.replace(/\$\{([^}]+)\}/g, (_, inner) => {
     if (inner.startsWith('KANTSUSHA_')) {
-      return env[inner] ?? `\${${inner}}`;
+      return process.env[inner] ?? `\${${inner}}`;
     }
     return `\${${inner}}`;
   });
@@ -47,7 +46,7 @@ export function substituteEnvRecursive(obj: unknown): unknown {
 export function resolveString(str: string): string {
   return str.replace(/\$\{([^}]+)\}/g, (_, inner) => {
     if (inner.startsWith('KANTSUSHA_')) {
-      return env[inner] ?? '';
+      return process.env[inner] ?? '';
     } else if (inner === 'SUBHOST') {
       return getBaseDomain(page.url.hostname);
     }
