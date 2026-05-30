@@ -98,6 +98,7 @@
           class="block truncate text-sm font-semibold {channel.isLive
             ? 'text-text'
             : 'text-text-muted'}"
+          title={channel.nickname}
         >
           {channel.nickname}
         </a>
@@ -108,6 +109,7 @@
               target="_blank"
               rel="external noopener noreferrer"
               class="truncate text-xs text-text-muted"
+              title={channel.category}
             >
               {channel.category}
             </a>

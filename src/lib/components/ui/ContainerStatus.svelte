@@ -81,7 +81,8 @@
         <div class="flex min-w-45 flex-col gap-1 p-2 text-xs">
           <div class="flex flex-col gap-0.5">
             <span class="text-text-muted">Image</span>
-            <span class="truncate text-text">{containerData.image}</span>
+            <span class="truncate text-text" title={containerData.image}>{containerData.image}</span
+            >
           </div>
           <div class="flex justify-between">
             <span class="text-text-muted">CPU</span>
@@ -119,16 +120,17 @@
         target={service.target ?? defaultTarget}
         rel="external noopener noreferrer"
         class="truncate text-sm font-semibold text-primary"
+        title={service.name}
       >
         {service.name}
       </a>
     {:else}
-      <span class="truncate text-sm font-semibold text-text">
+      <span class="truncate text-sm font-semibold text-text" title={service.name}>
         {service.name}
       </span>
     {/if}
     {#if service.description}
-      <span class="truncate text-xs text-text-muted">
+      <span class="truncate text-xs text-text-muted" title={service.description}>
         {service.description}
       </span>
     {/if}

@@ -42,16 +42,17 @@
         target={service.target ?? defaultTarget}
         rel="external noopener noreferrer"
         class="truncate text-sm font-semibold text-primary"
+        title={service.name}
       >
         {service.name}
       </a>
     {:else}
-      <span class="truncate text-sm font-semibold text-text">
+      <span class="truncate text-sm font-semibold text-text" title={service.name}>
         {service.name}
       </span>
     {/if}
     {#if service.description}
-      <span class="truncate text-xs text-text-muted">
+      <span class="truncate text-xs text-text-muted" title={service.description}>
         {service.description}
       </span>
     {/if}

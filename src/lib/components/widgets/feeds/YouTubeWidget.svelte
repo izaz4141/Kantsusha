@@ -32,7 +32,7 @@
         rel="external noopener noreferrer"
         class="relative inline-block text-sm font-semibold text-primary"
       >
-        <span class="line-clamp-2">
+        <span class="line-clamp-2" title={videos[index].title}>
           {videos[index].title}
         </span>
       </a>

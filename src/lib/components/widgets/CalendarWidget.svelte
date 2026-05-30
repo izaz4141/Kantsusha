@@ -204,10 +204,12 @@
                 style="background-color: {event.color}"
               ></span>
               <div class="min-w-0 flex-1">
-                <p class="truncate text-sm font-medium">{event.title}</p>
+                <p class="truncate text-sm font-medium" title={event.title}>{event.title}</p>
                 <p class="text-xs text-text-muted">{formatTime(event.start)}</p>
                 {#if event.location}
-                  <p class="mt-1 truncate text-xs text-text-muted">{event.location}</p>
+                  <p class="mt-1 truncate text-xs text-text-muted" title={event.location}>
+                    {event.location}
+                  </p>
                 {/if}
               </div>
             </li>
