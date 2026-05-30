@@ -4,9 +4,10 @@ import { fetchURL } from '$lib/utils/network';
 export async function checkEndpoint(
   name: string,
   statusCheckUrl: string | undefined,
-): Promise<EndpointData> {
+): Promise<{ data: EndpointData; errors: string[] }> {
+  const errors: string[] = [];
   if (!statusCheckUrl) {
-    return { name, status: 'unknown' };
+    return { data: { name, status: 'unknown' }, errors };
   }
 
   const startTime = Date.now();
@@ -16,16 +17,22 @@ export async function checkEndpoint(
       skipBody: true,
     })) as Response;
     return {
-      name,
-      status: response.ok ? 'online' : 'offline',
-      statusCode: response.status,
-      responseTime: Date.now() - startTime,
+      data: {
+        name,
+        status: response.ok ? 'online' : 'offline',
+        statusCode: response.status,
+        responseTime: Date.now() - startTime,
+      },
+      errors,
     };
   } catch {
     return {
-      name,
-      status: 'offline',
-      responseTime: Date.now() - startTime,
+      data: {
+        name,
+        status: 'offline',
+        responseTime: Date.now() - startTime,
+      },
+      errors,
     };
   }
 }

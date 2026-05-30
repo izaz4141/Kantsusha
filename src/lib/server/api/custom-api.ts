@@ -48,6 +48,7 @@ export async function fetchChain(
     }
   >,
   options?: Record<string, unknown>,
+  errors?: string[],
 ): Promise<FetchContext> {
   if (!fetches) return {};
 
@@ -77,26 +78,33 @@ export async function fetchChain(
       context[id] = data;
     } catch (err) {
       logger.error(err, `custom-api ${id}`);
+      errors?.push(`Failed to fetch custom-api: ${id}`);
     }
   }
 
   return context;
 }
 
-export async function renderCustomTemplate(params: CustomApiParams): Promise<CustomApiData> {
-  const context = await fetchChain(params.fetch, params.options);
+export async function renderCustomTemplate(
+  params: CustomApiParams,
+): Promise<{ data: CustomApiData; errors: string[] }> {
+  const errors: string[] = [];
+  const context = await fetchChain(params.fetch, params.options, errors);
 
   const parsed = parseTemplate(params.template);
 
   return {
-    html: parsed.html,
-    style: parsed.css,
-    script: parsed.script,
-    fetched: Object.fromEntries(
-      Object.entries(context).map(([id, data]) => [
-        id,
-        { id, type: typeof data === 'string' ? 'text' : 'json', data },
-      ]),
-    ),
+    data: {
+      html: parsed.html,
+      style: parsed.css,
+      script: parsed.script,
+      fetched: Object.fromEntries(
+        Object.entries(context).map(([id, data]) => [
+          id,
+          { id, type: typeof data === 'string' ? 'text' : 'json', data },
+        ]),
+      ),
+    },
+    errors,
   };
 }

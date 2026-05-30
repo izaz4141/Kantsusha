@@ -31,11 +31,17 @@ export interface Widget {
   type: string;
   params: AnyWidgetParams;
   data?: AnyWidgetData;
+  errors?: string[];
   cachedAt?: number;
 }
 
+interface WidgetHandlerResult {
+  data: AnyWidgetData;
+  errors: string[];
+}
+
 interface WidgetHandlers {
-  [type: string]: (params: AnyWidgetParams) => Promise<AnyWidgetData>;
+  [type: string]: (params: AnyWidgetParams) => Promise<WidgetHandlerResult>;
 }
 
 const DEFAULT_CACHE_TTL = 2 * 60 * 60 * 1000;
@@ -48,7 +54,7 @@ const widgetHandlers: WidgetHandlers = {};
 
 export function registerWidget(
   type: string,
-  handler: (params: AnyWidgetParams) => Promise<AnyWidgetData>,
+  handler: (params: AnyWidgetParams) => Promise<WidgetHandlerResult>,
 ) {
   widgetHandlers[type] = handler;
 }
@@ -126,22 +132,23 @@ export async function fetchWidgetInfo(id: string): Promise<AnyWidgetInfo> {
   const isExpired = !widget.cachedAt || Date.now() - widget.cachedAt > cacheTTL;
 
   if (!isExpired && widget.data) {
-    return { data: widget.data, params: widget.params };
+    return { data: widget.data, params: widget.params, errors: widget.errors ?? [] };
   }
 
   try {
-    const data = await handler(widget.params);
+    const result = await handler(widget.params);
 
     if (widgetCache.get(id) === widget) {
-      widget.data = data;
+      widget.data = result.data;
+      widget.errors = result.errors;
       widget.cachedAt = Date.now();
       setWidget(id, widget);
     }
 
-    return { data, params: widget.params };
+    return { data: result.data, params: widget.params, errors: result.errors };
   } catch (error) {
     if (widget.data) {
-      return { data: widget.data, params: widget.params };
+      return { data: widget.data, params: widget.params, errors: widget.errors ?? [] };
     }
     throw error;
   }
@@ -158,43 +165,52 @@ export function clearWidgetCache() {
 registerWidget('rss', async (params) => {
   params = params as RssParams;
   const { fetchRSS } = await import('./api/rss');
-  return fetchRSS(params.feeds, params.limit);
+  const { data, errors } = await fetchRSS(params.feeds, params.limit);
+  return { data, errors };
 });
 
 registerWidget('calendar', async (params) => {
   params = params as CalendarParams;
   const { fetchCalendar } = await import('./api/calendar');
-  return fetchCalendar(params.cals, params.range, params.limit);
+  const { data, errors } = await fetchCalendar(params.cals, params.range, params.limit);
+  return { data, errors };
 });
 
 registerWidget('reddit', async (params) => {
   params = params as RedditParams;
   const { fetchRedditPosts } = await import('./api/reddit');
-  return fetchRedditPosts(params.subreddit, params.sort, params.limit, params.time);
+  const { data, errors } = await fetchRedditPosts(
+    params.subreddit,
+    params.sort,
+    params.limit,
+    params.time,
+  );
+  return { data, errors };
 });
 
 registerWidget('youtube', async (params) => {
   params = params as YouTubeParams;
   const { fetchYouTube } = await import('./api/youtube');
-  return fetchYouTube(params.channels, params.limit, params.includeShorts);
+  const { data, errors } = await fetchYouTube(params.channels, params.limit, params.includeShorts);
+  return { data, errors };
 });
 
 registerWidget('tabbed', async (params) => {
   params = params as TabbedParams;
   const widget = widgetCache.get(params.id);
-  return widget?.data ?? [];
+  return { data: widget?.data ?? ([] as unknown as AnyWidgetData), errors: [] };
 });
 
 registerWidget('split-column', async (params) => {
   params = params as SplitColumnParams;
   const widget = widgetCache.get(params.id);
-  return widget?.data ?? [];
+  return { data: widget?.data ?? ([] as unknown as AnyWidgetData), errors: [] };
 });
 
 registerWidget('split-row', async (params) => {
   params = params as SplitRowParams;
   const widget = widgetCache.get(params.id);
-  return widget?.data ?? [];
+  return { data: widget?.data ?? ([] as unknown as AnyWidgetData), errors: [] };
 });
 
 registerWidget('services', async (params) => {
@@ -202,40 +218,48 @@ registerWidget('services', async (params) => {
   const { fetchContainerData, getContainerHost } = await import('./api/container');
   const { checkEndpoint } = await import('./api/endpoint');
 
+  const allErrors: string[] = [];
   const results: (ContainerData | EndpointData)[] = [];
 
   for (const service of params.services) {
     try {
       if (service.type === 'container') {
         const host = getContainerHost(service);
-        const data = await fetchContainerData(host, service.id);
+        const { data, errors } = await fetchContainerData(host, service.id);
         results.push(data);
+        allErrors.push(...errors);
       } else if (service.type === 'endpoint') {
-        const data = await checkEndpoint(service.name, service.statusCheckUrl);
+        const { data, errors } = await checkEndpoint(service.name, service.statusCheckUrl);
         results.push(data);
+        allErrors.push(...errors);
       }
     } catch (err) {
-      logger.error(err, `Service ${(service as { name?: string }).name ?? 'unknown'}`);
+      const name = (service as { name?: string }).name ?? 'unknown';
+      allErrors.push(`Service ${name} failed unexpectedly`);
+      logger.error(err, `Service ${name}`);
     }
   }
 
-  return results;
+  return { data: results, errors: allErrors };
 });
 
 registerWidget('custom-api', async (params) => {
   params = params as CustomApiParams;
   const { renderCustomTemplate } = await import('./api/custom-api');
-  return renderCustomTemplate(params);
+  const { data, errors } = await renderCustomTemplate(params);
+  return { data, errors };
 });
 
 registerWidget('twitch-channel', async (params) => {
   params = params as TwitchChannelParams;
   const { fetchTwitchChannels } = await import('./api/twitch-channel');
-  return fetchTwitchChannels(params.channels, params.sort);
+  const { data, errors } = await fetchTwitchChannels(params.channels, params.sort);
+  return { data, errors };
 });
 
 registerWidget('markets', async (params) => {
   params = params as MarketsParams;
   const { fetchMarketData } = await import('./api/markets');
-  return fetchMarketData(params.markets);
+  const { data, errors } = await fetchMarketData(params.markets);
+  return { data, errors };
 });

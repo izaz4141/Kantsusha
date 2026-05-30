@@ -15,7 +15,9 @@ function createFileStream(filePath: string) {
       const content = readFileSync(filePath, 'utf-8');
       lineCount = content.split('\n').filter(Boolean).length;
     }
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
 
   return new Writable({
     write(chunk, _encoding, callback) {

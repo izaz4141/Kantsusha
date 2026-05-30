@@ -54,8 +54,12 @@ async function parseRSS(xml: string, sourceUrl: string): Promise<RssArticle[]> {
   return articles;
 }
 
-export async function fetchRSS(feeds: RssFeed[], limit: number = 10): Promise<RssArticle[]> {
+export async function fetchRSS(
+  feeds: RssFeed[],
+  limit: number = 10,
+): Promise<{ data: RssArticle[]; errors: string[] }> {
   const allArticles: RssArticle[] = [];
+  const errors: string[] = [];
 
   await Promise.all(
     feeds.map(async (feed) => {
@@ -65,6 +69,7 @@ export async function fetchRSS(feeds: RssFeed[], limit: number = 10): Promise<Rs
         allArticles.push(...(feed.limit ? articles.slice(0, feed.limit) : articles));
       } catch (err) {
         logger.error(err, `RSS ${feed.url}`);
+        errors.push(`Failed to fetch RSS: ${feed.url}`);
       }
     }),
   );
@@ -77,5 +82,5 @@ export async function fetchRSS(feeds: RssFeed[], limit: number = 10): Promise<Rs
     return allArticles[a].source.localeCompare(allArticles[b].source);
   });
 
-  return indices.slice(0, limit).map((i) => allArticles[i]);
+  return { data: indices.slice(0, limit).map((i) => allArticles[i]), errors };
 }

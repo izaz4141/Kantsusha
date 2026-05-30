@@ -192,11 +192,12 @@ export async function fetchCalendar(
   cals: CalFeed[] = [],
   range: string = '183d',
   limit: number = 50,
-): Promise<CalendarEvent[]> {
+): Promise<{ data: CalendarEvent[]; errors: string[] }> {
   if (cals.length === 0) {
-    return [];
+    return { data: [], errors: [] };
   }
   const allEvents: CalendarEvent[] = [];
+  const errors: string[] = [];
   const colors = [
     '#ef4444',
     '#f97316',
@@ -236,6 +237,7 @@ export async function fetchCalendar(
         }
       } catch (err) {
         logger.error(err, `Calendar ${cal.url}`);
+        errors.push(`Failed to fetch calendar: ${cal.url}`);
       }
     }),
   );
@@ -249,5 +251,5 @@ export async function fetchCalendar(
     return allEvents[a].title.localeCompare(allEvents[b].title);
   });
 
-  return indices.slice(0, limit).map((i) => allEvents[i]);
+  return { data: indices.slice(0, limit).map((i) => allEvents[i]), errors };
 }

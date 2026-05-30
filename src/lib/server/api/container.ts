@@ -1,5 +1,5 @@
 import type { ContainerData } from '$lib/types/widget.data';
-import type { ContainerParams, ServicesParams } from '$lib/types/widget.params';
+import type { ContainerParams } from '$lib/types/widget.params';
 import { fetchURL, fetchURLStream, ReaderStream } from '$lib/utils/network';
 import logger from '$lib/server/logger';
 
@@ -130,7 +130,8 @@ interface DockerInspectResponse {
 export async function fetchContainerData(
   host: string,
   containerName: string,
-): Promise<ContainerData> {
+): Promise<{ data: ContainerData; errors: string[] }> {
+  const errors: string[] = [];
   const inspectUrl = buildContainerUrl(host, `/v1.54/containers/${containerName}/json`);
 
   let container: DockerInspectResponse;
@@ -142,15 +143,18 @@ export async function fetchContainerData(
     })) as DockerInspectResponse;
   } catch {
     return {
-      name: containerName,
-      image: 'unknown',
-      status: 'unknown',
-      health: null,
-      cpuPercent: 0,
-      memoryUsage: 0,
-      memoryLimit: 0,
-      memoryPercent: 0,
-      time: null,
+      data: {
+        name: containerName,
+        image: 'unknown',
+        status: 'unknown',
+        health: null,
+        cpuPercent: 0,
+        memoryUsage: 0,
+        memoryLimit: 0,
+        memoryPercent: 0,
+        time: null,
+      },
+      errors,
     };
   }
   const image = container.Config?.Image || 'unknown';
@@ -187,35 +191,22 @@ export async function fetchContainerData(
       }
     } catch {
       logger.warn(`Stats failed: ${containerName}`);
+      errors.push(`Failed to fetch stats for: ${containerName}`);
     }
   }
 
   return {
-    name: containerName,
-    image,
-    status,
-    health,
-    cpuPercent: Number(cpuPercent.toFixed(2)),
-    memoryUsage,
-    memoryLimit,
-    memoryPercent: Number(memoryPercent.toFixed(2)),
-    time,
+    data: {
+      name: containerName,
+      image,
+      status,
+      health,
+      cpuPercent: Number(cpuPercent.toFixed(2)),
+      memoryUsage,
+      memoryLimit,
+      memoryPercent: Number(memoryPercent.toFixed(2)),
+      time,
+    },
+    errors,
   };
-}
-
-export async function fetchContainers(params: ServicesParams): Promise<ContainerData[]> {
-  const containerServices = params.services.filter((s) => s.type === 'container');
-
-  const results: ContainerData[] = [];
-  for (const container of containerServices) {
-    try {
-      const host = getContainerHost(container);
-      const data = await fetchContainerData(host, container.id);
-      results.push(data);
-    } catch (e) {
-      logger.error(e, 'Container data failed: %s', container.id);
-    }
-  }
-
-  return results;
 }

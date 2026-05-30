@@ -84,8 +84,9 @@ export async function fetchYouTube(
   channels: YouTubeChannel[],
   limit: number = 10,
   includeShorts: boolean = false,
-): Promise<YouTubeVideo[]> {
+): Promise<{ data: YouTubeVideo[]; errors: string[] }> {
   const allVideos: YouTubeVideo[] = [];
+  const errors: string[] = [];
 
   await Promise.all(
     channels.map(async (ch) => {
@@ -95,13 +96,14 @@ export async function fetchYouTube(
         const videos = parseYouTubeFeed(xml);
         allVideos.push(...(ch.limit ? videos.slice(0, ch.limit) : videos));
       } catch (err) {
-        logger.error(err, `YouTube feed ${ch.channel}`);
+        logger.warn(err, `YouTube feed ${ch.channel}`);
         try {
           const { fetchYouTubeFallback } = await import('./youtube-fb');
           const fallback = await fetchYouTubeFallback([ch], limit, includeShorts);
           allVideos.push(...fallback);
         } catch (fbErr) {
           logger.error(fbErr, `YouTube scraper also failed for ${ch.channel}`);
+          errors.push(`YouTube feed failed for ${ch.channel}`);
         }
       }
     }),
@@ -129,5 +131,5 @@ export async function fetchYouTube(
     }
   }
 
-  return result.filter((v) => v !== undefined);
+  return { data: result.filter((v) => v !== undefined), errors };
 }

@@ -59,7 +59,7 @@ interface OperationResponse {
   };
 }
 
-async function fetchChannelInfo(username: string): Promise<TwitchChannel | null> {
+async function fetchChannelInfo(username: string, errors: string[]): Promise<TwitchChannel | null> {
   const body = JSON.stringify([
     {
       operationName: 'ChannelShell',
@@ -133,6 +133,7 @@ async function fetchChannelInfo(username: string): Promise<TwitchChannel | null>
     };
   } catch (err) {
     logger.error(err, `Twitch ${username}`);
+    errors.push(`Failed to fetch Twitch: ${username}`);
     return {
       username,
       nickname: username,
@@ -146,8 +147,9 @@ async function fetchChannelInfo(username: string): Promise<TwitchChannel | null>
 export async function fetchTwitchChannels(
   channels: string[],
   sort: 'live' | 'views' = 'live',
-): Promise<TwitchChannel[]> {
-  const results = await Promise.all(channels.map((channel) => fetchChannelInfo(channel)));
+): Promise<{ data: TwitchChannel[]; errors: string[] }> {
+  const errors: string[] = [];
+  const results = await Promise.all(channels.map((channel) => fetchChannelInfo(channel, errors)));
 
   const validResults = results.filter((r): r is TwitchChannel => r !== null);
 
@@ -161,5 +163,5 @@ export async function fetchTwitchChannels(
   } else {
     sorted = validResults.sort((a, b) => b.viewerCount - a.viewerCount);
   }
-  return sorted;
+  return { data: sorted, errors };
 }

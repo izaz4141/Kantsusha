@@ -117,16 +117,19 @@ export type BaseWidgetData =
 export interface BaseWidgetInfo {
   data: BaseWidgetData;
   params: BaseWidgetParams;
+  errors: string[];
 }
 
 export type WrapperWidgetData = { ids: string[] };
 export interface WrapperWidgetInfo {
   data: WrapperWidgetData;
   params: WrapperWidgetParams;
+  errors: string[];
 }
 
 export type AnyWidgetData = BaseWidgetData | WrapperWidgetData;
 export interface AnyWidgetInfo {
   data: AnyWidgetData;
   params: AnyWidgetParams;
+  errors: string[];
 }

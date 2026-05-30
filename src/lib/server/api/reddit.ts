@@ -50,7 +50,8 @@ export async function fetchRedditPosts(
   sort: string = 'hot',
   limit: number = 10,
   time: string = 'day',
-): Promise<RedditPost[]> {
+): Promise<{ data: RedditPost[]; errors: string[] }> {
+  const errors: string[] = [];
   const safeSort = REDDIT_SORT_REGEX.test(sort) ? sort : 'hot';
   const safeTime = REDDIT_TIME_REGEX.test(time) ? time : 'day';
 
@@ -70,7 +71,8 @@ export async function fetchRedditPosts(
     };
   } catch (err) {
     logger.error(err, `Reddit r/${subreddit}`);
-    return [];
+    errors.push(`Failed to fetch subreddit r/${subreddit}`);
+    return { data: [], errors };
   }
 
   const posts: RedditPost[] = [];
@@ -87,5 +89,5 @@ export async function fetchRedditPosts(
     }
   }
 
-  return posts;
+  return { data: posts, errors };
 }

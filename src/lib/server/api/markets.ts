@@ -28,6 +28,7 @@ async function fetchYahooData(
   code: string,
   range: string,
   interval: string,
+  errors: string[],
 ): Promise<MarketData | null> {
   const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(code)}?interval=${interval}&range=${range}`;
 
@@ -77,21 +78,26 @@ async function fetchYahooData(
     };
   } catch (err) {
     logger.error(err, `Markets ${code}`);
+    errors.push(`Failed to fetch market: ${code}`);
     return null;
   }
 }
 
-export async function fetchMarketData(markets: MarketEntry[]): Promise<MarketData[]> {
+export async function fetchMarketData(
+  markets: MarketEntry[],
+): Promise<{ data: MarketData[]; errors: string[] }> {
+  const errors: string[] = [];
   const results = await Promise.all(
     markets.map(async (market) => {
       const data = await fetchYahooData(
         market.code,
         market.range ?? '30d',
         market.interval ?? '1d',
+        errors,
       );
       return data;
     }),
   );
 
-  return results.filter((r): r is MarketData => r !== null);
+  return { data: results.filter((r): r is MarketData => r !== null), errors };
 }

@@ -10,6 +10,7 @@
   import CustomApiWidget from '$lib/components/widgets/CustomApiWidget.svelte';
   import MarketsWidget from '$lib/components/widgets/MarketsWidget.svelte';
   import type { BaseWidgetInfo } from '$lib/types/widget.data';
+  import Dropdown from '$lib/components/ui/Dropdown.svelte';
   import PulseLoader from '$lib/components/shared/PulseLoader.svelte';
   import { fetchURL } from '$lib/utils/network';
   import { timeToMs } from '$lib/utils/time';
@@ -21,6 +22,7 @@
     update?: number;
     showTitle?: boolean;
     refreshSignal?: number;
+    onErrors?: (errors: string[]) => void;
   }
 
   let {
@@ -29,6 +31,7 @@
     update = 2 * 60 * 60 * 1000,
     showTitle = true,
     refreshSignal = 0,
+    onErrors,
   }: Props = $props();
 
   let loading = $state(true);
@@ -37,10 +40,16 @@
   let widgetTitle = $state<string | null>(null);
   let intervalId: ReturnType<typeof setInterval> | null = null;
   let reloading = $state(false);
+  let errorTrigger = $state<HTMLElement>();
+  let errorOpen = $state(false);
 
   $effect(() => {
     if (refreshSignal === 0) return;
     fetchWidgetInfo(false);
+  });
+
+  $effect(() => {
+    onErrors?.(widgetInfo?.errors ?? []);
   });
 
   async function fetchWidgetInfo(isInitial = false) {
@@ -86,7 +95,26 @@
 
 {#if showTitle && widgetTitle}
   <div class="mx-2 flex items-center justify-between">
-    <span class="text-sm font-medium text-text uppercase">{widgetTitle}</span>
+    <span class="text-sm font-medium text-text uppercase">
+      {widgetTitle}
+      {#if widgetInfo?.errors?.length}
+        <div
+          bind:this={errorTrigger}
+          class="inline-flex text-error"
+          role="status"
+          aria-label="Widget Warning"
+          onmouseenter={() => (errorOpen = true)}
+          onmouseleave={() => (errorOpen = false)}
+        >
+          ⚠
+        </div>
+        <Dropdown bind:open={errorOpen} trigger={errorTrigger} targetPortal="portal-root">
+          {#each widgetInfo.errors as err (err)}
+            <div class="px-2 py-1 text-xs whitespace-nowrap text-error">{err}</div>
+          {/each}
+        </Dropdown>
+      {/if}
+    </span>
     <button
       onclick={reload}
       class="text-text-muted transition-colors hover:text-text"
