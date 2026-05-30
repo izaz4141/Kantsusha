@@ -1,3 +1,5 @@
+import { fetch } from 'undici';
+
 /* eslint-disable preserve-caught-error */
 export async function fetchURL(
   url: string,
@@ -28,7 +30,6 @@ export async function fetchURL(
         headers,
         body: options.body,
         signal: AbortSignal.timeout(timeoutMs),
-        keepalive: false,
       });
 
       if (!response.ok) {

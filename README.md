@@ -33,7 +33,7 @@
 
 ## Bugs
 
-- Annoying bug where after a while any fetch wouldn't work (could be Bun's bug)
+- Annoying bug where after a while any fetch wouldn't work (could be Bun's bug) (Trying undici as replacement)
 
 ## Notes
 
