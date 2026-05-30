@@ -47,6 +47,8 @@ theme: dark
 | `KANTSUSHA_ORIGINS`      | Allowed origins      | `http://localhost:*,http://127.0.0.1:*` |
 | `KANTSUSHA_AUTH_SECRET`  | Auth secret          | -                                       |
 | `KANTSUSHA_ASSETS_DIR`   | Assets Directory     | /app/assets                             |
+| `KANTSUSHA_LOGFILE_PATH` | Log File Path        | -                                       |
+| `KANTSUSHA_LOG_LEVEL`    | Log Level cut-off    | info                                    |
 
 ## Running
 
