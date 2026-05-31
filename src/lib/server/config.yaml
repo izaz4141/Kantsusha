@@ -155,22 +155,6 @@ pages:
             column: 2
             services:
               # - type: container
-              #   id: jellyfin
-              #   sockPath: tcp://socket-proxy:2375
-              #   name: Jellyfin
-              #   description: Media Player
-              #   url: https://jf.${SUBHOST}
-              #   icon: di:jellyfin.svg
-
-              # - type: container
-              #   id: immich-server
-              #   sockPath: tcp://socket-proxy:2375
-              #   name: Immich
-              #   description: Gallery
-              #   url: https://im.${SUBHOST}
-              #   icon: sh:immich
-
-              # - type: container
               #   id: vaultwarden
               #   sockPath: tcp://socket-proxy:2375
               #   name: VaultWarden
@@ -272,22 +256,48 @@ pages:
     columns:
       - size: full
         widgets:
-          - type: calendar
-            cals:
-              - type: ics
-                url: 'https://calendar.google.com/calendar/ical/id.indonesian%23holiday%40group.v.calendar.google.com/public/basic.ics'
-          - type: docker-containers
-            title: Download
-            sockPath: tcp://socket-proxy:2375
+          - type: services
+            title: Media
+            target: _blank
             column: 2
-            containers:
-              nadekodon:
-                name: Nadeko~don
-                description: Download Manager
-                url: https://ndk.${SUBHOST}/
-                icon: /assets/nadeko-don-64.png
-              slskd:
-                name: Slskd
-                description: Soulseek Client
-                url: https://sls.${SUBHOST}/
-                icon: sh:slskd
+            services:
+              # - type: container
+              #   id: vaultwarden
+              #   sockPath: tcp://socket-proxy:2375
+              #   name: VaultWarden
+              #   description: Password Manager
+              #   url: https://vw.${SUBHOST}
+              #   icon: auto di:vaultwarden
+
+              - type: endpoint
+                name: Jellyfin1
+                description: Media Player
+                icon: https://github.com/av1155/houndarr/raw/main/src/houndarr/static/img/houndarr-logo-dark.png
+                url: https://jf.${SUBHOST}
+                target: _blank
+                statusCheck: true
+                statusCheckUrl: https://aaaaaaaaaa.com
+              - type: endpoint
+                name: Jellyfin2
+                description: Media Player
+                icon: di:jellyfin
+                url: https://jf.${SUBHOST}
+                target: _blank
+                statusCheck: true
+                statusCheckUrl: https://example.com
+              - type: endpoint
+                name: Jellyfin3
+                description: Media Player
+                icon: di:jellyfin
+                url: https://jf.${SUBHOST}
+                target: _blank
+                statusCheck: true
+                statusCheckUrl: https://google.com
+              - type: endpoint
+                name: Jellyfin4
+                description: Media Player
+                icon: di:jellyfin
+                url: https://jf.${SUBHOST}
+                target: _blank
+                statusCheck: true
+                statusCheckUrl: https://google.com

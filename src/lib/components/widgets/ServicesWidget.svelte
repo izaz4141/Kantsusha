@@ -58,15 +58,14 @@
     position: absolute;
     left: -4px;
     top: 50%;
-    translate: 0 -50%;
     width: 3px;
     height: 80%;
-    border-radius: calc(infinity * 1px) 0 0 calc(infinity * 1px);
+    border-radius: calc(infinity * 1px);
     background-color: var(--color-primary);
-    transform: scaleY(0);
+    transform: translate(0, -50%) scaleY(0);
     transition: transform 0.2s ease-out;
   }
   li:hover::before {
-    transform: scaleY(1);
+    transform: translate(0, -50%) scaleY(1);
   }
 </style>
