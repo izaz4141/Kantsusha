@@ -47,6 +47,8 @@ export function resolveString(str: string): string {
   return str.replace(/\$\{([^}]+)\}/g, (_, inner) => {
     if (inner.startsWith('KANTSUSHA_')) {
       return process.env[inner] ?? '';
+    } else if (inner === 'HOST') {
+      return page.url.hostname;
     } else if (inner === 'SUBHOST') {
       return getBaseDomain(page.url.hostname);
     }
