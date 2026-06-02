@@ -92,7 +92,7 @@ export interface CustomApiData {
   script: string;
 }
 
-export interface HostStatsData {
+export interface ServerStatsData {
   hostname: string;
   cpu: {
     loadAvg: [number, number, number];
@@ -164,7 +164,7 @@ export type BaseWidgetData =
   | (ContainerData | EndpointData)[]
   | CustomApiData
   | MarketData[]
-  | HostStatsData;
+  | ServerStatsData[];
 export interface BaseWidgetInfo {
   data: BaseWidgetData;
   params: BaseWidgetParams;

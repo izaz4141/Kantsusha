@@ -1,8 +1,8 @@
 import { existsSync, readFileSync, statfsSync, readdirSync } from 'node:fs';
 import { hostname as osHostname } from 'node:os';
 import logger from '$lib/server/logger';
-import type { HostStatsData } from '$lib/types/widget.data';
-import type { HostStatsParams } from '$lib/types/widget.params';
+import type { ServerStatsData } from '$lib/types/widget.data';
+import type { ServerStatsParams } from '$lib/types/widget.params';
 
 const PROC_BASE = existsSync('/host/proc/stat') ? '/host/proc' : '/proc';
 const ETC_BASE = existsSync('/host/etc/os-release') ? '/host/etc' : '/etc';
@@ -20,7 +20,7 @@ function readEtc(path: string): string | null {
   }
 }
 
-function parseMeminfo(): HostStatsData['memory'] | null {
+function parseMeminfo(): ServerStatsData['memory'] | null {
   try {
     const text = readProc('meminfo');
     const totalMatch = text.match(/MemTotal:\s+(\d+)\s+kB/);
@@ -36,7 +36,7 @@ function parseMeminfo(): HostStatsData['memory'] | null {
   }
 }
 
-function parseSwap(): HostStatsData['swap'] | null {
+function parseSwap(): ServerStatsData['swap'] | null {
   try {
     const text = readProc('meminfo');
     const totalMatch = text.match(/SwapTotal:\s+(\d+)\s+kB/);
@@ -99,7 +99,6 @@ function parseHostname(): string {
     return osHostname();
   }
 }
-}
 
 function parseUptime(): number | null {
   try {
@@ -111,7 +110,7 @@ function parseUptime(): number | null {
   }
 }
 
-function parsePlatform(): HostStatsData['platform'] | null {
+function parsePlatform(): ServerStatsData['platform'] | null {
   try {
     const text = readEtc('os-release');
     if (!text) return null;
@@ -127,12 +126,12 @@ function parsePlatform(): HostStatsData['platform'] | null {
   }
 }
 
-function parseTemperature(): HostStatsData['temperature'] {
+function parseTemperature(): ServerStatsData['temperature'] {
   try {
     const zones = readdirSync(`${SYS_BASE}/class/thermal`).filter((d) =>
       d.startsWith('thermal_zone'),
     );
-    const results: HostStatsData['temperature'] = [];
+    const results: ServerStatsData['temperature'] = [];
     for (const zone of zones) {
       try {
         const type = readFileSync(`${SYS_BASE}/class/thermal/${zone}/type`, 'utf-8').trim();
@@ -150,7 +149,7 @@ function parseTemperature(): HostStatsData['temperature'] {
   }
 }
 
-function parseStorage(filterMounts?: string[]): HostStatsData['storage'] {
+function parseStorage(filterMounts?: string[]): ServerStatsData['storage'] {
   const SKIP_FS = new Set([
     'proc',
     'sysfs',
@@ -186,7 +185,7 @@ function parseStorage(filterMounts?: string[]): HostStatsData['storage'] {
   try {
     const text = readProc('mounts');
     const lines = text.split('\n').filter((l) => l.trim());
-    const results: HostStatsData['storage'] = [];
+    const results: ServerStatsData['storage'] = [];
     for (const line of lines) {
       const parts = line.trim().split(/\s+/);
       if (parts.length < 3) continue;
@@ -276,7 +275,7 @@ async function collectCpu(): Promise<{
 
 async function collectNetwork(
   filterInterfaces?: string[],
-): Promise<HostStatsData['network'] | null> {
+): Promise<ServerStatsData['network'] | null> {
   try {
     const first = parseNetDev();
     if (first.length === 0) return null;
@@ -322,7 +321,7 @@ function parseDiskstats(): DiskIOSample[] {
     .filter((d) => !d.name.startsWith('loop') && !d.name.startsWith('ram'));
 }
 
-async function collectDiskIO(filterDevices?: string[]): Promise<HostStatsData['diskIO'] | null> {
+async function collectDiskIO(filterDevices?: string[]): Promise<ServerStatsData['diskIO'] | null> {
   try {
     const first = parseDiskstats();
     if (first.length === 0) return null;
@@ -346,9 +345,16 @@ async function collectDiskIO(filterDevices?: string[]): Promise<HostStatsData['d
   }
 }
 
-export async function collectHostStats(
-  params: HostStatsParams,
-): Promise<{ data: HostStatsData; errors: string[] }> {
+export async function collectServerStats(
+  params: ServerStatsParams,
+): Promise<{ data: ServerStatsData[]; errors: string[] }> {
+  if ('beszel' in params.source) {
+    const { url, email, password, systemIds } = params.source.beszel;
+    const { collectBeszelStats } = await import('./beszel-stats');
+    return collectBeszelStats(url, email, password, systemIds, params);
+  }
+
+  const { networkInterfaces, diskDevices, mountPoints } = params.source.host;
   const errors: string[] = [];
   const hostname = parseHostname();
   const [cpu, memory, swap, uptime, platform, temperature, storage, network, diskIO] =
@@ -359,9 +365,9 @@ export async function collectHostStats(
       params.showUptime ? parseUptime() : null,
       params.showPlatform ? parsePlatform() : null,
       params.showTemperature ? parseTemperature() : null,
-      params.showStorage ? parseStorage(params.mountPoints) : null,
-      params.showNetwork ? collectNetwork(params.networkInterfaces) : null,
-      params.showDiskIO ? collectDiskIO(params.diskDevices) : null,
+      params.showStorage ? parseStorage(mountPoints) : null,
+      params.showNetwork ? collectNetwork(networkInterfaces) : null,
+      params.showDiskIO ? collectDiskIO(diskDevices) : null,
     ]);
   if (!cpu) errors.push('Failed to collect CPU stats');
   if (!memory) errors.push('Failed to collect memory stats');
@@ -369,19 +375,17 @@ export async function collectHostStats(
   if (!uptime) errors.push('Failed to collect uptime');
   if (!platform) errors.push('Failed to detect platform');
   if (!network) errors.push('Failed to collect network stats');
-  return {
-    data: {
-      hostname,
-      cpu: cpu ?? { usagePercent: 0, loadAvg: [0, 0, 0], cores: 1, iowaitPercent: 0 },
-      memory: memory ?? { total: 0, available: 0, used: 0, percent: 0 },
-      swap: swap ?? { total: 0, used: 0, percent: 0 },
-      uptime: uptime ?? 0,
-      platform: platform ?? { id: 'unknown', prettyName: 'Unknown' },
-      temperature: temperature ?? [],
-      storage: storage ?? [],
-      network: network ?? { interfaces: [] },
-      diskIO: diskIO ?? [],
-    },
-    errors,
+  const data: ServerStatsData = {
+    hostname,
+    cpu: cpu ?? { usagePercent: 0, loadAvg: [0, 0, 0], cores: 1, iowaitPercent: 0 },
+    memory: memory ?? { total: 0, available: 0, used: 0, percent: 0 },
+    swap: swap ?? { total: 0, used: 0, percent: 0 },
+    uptime: uptime ?? 0,
+    platform: platform ?? { id: 'unknown', prettyName: 'Unknown' },
+    temperature: temperature ?? [],
+    storage: storage ?? [],
+    network: network ?? { interfaces: [] },
+    diskIO: diskIO ?? [],
   };
+  return { data: [data], errors };
 }

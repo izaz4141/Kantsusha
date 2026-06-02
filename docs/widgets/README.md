@@ -14,7 +14,7 @@
 | [Custom API](widgets/custom-api.md)         | Generic API widget             |
 | [Tabbed](widgets/tabbed.md)                 | Container for nested widgets   |
 | [Split Column](widgets/split-column.md)     | Side-by-side widget layout     |
-| [Host Stats](widgets/host-stats.md)         | Live system metrics            |
+| [Server Stats](widgets/server-stats.md)     | Live system metrics            |
 | [Split Row](widgets/split-row.md)           | Stacked vertical widget layout |
 
 ## Container Widgets

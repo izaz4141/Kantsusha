@@ -9,7 +9,7 @@
   import ServicesWidget from '$lib/components/widgets/ServicesWidget.svelte';
   import CustomApiWidget from '$lib/components/widgets/CustomApiWidget.svelte';
   import MarketsWidget from '$lib/components/widgets/MarketsWidget.svelte';
-  import HostStatsWidget from '$lib/components/widgets/HostStatsWidget.svelte';
+  import ServerStatsWidget from '$lib/components/widgets/ServerStatsWidget.svelte';
   import type { BaseWidgetInfo } from '$lib/types/widget.data';
   import Dropdown from '$lib/components/ui/Dropdown.svelte';
   import PulseLoader from '$lib/components/shared/PulseLoader.svelte';
@@ -154,7 +154,7 @@
     <CustomApiWidget result={widgetInfo} />
   {:else if type === 'markets' && widgetInfo}
     <MarketsWidget result={widgetInfo} />
-  {:else if type === 'host-stats' && widgetInfo}
-    <HostStatsWidget result={widgetInfo} />
+  {:else if type === 'server-stats' && widgetInfo}
+    <ServerStatsWidget result={widgetInfo} />
   {/if}
 </div>

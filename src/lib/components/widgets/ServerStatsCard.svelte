@@ -1,18 +1,16 @@
 <script lang="ts">
-  import type { BaseWidgetInfo, HostStatsData } from '$lib/types/widget.data';
-  import type { HostStatsParams } from '$lib/types/widget.params';
+  import type { ServerStatsData } from '$lib/types/widget.data';
+  import type { ServerStatsParams } from '$lib/types/widget.params';
   import Dropdown from '$lib/components/ui/Dropdown.svelte';
   import { PLATFORM_SLUGS } from '$lib/utils/constants';
+  import brokenIcon from '$lib/assets/broken-icon.svg';
 
   interface Props {
-    result: BaseWidgetInfo;
-    class?: string;
+    data: ServerStatsData;
+    params: ServerStatsParams;
   }
 
-  let { result, class: className = '' }: Props = $props();
-
-  let data = $derived(result.data as HostStatsData);
-  let params = $derived(result.params as HostStatsParams);
+  let { data, params }: Props = $props();
 
   let diskMounts = $derived([...data.storage].sort((a, b) => b.total - a.total).slice(0, 2));
 
@@ -66,10 +64,15 @@
   }
 </script>
 
-<div class="{className} flex flex-col gap-2">
+<div class="flex flex-col gap-2">
   <div class="mb-2 flex flex-row items-center gap-3 rounded-lg">
     <div class="flex h-8 w-8 items-center">
-      <img src={platformIcon} alt={data.platform.prettyName} class="h-full w-full" />
+      <img
+        src={platformIcon}
+        alt={data.platform.prettyName}
+        class="h-full w-full"
+        onerror={(e) => ((e.currentTarget as HTMLImageElement).src = brokenIcon)}
+      />
     </div>
     <div class="flex flex-col">
       <span class="text-sm font-medium text-text">{data.hostname.toUpperCase()}</span>
@@ -124,6 +127,8 @@
       <div class="grid min-w-44 grid-cols-2 gap-x-3 gap-y-1 px-3 py-2 text-xs">
         <span class="text-text-muted">Usage</span>
         <span class="text-right font-mono text-text">{data.cpu.usagePercent.toFixed(1)}%</span>
+        <span class="text-text-muted">I/O Wait</span>
+        <span class="text-right font-mono text-text">{data.cpu.iowaitPercent.toFixed(1)}%</span>
         <span class="text-text-muted">Load 1m</span>
         <span class="text-right font-mono text-text">{data.cpu.loadAvg[0].toFixed(2)}</span>
         <span class="text-text-muted">Load 5m</span>
@@ -132,8 +137,6 @@
         <span class="text-right font-mono text-text">{data.cpu.loadAvg[2].toFixed(2)}</span>
         <span class="text-text-muted">Cores</span>
         <span class="text-right font-mono text-text">{data.cpu.cores}</span>
-        <span class="text-text-muted">I/O Wait</span>
-        <span class="text-right font-mono text-text">{data.cpu.iowaitPercent.toFixed(1)}%</span>
       </div>
     </Dropdown>
 

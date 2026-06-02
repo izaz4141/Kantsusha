@@ -174,12 +174,32 @@ export const CustomApiParamsSchema = CommonWidgetParamsSchema.merge(
 );
 export type CustomApiParams = z.infer<typeof CustomApiParamsSchema>;
 
-export const HostStatsParamsSchema = CommonWidgetParamsSchema.merge(
+export const ServerSourceFiltersSchema = z.object({
+  networkInterfaces: z.array(z.string()).optional(),
+  diskDevices: z.array(z.string()).optional(),
+  mountPoints: z.array(z.string()).optional(),
+});
+export type ServerSourceFilters = z.infer<typeof ServerSourceFiltersSchema>;
+
+const ServerSourceSchema = z.union([
+  z.object({ host: ServerSourceFiltersSchema }),
   z.object({
-    type: z.literal('host-stats'),
-    title: z.string().default('Host Stats'),
+    beszel: z.object({
+      url: z.string(),
+      email: z.string(),
+      password: z.string(),
+      systemIds: z.record(z.string(), ServerSourceFiltersSchema).optional(),
+    }),
+  }),
+]);
+
+export const ServerStatsParamsSchema = CommonWidgetParamsSchema.merge(
+  z.object({
+    type: z.literal('server-stats'),
+    title: z.string().default('Server Stats'),
     cache: z.string().regex(TIME_REGEX).default('15m').optional(),
     update: z.string().regex(TIME_REGEX).default('15m').optional(),
+    source: ServerSourceSchema.default({ host: {} }),
     showCpu: z.boolean().default(true),
     showMemory: z.boolean().default(true),
     showSwap: z.boolean().default(true),
@@ -189,12 +209,9 @@ export const HostStatsParamsSchema = CommonWidgetParamsSchema.merge(
     showStorage: z.boolean().default(true),
     showNetwork: z.boolean().default(true),
     showDiskIO: z.boolean().default(true),
-    networkInterfaces: z.array(z.string()).optional(),
-    diskDevices: z.array(z.string()).optional(),
-    mountPoints: z.array(z.string()).optional(),
   }),
 );
-export type HostStatsParams = z.infer<typeof HostStatsParamsSchema>;
+export type ServerStatsParams = z.infer<typeof ServerStatsParamsSchema>;
 
 const BaseWidgetParamsSchema = z.discriminatedUnion('type', [
   CalendarParamsSchema,
@@ -205,7 +222,7 @@ const BaseWidgetParamsSchema = z.discriminatedUnion('type', [
   CustomApiParamsSchema,
   TwitchChannelParamsSchema,
   MarketsParamsSchema,
-  HostStatsParamsSchema,
+  ServerStatsParamsSchema,
 ]);
 export type BaseWidgetParams = z.infer<typeof BaseWidgetParamsSchema>;
 

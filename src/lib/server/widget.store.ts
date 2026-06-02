@@ -14,7 +14,7 @@ import type {
   CustomApiParams,
   TwitchChannelParams,
   MarketsParams,
-  HostStatsParams,
+  ServerStatsParams,
   WrapperWidgetParams,
   WrapperWidgetEntry,
 } from '$lib/types/widget.params';
@@ -270,8 +270,8 @@ registerWidget('markets', async (params) => {
   return { data, errors };
 });
 
-registerWidget('host-stats', async (params) => {
-  params = params as HostStatsParams;
-  const { collectHostStats } = await import('./api/host-stats');
-  return await collectHostStats(params);
+registerWidget('server-stats', async (params) => {
+  params = params as ServerStatsParams;
+  const { collectServerStats } = await import('./api/server-stats');
+  return await collectServerStats(params);
 });

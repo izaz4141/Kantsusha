@@ -144,11 +144,9 @@ pages:
                 feeds:
                   - url: 'https://selfh.st/rss'
 
-          - type: host-stats
+          - type: server-stats
             cache: 5s
             update: 5s
-            networkInterfaces:
-              - wlp1s0
 
           - type: twitch-channel
             channels:
