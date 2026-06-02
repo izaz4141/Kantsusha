@@ -48,12 +48,13 @@ widgets:
 
 All widgets support:
 
-| Parameter   | Type     | Default | Description     |
-| ----------- | -------- | ------- | --------------- |
-| `title`     | string   | -       | Widget header   |
-| `cache`     | duration | `1h`    | Cache duration  |
-| `update`    | duration | `1h`    | Update interval |
-| `frameless` | boolean  | `false` | Hide header     |
+| Parameter   | Type     | Default | Description                                           |
+| ----------- | -------- | ------- | ----------------------------------------------------- |
+| `title`     | string   | -       | Widget header                                         |
+| `cache`     | duration | `1h`    | Cache duration                                        |
+| `update`    | duration | `1h`    | Update interval                                       |
+| `frameless` | boolean  | `false` | Hide header                                           |
+| `lazy`      | boolean  | `false` | Skip background refresh, fetch on client request only |
 
 ### Duration Format
 

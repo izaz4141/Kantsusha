@@ -30,6 +30,7 @@ function startRefreshCycles(): void {
     const widget = widgets[i];
     const cacheTTL = timeToMs(widget.params.cache);
     if (!cacheTTL || cacheTTL <= 0) continue;
+    if (widget.params.lazy) continue;
 
     setTimeout(() => {
       fetchWidgetInfo(widget.id).catch(() => {});

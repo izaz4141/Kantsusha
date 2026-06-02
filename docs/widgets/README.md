@@ -37,6 +37,7 @@ Container widgets can nest any widget type, including other container widgets.
   cache: 1h # Cache duration (default: 1h)
   update: 1h # Update interval
   frameless: false # Hide header
+  lazy: false # Skip background refresh, fetch on client request
 ```
 
 ## Duration Format
