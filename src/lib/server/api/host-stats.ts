@@ -91,12 +91,14 @@ function parseCpuCores(): number {
 }
 
 function parseHostname(): string {
+  const fromEtc = readEtc('hostname');
+  if (fromEtc) return fromEtc.trim();
   try {
     return readProc('sys/kernel/hostname').trim();
-  } catch (err) {
-    logger.error(err, 'Failed to read hostname from /proc/sys/kernel/hostname');
+  } catch {
     return osHostname();
   }
+}
 }
 
 function parseUptime(): number | null {

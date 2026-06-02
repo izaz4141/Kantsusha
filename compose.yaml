@@ -9,6 +9,7 @@ services:
       - ./config:/app/config:Z,U
       - /proc:/host/proc:ro
       - /sys:/host/sys:ro
+      - /etc/hostname:/host/etc/hostname:ro
     ports:
       - 3000:3000
     environment:
