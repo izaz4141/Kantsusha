@@ -165,7 +165,7 @@ export function clearWidgetCache() {
 registerWidget('rss', async (params) => {
   params = params as RssParams;
   const { fetchRSS } = await import('./api/rss');
-  const { data, errors } = await fetchRSS(params.feeds, params.limit);
+  const { data, errors } = await fetchRSS(params.feeds, params.limit, params.sort);
   return { data, errors };
 });
 
@@ -191,7 +191,12 @@ registerWidget('reddit', async (params) => {
 registerWidget('youtube', async (params) => {
   params = params as YouTubeParams;
   const { fetchYouTube } = await import('./api/youtube');
-  const { data, errors } = await fetchYouTube(params.channels, params.limit, params.includeShorts);
+  const { data, errors } = await fetchYouTube(
+    params.channels,
+    params.limit,
+    params.includeShorts,
+    params.sort,
+  );
   return { data, errors };
 });
 

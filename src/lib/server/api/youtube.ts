@@ -84,6 +84,7 @@ export async function fetchYouTube(
   channels: YouTubeChannel[],
   limit: number = 10,
   includeShorts: boolean = false,
+  sort: boolean = true,
 ): Promise<{ data: YouTubeVideo[]; errors: string[] }> {
   const allVideos: YouTubeVideo[] = [];
   const errors: string[] = [];
@@ -109,27 +110,31 @@ export async function fetchYouTube(
     }),
   );
 
-  const length = allVideos.length;
-  const temp = new Float64Array(length);
-  const indices = new Int32Array(length);
+  if (sort) {
+    const length = allVideos.length;
+    const temp = new Float64Array(length);
+    const indices = new Int32Array(length);
 
-  for (let i = 0; i < length; i++) {
-    temp[i] = allVideos[i].pubDate.getTime();
-    indices[i] = i;
-  }
-
-  indices.sort((a, b) => {
-    const diff = temp[b] - temp[a];
-    if (diff) return diff;
-    return allVideos[a].channelTitle.localeCompare(allVideos[b].channelTitle);
-  });
-
-  const result: YouTubeVideo[] = new Array(limit);
-  for (let i = 0; i < limit; i++) {
-    if (indices[i] !== undefined) {
-      result[i] = allVideos[indices[i]];
+    for (let i = 0; i < length; i++) {
+      temp[i] = allVideos[i].pubDate.getTime();
+      indices[i] = i;
     }
+
+    indices.sort((a, b) => {
+      const diff = temp[b] - temp[a];
+      if (diff) return diff;
+      return allVideos[a].channelTitle.localeCompare(allVideos[b].channelTitle);
+    });
+
+    const result: YouTubeVideo[] = new Array(limit);
+    for (let i = 0; i < limit; i++) {
+      if (indices[i] !== undefined) {
+        result[i] = allVideos[indices[i]];
+      }
+    }
+
+    return { data: result.filter((v) => v !== undefined), errors };
   }
 
-  return { data: result.filter((v) => v !== undefined), errors };
+  return { data: allVideos.slice(0, limit), errors };
 }

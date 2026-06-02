@@ -3,8 +3,12 @@ import logger from '$lib/server/logger';
 import type { RssArticle } from '$lib/types/widget.data';
 import type { RssFeed } from '$lib/types/widget.params';
 
-async function parseRSS(xml: string, sourceUrl: string): Promise<RssArticle[]> {
+async function parseRSS(
+  xml: string,
+  sourceUrl: string,
+): Promise<{ articles: RssArticle[]; errors: string[] }> {
   const articles: RssArticle[] = [];
+  const errors: string[] = [];
   const urlObj = new URL(sourceUrl);
   const sourceName = urlObj.hostname.replace('www.', '');
 
@@ -24,11 +28,16 @@ async function parseRSS(xml: string, sourceUrl: string): Promise<RssArticle[]> {
 
     let link = '';
     const linkMatch = itemXml.match(/<link>([^<]*)<\/link>/i);
+    const linkHrefMatch = itemXml.match(/<link[^>]*href="([^"]+)"/i);
     if (linkMatch) link = linkMatch[1];
+    else if (linkHrefMatch) link = linkHrefMatch[1];
 
     let pubDate: Date | null = null;
-    const dateMatch = itemXml.match(/<pubDate>([^<]*)<\/pubDate>|<dc:date>([^<]*)<\/dc:date>/i);
-    if (dateMatch) pubDate = new Date(dateMatch[1] || dateMatch[2] || '');
+    const dateMatch = itemXml.match(
+      /<pubDate>([^<]*)<\/pubDate>|<dc:date>([^<]*)<\/dc:date>|<published>([^<]*)<\/published>|<updated>([^<]*)<\/updated>/i,
+    );
+    if (dateMatch)
+      pubDate = new Date(dateMatch[1] || dateMatch[2] || dateMatch[3] || dateMatch[4] || '');
 
     let thumbnail = '';
     const mediaContentMatch = itemXml.match(/<media:content[^>]*url="([^"]+)"/i);
@@ -46,17 +55,25 @@ async function parseRSS(xml: string, sourceUrl: string): Promise<RssArticle[]> {
       if (anyMediaMatch) thumbnail = anyMediaMatch[1];
     }
 
+    if (link) link = link.replace(/&amp;/g, '&');
+    if (thumbnail) thumbnail = thumbnail.replace(/&amp;/g, '&');
+
     if (title && link && pubDate) {
       articles.push({ title, link, pubDate, source: sourceName, thumbnail });
+    } else if (title) {
+      const msg = `RSS entry skipped: missing link or date for "${title.slice(0, 80)}"`;
+      logger.warn(msg);
+      errors.push(msg);
     }
   }
 
-  return articles;
+  return { articles, errors };
 }
 
 export async function fetchRSS(
   feeds: RssFeed[],
   limit: number = 10,
+  sort: boolean = true,
 ): Promise<{ data: RssArticle[]; errors: string[] }> {
   const allArticles: RssArticle[] = [];
   const errors: string[] = [];
@@ -65,8 +82,9 @@ export async function fetchRSS(
     feeds.map(async (feed) => {
       try {
         const xml = (await fetchURL(feed.url, { customHeaders: feed.headers })) as string;
-        const articles = await parseRSS(xml, feed.url);
+        const { articles, errors: parseErrors } = await parseRSS(xml, feed.url);
         allArticles.push(...(feed.limit ? articles.slice(0, feed.limit) : articles));
+        errors.push(...parseErrors);
       } catch (err) {
         logger.error(err, `RSS ${feed.url}`);
         errors.push(`Failed to fetch RSS: ${feed.url}`);
@@ -74,13 +92,17 @@ export async function fetchRSS(
     }),
   );
 
-  const times = allArticles.map((a) => a.pubDate.getTime());
-  const indices = Array.from({ length: allArticles.length }, (_, i) => i);
-  indices.sort((a, b) => {
-    const diff = times[b] - times[a];
-    if (diff) return diff;
-    return allArticles[a].source.localeCompare(allArticles[b].source);
-  });
+  if (sort) {
+    const times = allArticles.map((a) => a.pubDate.getTime());
+    const indices = Array.from({ length: allArticles.length }, (_, i) => i);
+    indices.sort((a, b) => {
+      const diff = times[b] - times[a];
+      if (diff) return diff;
+      return allArticles[a].source.localeCompare(allArticles[b].source);
+    });
 
-  return { data: indices.slice(0, limit).map((i) => allArticles[i]), errors };
+    return { data: indices.slice(0, limit).map((i) => allArticles[i]), errors };
+  }
+
+  return { data: allArticles.slice(0, limit), errors };
 }

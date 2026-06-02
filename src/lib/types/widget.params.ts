@@ -21,6 +21,7 @@ export const FeedWidgetParamsSchema = CommonWidgetParamsSchema.merge(
     collapseAfter: z.number().int().positive().default(5),
     limit: z.number().int().positive().default(10),
     view: z.enum(['list', 'card']).default('list'),
+    sort: z.boolean().default(true),
   }),
 );
 export type FeedWidgetParams = z.infer<typeof FeedWidgetParamsSchema>;
