@@ -17,6 +17,8 @@ Use `bun --bun` prefix:
 
 Pages/themes in `src/lib/server/config.yaml`. Quirks:
 
+> **Keep `docs/` in sync**: If a change modifies config.yaml behavior, update `docs/configuration.md` and any affected docs.
+
 - **External override**: `./config/config.yaml` merges on top (presets merge, pages replace)
 - **`$include`** directive includes other YAML files, supports `{overrides}`
 - **`${VAR}` substitution** via `substituteEnvRecursive`

@@ -92,6 +92,56 @@ export interface CustomApiData {
   script: string;
 }
 
+export interface HostStatsData {
+  hostname: string;
+  cpu: {
+    loadAvg: [number, number, number];
+    usagePercent: number;
+    cores: number;
+    iowaitPercent: number;
+  };
+  memory: {
+    total: number;
+    available: number;
+    used: number;
+    percent: number;
+  };
+  swap: {
+    total: number;
+    used: number;
+    percent: number;
+  };
+  uptime: number;
+  platform: {
+    id: string;
+    prettyName: string;
+  };
+  temperature: Array<{
+    name: string;
+    temp: number;
+  }>;
+  storage: Array<{
+    mount: string;
+    fs: string;
+    total: number;
+    used: number;
+    available: number;
+    percent: number;
+  }>;
+  network: {
+    interfaces: Array<{
+      name: string;
+      rxBytes: number;
+      txBytes: number;
+    }>;
+  };
+  diskIO: Array<{
+    name: string;
+    readBytes: number;
+    writeBytes: number;
+  }>;
+}
+
 export interface MarketData {
   code: string;
   displayName: string;
@@ -113,7 +163,8 @@ export type BaseWidgetData =
   | EndpointData[]
   | (ContainerData | EndpointData)[]
   | CustomApiData
-  | MarketData[];
+  | MarketData[]
+  | HostStatsData;
 export interface BaseWidgetInfo {
   data: BaseWidgetData;
   params: BaseWidgetParams;

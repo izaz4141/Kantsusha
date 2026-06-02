@@ -7,6 +7,8 @@ services:
     volumes:
       - ./db:/app/db:Z,U
       - ./config:/app/config:Z,U
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
     ports:
       - 3000:3000
     environment:

@@ -2,10 +2,10 @@ import { getThemeCSS, getCached, getPages, getSearchConfig } from '$lib/server/c
 
 export const load = async ({
   cookies,
-  request,
+  _request,
 }: {
   cookies: { get: (name: string) => string | undefined };
-  request: { headers: { get: (name: string) => string | null } };
+  _request: { headers: { get: (name: string) => string | null } };
 }) => {
   const themeCookie = cookies.get('Kantussha-theme');
   const cache = await getCached();

@@ -97,7 +97,7 @@ export async function fetchYouTube(
         const videos = parseYouTubeFeed(xml);
         allVideos.push(...(ch.limit ? videos.slice(0, ch.limit) : videos));
       } catch (err) {
-        logger.warn(err, `YouTube feed ${ch.channel}`);
+        logger.debug(err, `YouTube feed ${ch.channel}`);
         try {
           const { fetchYouTubeFallback } = await import('./youtube-fb');
           const fallback = await fetchYouTubeFallback([ch], limit, includeShorts);

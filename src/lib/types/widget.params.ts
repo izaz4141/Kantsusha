@@ -174,6 +174,28 @@ export const CustomApiParamsSchema = CommonWidgetParamsSchema.merge(
 );
 export type CustomApiParams = z.infer<typeof CustomApiParamsSchema>;
 
+export const HostStatsParamsSchema = CommonWidgetParamsSchema.merge(
+  z.object({
+    type: z.literal('host-stats'),
+    title: z.string().default('Host Stats'),
+    cache: z.string().regex(TIME_REGEX).default('15m').optional(),
+    update: z.string().regex(TIME_REGEX).default('15m').optional(),
+    showCpu: z.boolean().default(true),
+    showMemory: z.boolean().default(true),
+    showSwap: z.boolean().default(true),
+    showUptime: z.boolean().default(true),
+    showPlatform: z.boolean().default(true),
+    showTemperature: z.boolean().default(true),
+    showStorage: z.boolean().default(true),
+    showNetwork: z.boolean().default(true),
+    showDiskIO: z.boolean().default(true),
+    networkInterfaces: z.array(z.string()).optional(),
+    diskDevices: z.array(z.string()).optional(),
+    mountPoints: z.array(z.string()).optional(),
+  }),
+);
+export type HostStatsParams = z.infer<typeof HostStatsParamsSchema>;
+
 const BaseWidgetParamsSchema = z.discriminatedUnion('type', [
   CalendarParamsSchema,
   RssParamsSchema,
@@ -183,6 +205,7 @@ const BaseWidgetParamsSchema = z.discriminatedUnion('type', [
   CustomApiParamsSchema,
   TwitchChannelParamsSchema,
   MarketsParamsSchema,
+  HostStatsParamsSchema,
 ]);
 export type BaseWidgetParams = z.infer<typeof BaseWidgetParamsSchema>;
 

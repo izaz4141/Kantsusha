@@ -1,7 +1,7 @@
 import { getOrCreateWidget, fetchWidgetInfo, getAllWidgets } from './widget.store';
 import { timeToMs } from '$lib/utils/time';
 import type { PageConfig } from '$lib/types/pages';
-import logger from '$lib/utils/logger';
+import logger from '$lib/server/logger';
 
 interface RefreshEntry {
   id: string;
@@ -35,7 +35,7 @@ function startRefreshCycles(): void {
       fetchWidgetInfo(widget.id).catch(() => {});
 
       const timerId = setInterval(() => {
-        logger.info(`Refreshing ${widget.id} Widget Data`);
+        logger.debug(`Refreshing ${widget.id} Widget Data`);
         fetchWidgetInfo(widget.id).catch(() => {});
       }, cacheTTL);
 

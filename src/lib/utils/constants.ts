@@ -10,6 +10,35 @@ export const CSS_UNIT_REGEX =
   /^\d+(\.\d+)?(px|rem|em|ex|ch|lh|pt|pc|cm|mm|in|Q|%|vw|vh|vmin|vmax|svw|svh|lvw|lvh|dvw|dvh|cqw|cqh|cqi|cqb|cqmin|cqmax)$/;
 export const CSS_PERCENT_REGEX = /^(\d+(\.\d+)?)%$/;
 
+export const PLATFORM_SLUGS: Record<string, string> = {
+  arch: 'archlinux',
+  ubuntu: 'ubuntu',
+  debian: 'debian',
+  fedora: 'fedora',
+  alpine: 'alpinelinux',
+  nixos: 'nixos',
+  centos: 'centos',
+  rhel: 'redhat',
+  opensuse: 'opensuse',
+  manjaro: 'manjaro',
+  linuxmint: 'linuxmint',
+  pop: 'popos',
+  elementary: 'elementaryos',
+  kali: 'kali',
+  gentoo: 'gentoo',
+  slackware: 'slackware',
+  deepin: 'deepin',
+  zorin: 'zorin',
+  raspbian: 'raspberrypi',
+  rocky: 'rockylinux',
+  almalinux: 'almalinux',
+  endeavouros: 'endeavouros',
+  void: 'voidlinux',
+  solus: 'solus',
+  freebsd: 'freebsd',
+  proxmox: 'proxmox',
+};
+
 export const CURRENCY_SYMBOLS: Record<string, string> = {
   USD: '$',
   EUR: '€',

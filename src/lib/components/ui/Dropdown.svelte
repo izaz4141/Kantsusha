@@ -4,7 +4,7 @@
 
   interface Props {
     open?: boolean;
-    trigger: HTMLElement;
+    trigger: HTMLElement | undefined;
     children: Snippet;
     class?: string;
     overlay?: boolean;

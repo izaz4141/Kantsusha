@@ -37,17 +37,17 @@ function createFileStream(filePath: string) {
 }
 
 const logfilePath = process.env.KANTSUSHA_LOGFILE_PATH;
-const streams: pino.StreamEntry[] = [
-  { stream: pino.transport({ target: 'pino-pretty', options: PRETTY_OPTS }) },
-];
+const level = process.env.KANTSUSHA_LOG_LEVEL ?? 'info';
+const transport = pino.transport({ target: 'pino-pretty', options: PRETTY_OPTS });
 
-if (logfilePath) {
-  streams.push({ stream: createFileStream(logfilePath) });
-}
-
-const logger = pino(
-  { level: process.env.KANTSUSHA_LOG_LEVEL ?? 'info' },
-  pino.multistream(streams),
-);
+const logger = logfilePath
+  ? pino(
+      { level },
+      pino.multistream([
+        { stream: transport, level },
+        { stream: createFileStream(logfilePath), level },
+      ]),
+    )
+  : pino({ level }, transport);
 
 export default logger;
