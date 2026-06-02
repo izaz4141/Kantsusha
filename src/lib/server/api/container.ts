@@ -121,7 +121,7 @@ interface DockerInspectResponse {
   Config?: { Image?: string };
   State?: {
     Status?: string;
-    Health?: { status?: string };
+    Health?: { Status?: string };
     StartedAt?: string;
     FinishedAt?: string;
   };
@@ -160,7 +160,7 @@ export async function fetchContainerData(
   const image = container.Config?.Image || 'unknown';
 
   const status = (container.State?.Status?.toLowerCase() || 'created') as ContainerData['status'];
-  const health = (container.State?.Health?.status?.toLowerCase() ||
+  const health = (container.State?.Health?.Status?.toLowerCase() ||
     null) as ContainerData['health'];
 
   const now = Date.now();
