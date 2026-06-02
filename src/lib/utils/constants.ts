@@ -1,7 +1,5 @@
 export const EXTERNAL_CONFIG_PATH = './config/config.yaml';
 
-export const DEFAULT_THEME = 'light';
-
 export const VALID_SIZES = ['small', 'full'] as const;
 
 export const TIME_REGEX = /^(\d+)(s|m|h|d|w|mo|y)$/;

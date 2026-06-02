@@ -36,7 +36,8 @@ pages:
             feeds:
               - url: 'https://example.com/rss'
 
-theme: dark
+theme:
+  default: dark
 ```
 
 ## Environment Variables

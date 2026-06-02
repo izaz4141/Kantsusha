@@ -67,7 +67,17 @@ All widgets support:
 ## Theme
 
 ```yaml
-theme: dark # light, sepia, dark, high-contrast
+theme:
+  default: dark
+  presets:
+    light:
+      name: Rosé Pine Dawn
+      light: true
+      colors: {}
+    dark:
+      name: Rosé Pine
+      light: false
+      colors: {}
 ```
 
 See [Theming](theming.md) for customization options.

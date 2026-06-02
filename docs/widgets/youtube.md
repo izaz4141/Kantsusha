@@ -4,14 +4,15 @@ Display latest videos from YouTube channels.
 
 ## Parameters
 
-| Parameter       | Type     | Required | Default   | Description                          |
-| --------------- | -------- | -------- | --------- | ------------------------------------ |
-| `type`          | string   | Yes      | -         | `youtube`                            |
-| `channels`      | object[] | Yes      | -         | Array of channel entries (see below) |
-| `title`         | string   | No       | `YouTube` | Widget title                         |
-| `view`          | string   | No       | `card`    | `list` or `card`                     |
-| `includeShorts` | boolean  | No       | `false`   | Include Shorts                       |
-| `frameless`     | boolean  | No       | `true`    | Hide header                          |
+| Parameter       | Type     | Required | Default   | Description                                                  |
+| --------------- | -------- | -------- | --------- | ------------------------------------------------------------ |
+| `type`          | string   | Yes      | -         | `youtube`                                                    |
+| `channels`      | object[] | Yes      | -         | Array of channel entries (see below)                         |
+| `title`         | string   | No       | `YouTube` | Widget title                                                 |
+| `view`          | string   | No       | `card`    | `list` or `card`                                             |
+| `includeShorts` | boolean  | No       | `false`   | Include Shorts                                               |
+| `sort`          | boolean  | No       | `true`    | Sort by date (newest first). `false` preserves channel order |
+| `frameless`     | boolean  | No       | `true`    | Hide header                                                  |
 
 ### Channel Entry
 

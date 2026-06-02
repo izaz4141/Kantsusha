@@ -1,4 +1,3 @@
-import { DEFAULT_THEME } from '$lib/utils/constants';
 import type { ThemePreset } from '$lib/types/theme';
 
 export const themeState = $state<{
@@ -6,7 +5,7 @@ export const themeState = $state<{
   css: string;
   presets: Record<string, ThemePreset>;
 }>({
-  current: DEFAULT_THEME,
+  current: 'dark',
   css: '',
   presets: {},
 });

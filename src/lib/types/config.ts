@@ -6,26 +6,29 @@ import { SearchConfigSchema } from '$lib/types/search';
 
 export const ConfigSchema = z.object({
   search: SearchConfigSchema,
-  presets: z
-    .record(z.string(), RawPresetSchema)
-    .optional()
-    .transform((presets) => {
-      if (!presets) return {} as Record<string, ThemePreset>;
-      const valid: Record<string, ThemePreset> = {};
-      for (const [name, raw] of Object.entries(presets)) {
-        const result = ThemePresetSchema.safeParse({
-          name: raw.name,
-          colorScheme: raw.light === false ? 'dark' : 'light',
-          colors: raw.colors ?? {},
-        });
-        if (result.success) {
-          valid[name] = result.data;
-        } else {
-          logger.warn(`Preset "${name}" invalid`);
+  theme: z.object({
+    default: z.string().default('dark'),
+    presets: z
+      .record(z.string(), RawPresetSchema)
+      .optional()
+      .transform((presets) => {
+        if (!presets) return {} as Record<string, ThemePreset>;
+        const valid: Record<string, ThemePreset> = {};
+        for (const [name, raw] of Object.entries(presets)) {
+          const result = ThemePresetSchema.safeParse({
+            name: raw.name,
+            colorScheme: raw.light === false ? 'dark' : 'light',
+            colors: raw.colors ?? {},
+          });
+          if (result.success) {
+            valid[name] = result.data;
+          } else {
+            logger.warn(`Preset "${name}" invalid`);
+          }
         }
-      }
-      return valid;
-    }),
+        return valid;
+      }),
+  }),
   pages: z
     .array(PageConfigSchema)
     .optional()

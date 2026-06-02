@@ -11,7 +11,6 @@ import type { PageConfig } from '$lib/types/pages';
 import type { AnyWidgetParams } from '$lib/types/widget.params';
 import type { SearchConfig } from '$lib/types/search';
 import { generateThemeCSS } from './theme';
-import { DEFAULT_THEME } from '$lib/utils/constants';
 import { clearWidgetCache } from '../widget.store';
 import { substituteEnvRecursive } from '$lib/utils/substitution';
 import { ConfigSchema, type ParsedConfig } from '$lib/types/config';
@@ -229,11 +228,20 @@ function mergeConfig(
   }
 
   for (const [key, value] of Object.entries(external)) {
-    if (key === 'presets' && typeof value === 'object' && typeof result.presets === 'object') {
-      result.presets = {
-        ...(result.presets as Record<string, unknown>),
-        ...(value as Record<string, unknown>),
-      };
+    if (key === 'theme' && typeof value === 'object' && value !== null) {
+      const themeVal = value as Record<string, unknown>;
+      const existingTheme = (result.theme ?? {}) as Record<string, unknown>;
+      if (typeof themeVal.presets === 'object' && typeof existingTheme.presets === 'object') {
+        result.theme = {
+          ...existingTheme,
+          presets: {
+            ...(existingTheme.presets as Record<string, unknown>),
+            ...(themeVal.presets as Record<string, unknown>),
+          },
+        };
+      } else {
+        result[key] = value;
+      }
     } else if (key === 'pages' && Array.isArray(value)) {
       result.pages = value;
     } else {
@@ -307,11 +315,11 @@ export async function getCached(): Promise<FullParsedConfig> {
     const config = await loadConfig();
     const updatedMtime = await getConfigMtime();
 
-    if (Object.keys(config.presets).length === 0) {
+    if (Object.keys(config.theme.presets).length === 0) {
       throw new Error('No valid presets found in config');
     }
 
-    const css = generateThemeCSS(config.presets);
+    const css = generateThemeCSS(config.theme.presets);
 
     const { restartBackgroundRefresh } = await import('../widget.scheduler');
     await restartBackgroundRefresh(config.pages);
@@ -334,12 +342,12 @@ export async function getCached(): Promise<FullParsedConfig> {
 }
 
 export async function getPresets(): Promise<Record<string, ThemePreset>> {
-  return (await getCached()).presets;
+  return (await getCached()).theme.presets;
 }
 
 export async function getPreset(name: string): Promise<ThemePreset> {
   const cache = await getCached();
-  return cache.presets[name] ?? cache.presets[DEFAULT_THEME];
+  return cache.theme.presets[name] ?? cache.theme.presets[cache.theme.default];
 }
 
 export async function getThemeCSS(): Promise<string> {

@@ -5,17 +5,18 @@
 Six theme presets available:
 
 ```yaml
-theme: catppuccin-mocha # light, sepia, catppuccin-latte, dark, high-contrast, catppuccin-mocha
+theme:
+  default: catppuccin-mocha
 ```
 
-| Preset             | Light Mode | Description              |
-| ------------------ | ---------- | ------------------------ |
-| `light`            | Yes        | Rosé Pine Dawn (default) |
-| `sepia`            | Yes        | Warm paper tone          |
-| `catppuccin-latte` | Yes        | Catppuccin Latte         |
-| `dark`             | No         | Rosé Pine (default)      |
-| `high-contrast`    | No         | Accessibility-focused    |
-| `catppuccin-mocha` | No         | Catppuccin Mocha         |
+| Preset             | Light Mode | Description           |
+| ------------------ | ---------- | --------------------- |
+| `light`            | Yes        | Rosé Pine Dawn        |
+| `sepia`            | Yes        | Warm paper tone       |
+| `catppuccin-latte` | Yes        | Catppuccin Latte      |
+| `dark`             | No         | Rosé Pine (default)   |
+| `high-contrast`    | No         | Accessibility-focused |
+| `catppuccin-mocha` | No         | Catppuccin Mocha      |
 
 ### How Presets Work
 
@@ -28,24 +29,30 @@ Presets with empty `colors: {}` use the CSS defaults:
 
 ```yaml
 # Uses CSS defaults from layout.css
-dark:
-  name: Rosé Pine
-  light: false
-  colors: {} # empty = use CSS defaults
+theme:
+  default: dark
+  presets:
+    dark:
+      name: Rosé Pine
+      light: false
+      colors: {} # empty = use CSS defaults
 ```
 
 Presets with custom colors override the CSS:
 
 ```yaml
 # Custom colors override CSS defaults
-sepia:
-  name: Sepia
-  light: true
-  colors:
-    background: '#f5f0e6'
-    surface: '#ebe4d4'
-    primary: '#b8860b'
-    # ... other custom colors
+theme:
+  default: sepia
+  presets:
+    sepia:
+      name: Sepia
+      light: true
+      colors:
+        background: '#f5f0e6'
+        surface: '#ebe4d4'
+        primary: '#b8860b'
+        # ... other custom colors
 ```
 
 ## Theme Tokens

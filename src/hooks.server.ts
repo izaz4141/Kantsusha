@@ -3,7 +3,6 @@ import { building } from '$app/environment';
 import { auth } from '$lib/server/auth';
 import { svelteKitHandler } from 'better-auth/svelte-kit';
 import type { HandleServerError } from '@sveltejs/kit';
-import { DEFAULT_THEME } from '$lib/utils/constants';
 import { getPreset, getCached } from '$lib/server/config/config';
 import { sequence } from '@sveltejs/kit/hooks';
 import logger from '$lib/server/logger';
@@ -36,18 +35,10 @@ const handleTheming: Handle = async ({ event, resolve }) => {
   const themeCookie = event.cookies.get('Kantussha-theme');
   const cache = await getCached();
 
-  let theme: string;
+  let theme: string = cache.theme.default;
 
-  if (themeCookie && themeCookie in cache.presets) {
+  if (themeCookie && themeCookie in cache.theme.presets) {
     theme = themeCookie;
-  } else {
-    const userAgent: string = event.request.headers.get('user-agent') || '';
-    const prefersDark: boolean = /dark|android|iphone|ipad/i.test(userAgent);
-    const preferredColorScheme: string = prefersDark ? 'dark' : 'light';
-    const matchingPreset = Object.entries(cache.presets).find(
-      ([_, preset]) => preset.colorScheme === preferredColorScheme,
-    );
-    theme = matchingPreset ? matchingPreset[0] : DEFAULT_THEME;
   }
 
   const preset = await getPreset(theme);

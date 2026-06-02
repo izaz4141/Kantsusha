@@ -4,15 +4,16 @@ Display articles from RSS/Atom feeds.
 
 ## Parameters
 
-| Parameter       | Type      | Required | Default | Description            |
-| --------------- | --------- | -------- | ------- | ---------------------- |
-| `type`          | string    | Yes      | -       | `rss`                  |
-| `feeds`         | RssFeed[] | Yes      | -       | Array of feeds (min 1) |
-| `title`         | string    | No       | -       | Widget title           |
-| `showThumbnail` | boolean   | No       | `false` | Show article images    |
-| `collapseAfter` | number    | No       | `5`     | Items before collapse  |
-| `limit`         | number    | No       | `10`    | Max items              |
-| `view`          | string    | No       | `list`  | `list` or `card`       |
+| Parameter       | Type      | Required | Default | Description                                               |
+| --------------- | --------- | -------- | ------- | --------------------------------------------------------- |
+| `type`          | string    | Yes      | -       | `rss`                                                     |
+| `feeds`         | RssFeed[] | Yes      | -       | Array of feeds (min 1)                                    |
+| `title`         | string    | No       | -       | Widget title                                              |
+| `showThumbnail` | boolean   | No       | `false` | Show article images                                       |
+| `collapseAfter` | number    | No       | `5`     | Items before collapse                                     |
+| `limit`         | number    | No       | `10`    | Max items                                                 |
+| `sort`          | boolean   | No       | `true`  | Sort by date (newest first). `false` preserves feed order |
+| `view`          | string    | No       | `list`  | `list` or `card`                                          |
 
 ### RssFeed Object
 

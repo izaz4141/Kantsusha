@@ -1,4 +1,3 @@
-import { DEFAULT_THEME } from '$lib/utils/constants';
 import { getThemeCSS, getCached, getPages, getSearchConfig } from '$lib/server/config/config';
 
 export const load = async ({
@@ -11,20 +10,10 @@ export const load = async ({
   const themeCookie = cookies.get('Kantussha-theme');
   const cache = await getCached();
 
-  let theme: string = DEFAULT_THEME;
+  let theme: string = cache.theme.default;
 
-  if (themeCookie && themeCookie in cache.presets) {
+  if (themeCookie && themeCookie in cache.theme.presets) {
     theme = themeCookie;
-  } else {
-    const userAgent: string = request.headers.get('user-agent') || '';
-    const prefersDark: boolean = /dark|android|iphone|ipad/i.test(userAgent);
-    const preferredColorScheme: string = prefersDark ? 'dark' : 'light';
-    const matchingPreset = Object.entries(cache.presets).find(
-      ([_, preset]) => preset.colorScheme === preferredColorScheme,
-    );
-    if (matchingPreset) {
-      theme = matchingPreset[0];
-    }
   }
 
   const pages = await getPages();
@@ -40,7 +29,7 @@ export const load = async ({
     theme: {
       name: theme,
       css,
-      presets: cache.presets,
+      presets: cache.theme.presets,
     },
     routes,
     search,
