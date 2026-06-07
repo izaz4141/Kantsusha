@@ -20,6 +20,8 @@
   let memTrigger = $state<HTMLElement>();
   let diskOpen = $state(false);
   let diskTrigger = $state<HTMLElement>();
+  let tempOpen = $state(false);
+  let tempTrigger = $state<HTMLElement>();
 
   let platformIcon = $derived(
     `https://cdn.simpleicons.org/${PLATFORM_SLUGS[data.platform.id] ?? 'linux'}`,
@@ -82,7 +84,28 @@
         {/if}
         {#if tempDisplay}
           {@const temp = data.temperature[0].temp}
-          <span style="color: {barColor(temp)};">🌡 {tempDisplay}</span>
+          <div
+            bind:this={tempTrigger}
+            class="cursor-default"
+            role="button"
+            tabindex="-1"
+            onmouseenter={() => (tempOpen = true)}
+            onmouseleave={() => (tempOpen = false)}
+          >
+            <span style="color: {barColor(temp)};">🌡 {tempDisplay}</span>
+          </div>
+          {#if data.temperature.length > 1}
+            <Dropdown bind:open={tempOpen} trigger={tempTrigger} targetPortal="portal-root">
+              <div class="grid min-w-44 grid-cols-2 gap-x-3 gap-y-1 px-3 py-2 text-xs">
+                {#each data.temperature as t (t.name)}
+                  <span class="text-text-muted">{t.name}</span>
+                  <span class="text-right font-mono text-text" style="color: {barColor(t.temp)};">
+                    {t.temp.toFixed(1)}°C
+                  </span>
+                {/each}
+              </div>
+            </Dropdown>
+          {/if}
         {/if}
       </div>
     </div>

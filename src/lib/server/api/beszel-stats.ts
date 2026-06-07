@@ -76,8 +76,8 @@ function buildMemory(
   totalBytes: number | undefined,
 ): ServerStatsData['memory'] {
   if (m !== undefined && mu !== undefined && mp !== undefined) {
-    const total = totalBytes ?? m * 1_000_000_000;
-    const used = mu * 1_000_000_000;
+    const total = totalBytes ?? m * 1024 ** 3;
+    const used = mu * 1024 ** 3;
     return { total, used, available: total - used, percent: mp };
   }
   if (mp !== undefined && totalBytes) {
@@ -171,9 +171,9 @@ async function enrichSystem(
           {
             mount: '/',
             fs: 'unknown',
-            total: stats.d * 1_000_000_000,
-            used: stats.du !== undefined ? stats.du * 1_000_000_000 : 0,
-            available: (stats.d - (stats.du ?? 0)) * 1_000_000_000,
+            total: stats.d * 1024 ** 3,
+            used: stats.du !== undefined ? stats.du * 1024 ** 3 : 0,
+            available: (stats.d - (stats.du ?? 0)) * 1024 ** 3,
             percent: stats.dp ?? ((stats.du ?? 0) / stats.d) * 100,
           },
         ]
@@ -183,9 +183,9 @@ async function enrichSystem(
     ? Object.entries(stats.efs).map(([mount, fs]) => ({
         mount,
         fs: 'unknown',
-        total: fs.d * 1_000_000_000,
-        used: fs.du * 1_000_000_000,
-        available: (fs.d - fs.du) * 1_000_000_000,
+        total: fs.d * 1024 ** 3,
+        used: fs.du * 1024 ** 3,
+        available: (fs.d - fs.du) * 1024 ** 3,
         percent: (fs.du / fs.d) * 100,
       }))
     : [];
@@ -275,8 +275,8 @@ async function enrichSystem(
     swap: (() => {
       if (!params.showSwap) return { total: 0, used: 0, percent: 0 };
       if (stats?.s !== undefined && stats?.su !== undefined) {
-        const total = stats.s * 1_000_000_000;
-        const used = stats.su * 1_000_000_000;
+        const total = stats.s * 1024 ** 3;
+        const used = stats.su * 1024 ** 3;
         return { total, used, percent: stats.s > 0 ? (stats.su / stats.s) * 100 : 0 };
       }
       return { total: 0, used: 0, percent: 0 };
