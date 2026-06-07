@@ -1,3 +1,4 @@
+import { decode } from 'he';
 import { fetchURL } from '$lib/utils/network';
 import logger from '$lib/server/logger';
 import type { RedditPost } from '$lib/types/widget.data';
@@ -26,14 +27,14 @@ function parseRedditPost(post: RedditApiPost): RedditPost {
   let thumbnail: string | undefined;
 
   if (post.thumbnail) {
-    thumbnail = post.thumbnail.replace(/&amp;/g, '&');
+    thumbnail = decode(post.thumbnail);
   } else if (post.preview?.images?.[0]) {
     const img = post.preview.images[0];
-    thumbnail = img.source.url?.replace(/&amp;/g, '&');
+    thumbnail = decode(img.source.url);
   }
 
   return {
-    title: post.title,
+    title: decode(post.title),
     link: post.url,
     pubDate: new Date(post.created_utc * 1000),
     author: post.author,

@@ -1,3 +1,4 @@
+import { decode } from 'he';
 import { fetchURL } from '$lib/utils/network';
 import { timeToMs } from '$lib/utils/time';
 import logger from '$lib/server/logger';
@@ -174,11 +175,7 @@ function parseCalDAVMultistatus(xml: string): string[] {
 
   for (const match of calendarDataMatches) {
     const content = match[1].trim();
-    const decoded = content
-      .replace(/&lt;/g, '<')
-      .replace(/&gt;/g, '>')
-      .replace(/&amp;/g, '&')
-      .replace(/&#10;/g, '\n');
+    const decoded = decode(content);
 
     if (decoded.includes('BEGIN:VCALENDAR')) {
       icalBlocks.push(decoded);

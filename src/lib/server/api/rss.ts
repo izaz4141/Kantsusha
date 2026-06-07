@@ -1,3 +1,4 @@
+import { decode } from 'he';
 import { fetchURL } from '$lib/utils/network';
 import logger from '$lib/server/logger';
 import type { RssArticle } from '$lib/types/widget.data';
@@ -24,13 +25,13 @@ async function parseRSS(
     const titleMatch = itemXml.match(
       /<title><!\[CDATA\[([^\]]*?)\]\]><\/title>|<title>([^<]*)<\/title>/i,
     );
-    if (titleMatch) title = titleMatch[1] || titleMatch[2] || '';
+    if (titleMatch) title = decode(titleMatch[1] || titleMatch[2] || '');
 
     let link = '';
     const linkMatch = itemXml.match(/<link>([^<]*)<\/link>/i);
     const linkHrefMatch = itemXml.match(/<link[^>]*href="([^"]+)"/i);
-    if (linkMatch) link = linkMatch[1];
-    else if (linkHrefMatch) link = linkHrefMatch[1];
+    if (linkMatch) link = decode(linkMatch[1]);
+    else if (linkHrefMatch) link = decode(linkHrefMatch[1]);
 
     let pubDate: Date | null = null;
     const dateMatch = itemXml.match(
@@ -44,19 +45,16 @@ async function parseRSS(
     const mediaThumbMatch = itemXml.match(/<media:thumbnail[^>]*url="([^"]+)"/i);
     const enclosureMatch = itemXml.match(/<enclosure[^>]*url="([^"]+)"/i);
     const atomLinkMatch = itemXml.match(/<link[^>]*rel="enclosure"[^>]*href="([^"]+)"/i);
-    if (mediaContentMatch) thumbnail = mediaContentMatch[1];
-    else if (mediaThumbMatch) thumbnail = mediaThumbMatch[1];
-    else if (enclosureMatch) thumbnail = enclosureMatch[1];
-    else if (atomLinkMatch) thumbnail = atomLinkMatch[1];
+    if (mediaContentMatch) thumbnail = decode(mediaContentMatch[1]);
+    else if (mediaThumbMatch) thumbnail = decode(mediaThumbMatch[1]);
+    else if (enclosureMatch) thumbnail = decode(enclosureMatch[1]);
+    else if (atomLinkMatch) thumbnail = decode(atomLinkMatch[1]);
 
     // Fallback: Try to get any image from media:content regardless of position
     if (!thumbnail) {
       const anyMediaMatch = itemXml.match(/<media:[^>]+url="([^"]+\.(jpg|jpeg|png|gif|webp))"/i);
-      if (anyMediaMatch) thumbnail = anyMediaMatch[1];
+      if (anyMediaMatch) thumbnail = decode(anyMediaMatch[1]);
     }
-
-    if (link) link = link.replace(/&amp;/g, '&');
-    if (thumbnail) thumbnail = thumbnail.replace(/&amp;/g, '&');
 
     if (title && link && pubDate) {
       articles.push({ title, link, pubDate, source: sourceName, thumbnail });
