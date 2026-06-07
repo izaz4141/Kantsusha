@@ -11,6 +11,9 @@
 
   let data = $derived(result.data as MarketData[]);
 
+  let hoveredMarket = $state<number | null>(null);
+  let hoveredBarIdx = $state<number | null>(null);
+
   function formatPrice(price: number, currency: string): string {
     const symbol = getCurrencySymbol(currency);
     if (price < 1) {
@@ -24,35 +27,58 @@
     return `${sign}${percent.toFixed(2)}%`;
   }
 
-  function getChartSegments(
+  function formatTimestamp(ts: number): string {
+    return new Date(ts).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  }
+
+  function getBars(
     prices: number[],
     width: number,
     height: number,
-  ): { x1: number; y1: number; x2: number; y2: number; color: string }[] {
+  ): { x: number; y: number; w: number; h: number; color: string }[] {
     if (prices.length < 2) return [];
 
     const min = Math.min(...prices);
     const max = Math.max(...prices);
     const range = max - min || 1;
+    const count = prices.length - 1;
+    const intervalWidth = width / count;
+    const gap = intervalWidth * 0.25;
 
-    const points = prices.map((price, idx) => ({
-      x: (idx / (prices.length - 1)) * width,
-      y: height - ((price - min) / range) * height,
-    }));
+    const bars: { x: number; y: number; w: number; h: number; color: string }[] = [];
 
-    const segments: { x1: number; y1: number; x2: number; y2: number; color: string }[] = [];
-    for (let i = 0; i < points.length - 1; i++) {
-      const up = prices[i + 1] >= prices[i];
-      segments.push({
-        x1: points[i].x,
-        y1: points[i].y,
-        x2: points[i + 1].x,
-        y2: points[i + 1].y,
-        color: up ? 'var(--color-success)' : 'var(--color-error)',
+    for (let i = 0; i < count; i++) {
+      const y0 = height - ((prices[i] - min) / range) * height;
+      const y1 = height - ((prices[i + 1] - min) / range) * height;
+      bars.push({
+        x: i * intervalWidth + gap / 2,
+        y: Math.min(y0, y1),
+        w: intervalWidth - gap,
+        h: Math.abs(y1 - y0),
+        color: prices[i + 1] >= prices[i] ? 'var(--color-success)' : 'var(--color-error)',
       });
     }
 
-    return segments;
+    return bars;
+  }
+
+  function handleMouseMove(e: MouseEvent, prices: number[], marketIdx: number) {
+    const svg = e.currentTarget as SVGSVGElement;
+    const rect = svg.getBoundingClientRect();
+    const mouseX = e.clientX - rect.left;
+    const viewBoxX = (mouseX / rect.width) * 100;
+    const intervalWidth = 100 / (prices.length - 1);
+    const idx = Math.min(Math.floor(viewBoxX / intervalWidth), prices.length - 2);
+
+    if (idx >= 0) {
+      hoveredBarIdx = idx;
+      hoveredMarket = marketIdx;
+    }
+  }
+
+  function handleMouseLeave() {
+    hoveredMarket = null;
+    hoveredBarIdx = null;
   }
 </script>
 
@@ -66,33 +92,66 @@
       {#each data as market, i (i)}
         {@const lineColor =
           market.changePercent >= 0 ? 'var(--color-success)' : 'var(--color-error)'}
-        {@const segments = getChartSegments(market.prices, 100, 40)}
+        {@const bars = getBars(market.prices, 100, 40)}
         <li class="relative flex h-18 items-center justify-between rounded-lg bg-surface/40 p-3">
           <svg
-            class="absolute inset-0 h-full w-full opacity-30"
+            class="absolute inset-0 h-full w-full"
             preserveAspectRatio="none"
             viewBox="0 0 100 40"
-            aria-hidden="true"
+            role="img"
+            onmousemove={(e) => handleMouseMove(e, market.prices, i)}
+            onmouseleave={handleMouseLeave}
           >
-            {#each segments as segment, i (`segment_${i}`)}
-              <line
-                x1={segment.x1}
-                y1={segment.y1}
-                x2={segment.x2}
-                y2={segment.y2}
-                stroke={segment.color}
-                stroke-width="1.5"
-                stroke-linecap="round"
+            {#each bars as bar, j (`bar_${j}`)}
+              <rect
+                x={bar.x}
+                y={bar.y}
+                width={bar.w}
+                height={bar.h}
+                fill={bar.color}
+                rx="0.3"
+                opacity={hoveredMarket === null || hoveredMarket !== i
+                  ? 0.35
+                  : hoveredBarIdx === j
+                    ? 0.85
+                    : 0.2}
               />
             {/each}
           </svg>
 
-          <div class="relative flex flex-col justify-start">
+          {#if hoveredMarket === i && hoveredBarIdx !== null && bars.length > 0}
+            {@const bar = bars[hoveredBarIdx]}
+            {@const price = market.prices[hoveredBarIdx + 1]}
+            {@const prevPrice = market.prices[hoveredBarIdx]}
+            {@const pctChange = prevPrice !== 0 ? ((price - prevPrice) / prevPrice) * 100 : 0}
+            <div
+              class="pointer-events-none absolute z-10 rounded-md border border-border bg-surface px-2 py-1 text-xs shadow-lg"
+              style="left: {bar.x + bar.w / 2}%; bottom: calc({((40 - bar.y) / 40) *
+                100}% + 4px); transform: translateX(-50%);"
+            >
+              <div class="flex flex-col gap-0.5 whitespace-nowrap">
+                <span class="font-mono font-semibold" style="color: {bar.color};">
+                  {formatPrice(price, market.currency)}
+                </span>
+                <span class="text-text-muted"
+                  >{formatTimestamp(market.timestamps[hoveredBarIdx + 1])}</span
+                >
+                <span
+                  class="font-mono"
+                  style="color: {pctChange >= 0 ? 'var(--color-success)' : 'var(--color-error)'};"
+                >
+                  {formatPercent(pctChange)}
+                </span>
+              </div>
+            </div>
+          {/if}
+
+          <div class="pointer-events-none relative flex flex-col justify-start">
             <span class="font-mono text-sm font-semibold text-text">{market.code}</span>
             <span class="text-xs text-text-muted">{market.displayName}</span>
           </div>
 
-          <div class="relative flex flex-col items-end justify-end">
+          <div class="pointer-events-none relative flex flex-col items-end justify-end">
             <span class="font-mono text-sm font-semibold" style="color: {lineColor};">
               {formatPercent(market.changePercent)}
             </span>
