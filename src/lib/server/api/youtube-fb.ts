@@ -187,34 +187,32 @@ export async function fetchYouTubeFallback(
   channels: YouTubeChannel[],
   limit: number = 10,
   includeShorts: boolean = false,
+  errors: string[] = [],
 ): Promise<YouTubeVideo[]> {
   const allVideos: YouTubeVideo[] = [];
 
   await Promise.all(
     channels.map(async (ch) => {
-      try {
-        const html = (await fetchURL(buildChannelUrl(ch.channel, 'videos'), {
-          customHeaders: LOCALE_HEADERS,
-        })) as string;
-        const data = parseYtInitialData(html);
-        const name = extractChannelName(data) || channelLabel(ch.channel);
-        const videos = extractVideosFromTab(data, name);
-        allVideos.push(...(ch.limit ? videos.slice(0, ch.limit) : videos));
+      const html = (await fetchURL(buildChannelUrl(ch.channel, 'videos'), {
+        customHeaders: LOCALE_HEADERS,
+      })) as string;
+      const data = parseYtInitialData(html);
+      const name = extractChannelName(data) || channelLabel(ch.channel);
+      const videos = extractVideosFromTab(data, name);
+      allVideos.push(...(ch.limit ? videos.slice(0, ch.limit) : videos));
 
-        if (includeShorts) {
-          try {
-            const shortsHtml = (await fetchURL(buildChannelUrl(ch.channel, 'shorts'), {
-              customHeaders: LOCALE_HEADERS,
-            })) as string;
-            const shortsData = parseYtInitialData(shortsHtml);
-            const shorts = extractVideosFromTab(shortsData, name);
-            allVideos.push(...(ch.limit ? shorts.slice(0, ch.limit) : shorts));
-          } catch (err) {
-            logger.error(err, `YouTube shorts fallback ${ch.channel}`);
-          }
+      if (includeShorts) {
+        try {
+          const shortsHtml = (await fetchURL(buildChannelUrl(ch.channel, 'shorts'), {
+            customHeaders: LOCALE_HEADERS,
+          })) as string;
+          const shortsData = parseYtInitialData(shortsHtml);
+          const shorts = extractVideosFromTab(shortsData, name);
+          allVideos.push(...(ch.limit ? shorts.slice(0, ch.limit) : shorts));
+        } catch (err) {
+          logger.error(err, `YouTube shorts fallback ${ch.channel}`);
+          errors.push(`YouTube shorts fallback failed for ${ch.channel}`);
         }
-      } catch (err) {
-        logger.error(err, `YouTube fallback ${ch.channel}`);
       }
     }),
   );

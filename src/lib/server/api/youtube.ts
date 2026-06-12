@@ -100,7 +100,7 @@ export async function fetchYouTube(
         logger.debug(err, `YouTube feed ${ch.channel}`);
         try {
           const { fetchYouTubeFallback } = await import('./youtube-fb');
-          const fallback = await fetchYouTubeFallback([ch], limit, includeShorts);
+          const fallback = await fetchYouTubeFallback([ch], limit, includeShorts, errors);
           allVideos.push(...fallback);
         } catch (fbErr) {
           logger.error(fbErr, `YouTube scraper also failed for ${ch.channel}`);
