@@ -45,7 +45,9 @@
 
   function onKeydown(e: KeyboardEvent) {
     if (!searchState.enabled) return;
-    if (e.key === searchState.triggerKey && !e.ctrlKey && !e.metaKey) {
+    const isTriggerKey = e.key === searchState.triggerKey && !e.ctrlKey && !e.metaKey;
+    const isCtrlK = (e.ctrlKey || e.metaKey) && e.key === 'k';
+    if (isTriggerKey || isCtrlK) {
       const tag = (e.target as HTMLElement)?.tagName;
       if (tag !== 'INPUT' && tag !== 'TEXTAREA' && !(e.target as HTMLElement)?.isContentEditable) {
         e.preventDefault();
