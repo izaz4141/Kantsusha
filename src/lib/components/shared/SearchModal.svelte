@@ -8,6 +8,7 @@
   let bangTag = $state('');
   let selectedIndex = $state(-1);
   let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+  let prediction = $state('');
 
   let activeEngine = $derived.by(() => {
     if (bangTag) {
@@ -48,6 +49,7 @@
 
   function onInput() {
     selectedIndex = -1;
+    prediction = '';
     const detected = detectEngineFromQuery(searchState.query);
     if (detected) {
       bangTag = searchState.engines[detected.engineKey]?.bang || '';
@@ -60,10 +62,10 @@
     }, 150);
   }
 
-  function doSearch(query: string) {
+  function doSearch(query?: string) {
     const engine = searchState.engines[activeEngine];
     if (!engine) return;
-    const q = query || searchState.query;
+    const q = query ?? searchState.query + prediction;
     if (!q.trim()) return;
     const url = resolveString(engine.queryUrl.replace('${QUERY}', encodeURIComponent(q)));
     closeSearch();
@@ -75,18 +77,44 @@
       closeSearch();
       return;
     }
+    if (e.key === 'Backspace' && prediction) {
+      e.preventDefault();
+      prediction = '';
+      return;
+    }
     if (e.key === 'Backspace' && searchState.query === '' && bangTag) {
       bangTag = '';
+      return;
+    }
+    if (
+      e.key === 'ArrowRight' &&
+      inputEl?.selectionStart === searchState.query.length &&
+      selectedIndex >= 0 &&
+      suggestions[selectedIndex] &&
+      searchState.query !== suggestions[selectedIndex]
+    ) {
+      e.preventDefault();
+      searchState.query = suggestions[selectedIndex];
+      prediction = '';
+      selectedIndex = -1;
       return;
     }
     if (e.key === 'ArrowDown') {
       e.preventDefault();
       selectedIndex = Math.min(selectedIndex + 1, suggestions.length - 1);
+      if (selectedIndex >= 0 && suggestions[selectedIndex]) {
+        prediction = suggestions[selectedIndex].slice(searchState.query.length);
+      }
       return;
     }
     if (e.key === 'ArrowUp') {
       e.preventDefault();
       selectedIndex = Math.max(selectedIndex - 1, -1);
+      if (selectedIndex >= 0 && suggestions[selectedIndex]) {
+        prediction = suggestions[selectedIndex].slice(searchState.query.length);
+      } else {
+        prediction = '';
+      }
       return;
     }
     if (e.key === 'Enter') {
@@ -94,7 +122,7 @@
       if (selectedIndex >= 0 && suggestions[selectedIndex]) {
         doSearch(suggestions[selectedIndex]);
       } else {
-        doSearch(searchState.query);
+        doSearch();
       }
       return;
     }
@@ -168,19 +196,41 @@
             >
           </span>
         {/if}
-        <input
-          bind:this={inputEl}
-          type="text"
-          bind:value={searchState.query}
-          oninput={onInput}
-          onkeydown={onKeydown}
-          placeholder="Search... (Tab to switch engine)"
-          class="min-w-0 flex-1 border-none bg-transparent p-0 text-text outline-none placeholder:text-text-muted focus:ring-0"
-        />
-        {#if searchState.query}
+        <div class="relative min-w-0 flex-1">
+          <input
+            bind:this={inputEl}
+            type="text"
+            bind:value={searchState.query}
+            oninput={onInput}
+            onkeydown={onKeydown}
+            placeholder=""
+            class="relative z-10 w-full border-none bg-transparent p-0 text-transparent outline-none focus:ring-0"
+            style="caret-color: var(--color-text)"
+          />
+          <span
+            class="pointer-events-none absolute inset-0 z-0 flex items-center text-text"
+            aria-hidden="true"
+          >
+            {#if searchState.query === '' && prediction === ''}
+              <span class="text-text-muted">Search... (Tab to switch engine)</span>
+            {:else if prediction && selectedIndex >= 0 && suggestions[selectedIndex]}
+              <span class="whitespace-pre text-text">
+                {suggestions[selectedIndex].slice(
+                  0,
+                  suggestions[selectedIndex].length - prediction.length,
+                )}
+              </span>
+              <span class="whitespace-pre text-text-muted/40">{prediction}</span>
+            {:else}
+              {searchState.query}
+            {/if}
+          </span>
+        </div>
+        {#if searchState.query || prediction}
           <button
             onclick={() => {
               searchState.query = '';
+              prediction = '';
               suggestions = [];
             }}
             class="flex h-5 w-5 cursor-pointer items-center justify-center rounded-full text-xl text-error/80 transition-colors hover:bg-surface-raised/30 hover:text-error"
@@ -200,7 +250,13 @@
                 ? 'bg-surface-raised'
                 : 'hover:bg-surface-raised'}"
               onmousedown={() => doSearch(suggestion)}
-              onmouseenter={() => (selectedIndex = i)}
+              onmouseenter={() => {
+                selectedIndex = i;
+                prediction =
+                  searchState.query.length < suggestion.length
+                    ? suggestion.slice(searchState.query.length)
+                    : '';
+              }}
             >
               <span>{suggestion}</span>
             </li>
