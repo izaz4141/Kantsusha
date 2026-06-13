@@ -1,3 +1,4 @@
+import { decode } from 'he';
 import { fetchURL } from '$lib/utils/network';
 import logger from '$lib/server/logger';
 import type { YouTubeVideo } from '$lib/types/widget.data';
@@ -109,6 +110,11 @@ export async function fetchYouTube(
       }
     }),
   );
+
+  for (const v of allVideos) {
+    v.title = decode(v.title);
+    v.channelTitle = decode(v.channelTitle);
+  }
 
   if (sort) {
     const length = allVideos.length;
