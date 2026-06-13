@@ -65,6 +65,7 @@ export function getWidget(id: string): Widget | undefined {
 }
 
 export function setWidget(id: string, widget: Widget) {
+  widgetCache.delete(id);
   widgetCache.set(id, widget);
 }
 

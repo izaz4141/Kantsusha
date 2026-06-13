@@ -274,12 +274,14 @@
               <span
                 class="inline-flex items-center gap-1 rounded-md bg-info/10 px-2 py-0.5 font-mono text-xs text-info"
               >
-                <span class="font-semibold">R</span> {formatNet(disk.readBytes)}
+                <span class="font-semibold">R</span>
+                {formatNet(disk.readBytes)}
               </span>
               <span
                 class="inline-flex items-center gap-1 rounded-md bg-warning/10 px-2 py-0.5 font-mono text-xs text-warning"
               >
-                <span class="font-semibold">W</span> {formatNet(disk.writeBytes)}
+                <span class="font-semibold">W</span>
+                {formatNet(disk.writeBytes)}
               </span>
             </span>
           </div>
