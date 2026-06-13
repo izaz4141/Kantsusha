@@ -111,7 +111,7 @@
                 fill={bar.color}
                 rx="0.3"
                 opacity={hoveredMarket === null || hoveredMarket !== i
-                  ? 0.2
+                  ? 0.35
                   : hoveredBarIdx === j
                     ? 0.85
                     : 0.2}
