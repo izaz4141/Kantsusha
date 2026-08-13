@@ -9,6 +9,7 @@
   let selectedIndex = $state(-1);
   let debounceTimer: ReturnType<typeof setTimeout> | null = null;
   let prediction = $state('');
+  let overflowOffset = $state(0);
 
   let activeEngine = $derived.by(() => {
     if (bangTag) {
@@ -196,19 +197,21 @@
             >
           </span>
         {/if}
-        <div class="relative min-w-0 flex-1">
+        <div class="relative min-w-0 flex-1 overflow-hidden">
           <input
             bind:this={inputEl}
             type="text"
             bind:value={searchState.query}
             oninput={onInput}
             onkeydown={onKeydown}
+            onscroll={() => (overflowOffset = inputEl?.scrollLeft ?? 0)}
             placeholder=""
             class="relative z-10 w-full border-none bg-transparent p-0 text-transparent outline-none focus:ring-0"
             style="caret-color: var(--color-text)"
           />
           <span
-            class="pointer-events-none absolute inset-0 z-0 flex items-center text-text"
+            class="pointer-events-none absolute inset-0 z-0 flex items-center whitespace-nowrap text-text"
+            style="transform: translateX({-overflowOffset}px)"
             aria-hidden="true"
           >
             {#if searchState.query === '' && prediction === ''}
