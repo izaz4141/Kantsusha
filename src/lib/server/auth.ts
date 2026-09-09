@@ -10,7 +10,7 @@ const rawOrigins =
   process.env.KANTSUSHA_ORIGINS?.split(',')
     .map((o) => o.trim())
     .filter(Boolean) ?? [];
-const origins = rawOrigins.length > 0 ? rawOrigins : ['http://localhost:*,http://127.0.0.1:*'];
+const origins = rawOrigins.length > 0 ? rawOrigins : ['http://localhost:*', 'http://127.0.0.1:*'];
 const allowedHosts = origins.map((url) => {
   try {
     return new URL(url).host;

@@ -26,6 +26,18 @@ Display posts from subreddits.
   limit: 10
 ```
 
+## Notes
+
+- Reddit now serves a JavaScript challenge to unauthenticated clients and only
+  returns data once a `loid` cookie is obtained. Kantsusha solves this
+  challenge transparently and caches the cookie (refreshed every 6 hours),
+  working around the resulting 403 responses.
+- To avoid being blocked by Reddit/Cloudflare TLS fingerprinting, the widget
+  impersonates a browser TLS handshake via Bun's native `fetch` `tls.ja3`
+  options. This requires **Bun >= 1.4.1**. On older Bun versions (or non-Bun
+  runtimes) the widget falls back to a standard request and still attempts the
+  cookie workaround, but the TLS impersonation is skipped.
+
 ## Sort Options
 
 | Value           | Description     |
