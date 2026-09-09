@@ -1,4 +1,4 @@
-import { betterAuth } from 'better-auth';
+import { betterAuth, type Auth, type BetterAuthOptions } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { sveltekitCookies } from 'better-auth/svelte-kit';
 import { dev } from '$app/environment';
@@ -19,7 +19,7 @@ const allowedHosts = origins.map((url) => {
   }
 });
 
-export const auth = betterAuth({
+const authOptions = {
   baseURL: {
     allowedHosts,
     protocol: dev ? 'http' : 'https',
@@ -36,4 +36,21 @@ export const auth = betterAuth({
   }),
   emailAndPassword: { enabled: true },
   plugins: [sveltekitCookies(getRequestEvent)],
+} satisfies BetterAuthOptions;
+
+/**
+ * `betterAuth()` must not run during `vite build`, otherwise it throws because
+ * no auth secret is available yet (it is only injected at runtime via
+ * `KANTSUSHA_AUTH_SECRET` / Docker env). Construction is deferred until the
+ * first real use, which only ever happens at request time.
+ */
+type AuthInstance = Auth<typeof authOptions>;
+
+let cachedAuth: AuthInstance | undefined;
+export const auth: AuthInstance = new Proxy({} as AuthInstance, {
+  get(_target, prop) {
+    if (!cachedAuth) cachedAuth = betterAuth(authOptions);
+    const value = (cachedAuth as unknown as Record<string, unknown>)[prop as string];
+    return typeof value === 'function' ? value.bind(cachedAuth) : value;
+  },
 });
